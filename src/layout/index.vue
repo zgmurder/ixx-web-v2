@@ -7,44 +7,29 @@
 </template>
 
 <script>
-// @ is an alias to /src
 import appNav from './appNav/index'
 import appFooter from './appFooter/index'
-
 export default {
   name: 'Layout',
   components: {
     appNav,
     appFooter
   },
-  data() {
+  data(vm) {
+    const routes = [...vm.$router.options.routes]
+    const mapNavList = vm.$i18n.messages['zh-CN'].appNav.mapNavList
+    const navDataArr = Object.keys(mapNavList).map(key => {
+      const index = routes.findIndex(item => item.name === key)
+      if (index === -1) return {}
+      const matchRoute = routes.splice(index, 1)[0]
+      return {
+        lable: vm.$t(key),
+        path: matchRoute.path
+      }
+    })
     return {
-      navDataArr: [
-        {
-          lable: this.$t('trading'),
-          herf: 'ssss'
-        },
-        {
-          lable: '合约交易',
-          herf: 'ssss'
-        },
-        {
-          lable: '法币交易',
-          herf: 'ssss'
-        },
-        {
-          lable: '市盈盈',
-          herf: 'ssss'
-        },
-        {
-          lable: '节点认购',
-          herf: 'ssss'
-        }
-      ]
+      navDataArr
     }
-  },
-  created() {
-    console.log(this)
   }
 }
 </script>

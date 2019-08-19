@@ -2,9 +2,9 @@
   <div class="app-nav">
     <div class="container" flex="main:justify cross:center">
       <div flex class="nav-left-container">
-        <img src="@/assets/ixx_logo.png" height="40px" alt="">
+        <img src="@/assets/ixx_logo.png" height="40px" alt="" @click="$router.push('/')">
         <ul flex="main:justify cross:center" class="nav-list">
-          <li v-for="(item,index) in navDataArr" :key="index">{{ item.lable }}</li>
+          <li v-for="(item,index) in navDataArr" :key="index" :class="{active:$route.path.includes(item.path)}" @click="$router.push(item.path)">{{ item.lable }}</li>
         </ul>
       </div>
       <div class="nav-right-container">
@@ -21,6 +21,7 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 import selectLang from '@/components/selectLang'
+
 export default {
   name: 'Home',
   components: {
@@ -42,7 +43,12 @@ export default {
     .nav-left-container{
       .nav-list>li{
         margin: 0 10px;
-        overflow: hidden
+        overflow: hidden;
+
+        &:hover,&.active{
+          cursor: pointer;
+          color: $--color-primary
+        }
       }
     }
     .nav-right-container{

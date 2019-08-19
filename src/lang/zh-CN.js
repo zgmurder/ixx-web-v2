@@ -1,4 +1,16 @@
 export default {
+  appNav: {
+    mapNavList: {
+      'trading': '币币交易',
+      'contract': '合约交易',
+      'otc_trade': '法币交易',
+      'bidTitle': '币盈盈',
+      'fund_assets_node_buy': '节点认购'
+    },
+    'signup': '创建帐号',
+    'signin': '登录',
+    'signout': '退出登录'
+  },
   'signup': '创建帐号',
   'signin': '登录',
   'signout': '退出登录',
