@@ -1,14 +1,16 @@
 <template>
-  <div class="app-nav">
+  <div class="app-nav" :style="appNavBackground">
     <div class="container" flex="main:justify cross:center">
       <div flex class="nav-left-container">
         <img src="@/assets/ixx_logo.png" height="40px" alt="" @click="$router.push('/')">
         <ul flex="main:justify cross:center" class="nav-list">
-          <li v-for="(item,index) in navDataArr" :key="index" :class="{active:$route.path.includes(item.path)}" @click="$router.push(item.path)">{{ item.lable }}</li>
+          <li v-for="(item,index) in navDataArr" :key="index" :class="{active:$route.path.includes(item.path)}" @click="$router.push(item.path)">{{ $t(item.keyPath) }}</li>
         </ul>
       </div>
       <div class="nav-right-container">
-        <a href="javascript:void(0)">登录<i class="separator">|</i>注册</a>
+        <el-link :type="$route.path === '/login'? 'primary':'info'" @click="$router.push('/login')">登录</el-link>
+        <i class="separator">|</i>
+        <el-link type="info">注册</el-link>
         <select-lang />
       </div>
     </div>
@@ -21,7 +23,7 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 import selectLang from '@/components/selectLang'
-
+import { mapNavBackground } from '@/const'
 export default {
   name: 'Home',
   components: {
@@ -31,6 +33,12 @@ export default {
     navDataArr: {
       type: Array,
       default: () => []
+    }
+  },
+  computed: {
+    appNavBackground() {
+      const key = Object.keys(mapNavBackground).find(key => this.$route.path.includes(key))
+      return key ? { backgroundColor: mapNavBackground[key] } : {}
     }
   }
 }

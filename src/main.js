@@ -6,14 +6,17 @@ import 'normalize.css'
 import 'flex.css'
 
 import ElementUI from 'element-ui'
-import '@/styles/element-variables.scss'
+import '@/styles/theme/index.css'
 import '@/styles/index.scss' // global css
 // import locale from 'element-ui/lib/locale/lang/en'
+// import 'element-ui/lib/theme-chalk/index.css'
+Vue.use(ElementUI)
 
 import './icons' // icon
 import router from './router/index'
 
-Vue.use(ElementUI)
+import './permission'
+
 // Vue.use(ElementUI, { locale })
 Vue.config.productionTip = false
 
