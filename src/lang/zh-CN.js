@@ -3,7 +3,7 @@ export default {
     mapNavList: {
       'trading': '币币交易',
       'contract': '合约交易',
-      'otc_trade': '法币交易',
+      'legalTender': '法币交易',
       'bidTitle': '币盈盈',
       'fund_assets_node_buy': '节点认购'
     },
@@ -11,7 +11,7 @@ export default {
     'signin': '登录',
     'signout': '退出登录'
   },
-  otc_trade: {
+  legalTender: {
     mapCurrency: {
       'CNY': '人民币',
       'SGD': '新加坡币'
@@ -64,6 +64,13 @@ export default {
     'a_2_p': '请输入需要出售的总数量',
     'b_1_p': '请输入需要购买的总金额',
     'b_2_p': '请输入需要购买的总数量'
+  },
+  login: {
+    'login_by_email': '邮箱登录',
+    'login_by_phone': '手机登录'
+  },
+  contract: {
+
   }
   // 'signup': '创建帐号',
   // 'signin': '登录',
@@ -1745,7 +1752,7 @@ export default {
   // 'tradingview_line': '分时线',
   // 'footer_application_coin': '上币申请',
 
-  // // 'otc_trade': '法币交易',
+  // // 'legalTender': '法币交易',
   // 'otc_tips': '添加微信请备注',
   // 'trading_fees': '币币手续费',
   // 'contract_fees': '合约手续费',

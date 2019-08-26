@@ -1612,7 +1612,7 @@ export default {
   'bubble_site_tips': '請您登入時認准下方IXX的標準功能變數名稱：',
   'tradingview_line': '分時綫',
   'footer_application_coin': '上幣申請',
-  'otc_trade': '法幣交易',
+  'legalTender': '法幣交易',
   'otc_tips': '添加微信請備註',
   'trading_fees': '幣幣手續費',
   'contract_fees': '合約手續費',

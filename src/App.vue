@@ -7,3 +7,16 @@
     <router-view />
   </div>
 </template>
+<script>
+export default {
+  name: 'App',
+  created() {
+    const that = this
+    window.TradingView.onready(function(configurationData) {
+      that.$eventBus.$on('TradingViewOnready', callBack => {
+        callBack()
+      })
+    })
+  }
+}
+</script>

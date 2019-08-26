@@ -84,6 +84,11 @@ export default {
       activeName: 'first'
     }
   },
+  created() {
+    // TradingView.onready(function() {
+    //   console.log(111)
+    // })
+  },
   methods: {
     handleClick(tab, event) {
       console.log(tab, event)

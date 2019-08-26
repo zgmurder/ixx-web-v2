@@ -1759,7 +1759,7 @@ export default {
   'bubble_site_tips': 'Please identify the standard domain name IXX below when you log in：',
   'tradingview_line': 'Time-share Line',
   'footer_application_coin': 'Coin listing application',
-  'otc_trade': 'Fiat',
+  'legalTender': 'Fiat',
   'otc_tips': 'Add WeChat Please note',
 
   'trading_fees': 'trading fee ',

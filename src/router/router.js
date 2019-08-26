@@ -24,49 +24,49 @@ export default new Router({
       ]
     },
     {
-      path: '/otc_trade',
+      path: '/legalTender',
       component: layout,
-      name: 'otc_trade',
+      name: 'legalTender',
       children: [
         {
-          path: '/otc_trade/index',
-          component: () => import('@/views/otc_trade')
+          path: '/legalTender/index',
+          component: () => import('@/views/legalTender')
         }
       ]
     },
     {
-      path: '/otc_trade',
+      path: '/legalTender',
       // redirect: '/home',
       component: layout,
-      name: 'otc_trade',
+      name: 'legalTender',
       children: [
         {
-          path: '/otc_trade/index',
-          component: () => import('@/views/otc_trade')
+          path: '/legalTender/index',
+          component: () => import('@/views/legalTender')
         }
       ]
     },
     {
-      path: '/otc_trade',
+      path: '/legalTender',
       // redirect: '/home',
       component: layout,
-      name: 'otc_trade',
+      name: 'legalTender',
       children: [
         {
-          path: '/otc_trade/index',
-          component: () => import('@/views/otc_trade')
+          path: '/legalTender/index',
+          component: () => import('@/views/legalTender')
         }
       ]
     },
     {
-      path: '/otc_trade',
-      redirect: '/otc_trade/index',
+      path: '/legalTender',
+      redirect: '/legalTender/index',
       component: layout,
-      name: 'otc_trade',
+      name: 'legalTender',
       children: [
         {
-          path: '/otc_trade/index',
-          component: () => import('@/views/otc_trade')
+          path: '/legalTender/index',
+          component: () => import('@/views/legalTender')
         }
       ]
     }

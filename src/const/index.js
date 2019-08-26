@@ -5,6 +5,7 @@ export const mapLang = {
   'ko': '한국어'
 }
 export const mapNavBackground = {
-  otc_trade: '#3E3E3E',
-  login: '#303E4B'
+  legalTender: '#3E3E3E',
+  login: '#303E4B',
+  contract: '#000'
 }

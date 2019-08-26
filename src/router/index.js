@@ -7,7 +7,7 @@ Vue.use(Router)
 import layout from '@/layout'
 
 /* Router Modules */
-import otc_tradeRouter from './modules/otc_trade'
+import otc_tradeRouter from './modules/legalTender'
 import tradingRouter from './modules/trading'
 import fund_assets_node_buyRouter from './modules/fund_assets_node_buy'
 import contractRouter from './modules/contract'
@@ -69,6 +69,7 @@ export const constantRoutes = [
       },
       {
         path: '/login',
+        name: 'login',
         component: () => import('@/views/login/index'),
         hidden: true
       }

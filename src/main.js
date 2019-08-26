@@ -17,6 +17,9 @@ import router from './router/index'
 
 import './permission'
 
+import mixins from './mixins'
+Vue.mixin(mixins)
+
 // Vue.use(ElementUI, { locale })
 Vue.config.productionTip = false
 
@@ -37,6 +40,8 @@ const i18n = new VueI18n({
     'zh-HK': zhHK
   }
 })
+
+Vue.prototype.$eventBus = new Vue({})
 
 new Vue({
   router,

@@ -4,13 +4,13 @@
       <div flex class="nav-left-container">
         <img src="@/assets/ixx_logo.png" height="40px" alt="" @click="$router.push('/')">
         <ul flex="main:justify cross:center" class="nav-list">
-          <li v-for="(item,index) in navDataArr" :key="index" :class="{active:$route.path.includes(item.path)}" @click="$router.push(item.path)">{{ $t(item.keyPath) }}</li>
+          <li v-for="(item,index) in navDataArr" :key="index" class="text-nowrap" :class="{active:$route.path.includes(item.path)}" @click="$router.push(item.path)">{{ $t(item.keyPath) }}</li>
         </ul>
       </div>
       <div class="nav-right-container">
-        <el-link :type="$route.path === '/login'? 'primary':'info'" @click="$router.push('/login')">登录</el-link>
+        <el-link :type="$route.path === '/login'? 'primary':'info'" @click="$router.push('/login')">{{ $tR('signin') }}</el-link>
         <i class="separator">|</i>
-        <el-link type="info">注册</el-link>
+        <el-link type="info">{{ $tR('signup') }}</el-link>
         <select-lang />
       </div>
     </div>
@@ -25,7 +25,7 @@
 import selectLang from '@/components/selectLang'
 import { mapNavBackground } from '@/const'
 export default {
-  name: 'Home',
+  name: 'AppNav',
   components: {
     selectLang
   },

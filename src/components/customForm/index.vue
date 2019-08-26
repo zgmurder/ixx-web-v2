@@ -92,11 +92,11 @@
 <script>
 // import { isEmpty } from '../units'
 const isEmpty = obj => JSON.stringify(obj) === '[]' || JSON.stringify(obj) === '{}' || !obj
-import ElDivider1 from '@/components/divider/main'
+// import ElDivider1 from '@/components/divider/main'
 export default {
   name: 'ComForm',
   components: {
-    ElDivider1
+    // ElDivider1
   },
   props: {
     schema: {

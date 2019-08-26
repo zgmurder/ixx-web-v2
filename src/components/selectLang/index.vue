@@ -28,7 +28,6 @@ export default {
   methods: {
     handleChange(command) {
       this.$i18n.locale = this.selectKey
-      console.log(this.$i18n.locale)
     }
   }
 }

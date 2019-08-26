@@ -1626,7 +1626,7 @@ export default {
   'bubble_site_tips': '로그인할 때 아래 IX의 표준 도메인을 확인하십시오：',
   'tradingview_line': '분 시간',
   'footer_application_coin': '화폐발행신청',
-  'otc_trade': '프랑스코인거래',
+  'legalTender': '프랑스코인거래',
   'otc_tips': '위쳇추가할때 이름을 밝히세요',
   'trading_fees': '코인수수료',
   'contract_fees': '계약수수료',

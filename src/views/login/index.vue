@@ -4,11 +4,11 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container" flex="main:justify cross:center">
-        <h2>登录</h2>
+        <h2>{{ $tR('login_by_email') }}</h2>
         <div>
-          <el-link type="primary">邮箱登录</el-link>
+          <el-link :type="isEmail ? 'primary':'info'" @click="isEmail=true">{{ $tR('login_by_email') }}</el-link>
           <el-divider direction="vertical" />
-          <el-link type="info">手机登录</el-link>
+          <el-link :type="isEmail ? 'info':'primary'" @click="isEmail=false">{{ $tR('login_by_phone') }}</el-link>
         </div>
       </div>
 
@@ -106,7 +106,9 @@ export default {
       loading: false,
       showDialog: false,
       redirect: undefined,
-      otherQuery: {}
+      otherQuery: {},
+
+      isEmail: true
     }
   },
   watch: {

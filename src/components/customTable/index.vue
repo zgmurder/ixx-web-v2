@@ -1,6 +1,7 @@
 <template>
   <div class="custom-table">
     <el-table
+      ref="elTable"
       v-bind="$attrs"
       :data="tableList"
     >
@@ -9,9 +10,10 @@
         :key="index"
         :show-overflow-tooltip="true"
         v-bind="item"
+        :label="item.hearderLabel"
       >
-        <template slot="header">
-          <p class="text-nowrap">{{ $t(item.transitionPath) }}</p>
+        <template slot="header" slot-scope="{ column }">
+          <p class="text-nowrap">{{ column.label }}</p>
         </template>
         <template slot-scope="scope">
           <span>{{ scope.row[item.prop] }}</span>
@@ -167,11 +169,7 @@ export default {
       pageConfig
     }
   },
-  created() {
-
-  },
   methods: {
-
   }
   // computed: {
   //   width() {
