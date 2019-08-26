@@ -14,7 +14,7 @@ export default {
     const that = this
     window.TradingView.onready(function(configurationData) {
       that.$eventBus.$on('TradingViewOnready', callBack => {
-        callBack()
+        typeof callBack === 'function' && callBack()
       })
     })
   }

@@ -2,7 +2,13 @@
   <table class="table-container" border="1" cellspacing="0" cellpadding="0">
     <tbody>
       <tr>
-        <td colspan="3">111122222</td>
+        <td colspan="3">
+          <div flex="main:left cross:strech" class="tabs-group">
+            <div class="active" flex="cross:center">BTC永续<br>10316.5 </div>
+            <div flex="cross:center">BTC永续<br>10316.5 </div>
+            <div flex="cross:center">BTC永续<br>10316.5 </div>
+          </div>
+        </td>
         <td rowspan="7">111122222</td>
         <td rowspan="7">111122222</td>
         <td rowspan="10">111122222</td>
@@ -52,8 +58,23 @@ export default {
   }
   td{
     border-width:4px;
-    // height: 60px;
-    border: solid 4px #272837
+    border: solid 4px #272837;
+    &>div{
+      width:100%;
+      height: 100%;
+      line-height: 1.4
+    }
+    .tabs-group > div{
+      padding: 0 20px;
+      margin-right:5px;
+      &:hover{
+        background: #1D1D1D;
+        cursor: pointer;
+      }
+      &.active{
+        background: #1D1D1D;
+      }
+    }
   }
 }
 
