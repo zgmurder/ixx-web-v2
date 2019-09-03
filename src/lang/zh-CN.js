@@ -5,7 +5,8 @@ export default {
       'contract': '合约交易',
       'legalTender': '法币交易',
       'bidTitle': '币盈盈',
-      'fund_assets_node_buy': '节点认购'
+      'fund_assets_node_buy': '节点认购',
+      'share_option': '期权交易'
     },
     'signup': '创建帐号',
     'signin': '登录',
@@ -70,6 +71,19 @@ export default {
     'login_by_phone': '手机登录'
   },
   contract: {
+    'mapTabs': {
+      BTC: `BTC永续`,
+      ETH: `ETH永续`,
+      EOS: `EOS永续`,
+      BHD: `BHD永续`
+    },
+    'mapDishInfo': {
+      current: '最新价',
+      change_24h: '涨跌幅',
+      volume_24h: '24H成交量',
+      markPrice: '标记价格',
+      increment_24h: '涨跌额'
+    }
 
   }
   // 'signup': '创建帐号',

@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <app-nav :nav-data-arr="navDataArr" />
-    <keep-alive>
+    <keep-alive :include="['contract']">
       <router-view />
     </keep-alive>
     <!-- <app-footer /> -->
@@ -22,6 +22,7 @@ export default {
     const routes = [...vm.$router.options.routes]
     const path = 'appNav.mapNavList'
     const mapNavList = getValueByPath(vm.$i18n.messages['zh-CN'], path)
+
     const navDataArr = Object.keys(mapNavList).map(key => {
       const index = routes.findIndex(item => item.name === key)
       if (index === -1) return {}

@@ -10,7 +10,7 @@ const bidTitleRouter = {
   children: [
     {
       path: '/bidTitle/index',
-      component: () => import('@/views/bidTitle')
+      component: () => import('@/views/icons')
     }
   ]
 }

@@ -1,4 +1,6 @@
 import { capitalizeLower } from '@/utils'
+import Big from 'big.js/big.mjs'
+
 export default {
   computed: {
     thisName() {
@@ -12,8 +14,8 @@ export default {
     gotoPath(path) {
       this.$router.push(path)
     },
-    $tR(keyPath) {
-      return this.$t(`${capitalizeLower(this.thisName)}.${keyPath}`)
+    $tR(keyPath, locale) {
+      return this.$t(`${capitalizeLower(this.thisName)}.${keyPath}`, locale)
     }
   }
 }

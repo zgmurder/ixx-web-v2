@@ -7,5 +7,6 @@ export const mapLang = {
 export const mapNavBackground = {
   legalTender: '#3E3E3E',
   login: '#303E4B',
-  contract: '#000'
+  contract: '#000',
+  'share_option': '#000'
 }

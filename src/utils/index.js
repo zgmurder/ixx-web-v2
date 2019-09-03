@@ -11,6 +11,9 @@ export const getValueByPath = (obj = {}, path) => {
 export const capitalizeLower = ([first, ...rest], lowerRest = false) => {
   return first.toLowerCase() + (lowerRest ? rest.join('').toLowerCase() : rest.join(''))
 }
+export const groupBy = (arr, func) =>
+  arr.map(typeof func === 'function' ? func : val => val[func])
+    .reduce((acc, val, i) => { acc[val] = (acc[val] || []).concat(arr[i]); return acc }, {})
 
 // /**
 //  * Created by PanJiaChen on 16/11/18.

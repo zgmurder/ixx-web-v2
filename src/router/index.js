@@ -12,6 +12,7 @@ import tradingRouter from './modules/trading'
 import fund_assets_node_buyRouter from './modules/fund_assets_node_buy'
 import contractRouter from './modules/contract'
 import bidTitleRouter from './modules/bidTitle'
+import share_optionRouter from './modules/share_option'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -79,7 +80,8 @@ export const constantRoutes = [
   tradingRouter,
   fund_assets_node_buyRouter,
   contractRouter,
-  bidTitleRouter
+  bidTitleRouter,
+  share_optionRouter
   // {
   //   path: '/404',
   //   component: () => import('@/views/error-page/404'),
