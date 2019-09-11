@@ -7,7 +7,7 @@
       <el-dropdown-item v-for="(value,key) in mapLang" :key="key" :style="{backgroundColor:selectKey === key && '#000'||'none'}" :command="key">{{ value }}</el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown> -->
-  <el-select v-model="selectKey" size="mini" class="custom-select" placeholder="请选择" @change="handleChange">
+  <el-select v-model="selectKey" size="mini" class="custom-select" @change="handleChange">
     <el-option
       v-for="(value,key) in mapLang"
       :key="key"

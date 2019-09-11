@@ -1,53 +1,26 @@
-import { getFUTUREList } from '@/api/contract'
-import { bigRound } from '@/utils/handleNum'
+import { getFutureDictionaryList } from '@/api/contract'
 export default {
   data() {
     return {
       websockets: [],
-      tickersData: null,
-      dataDictionary: [],
-
-      delegateData: null
+      tickersData: null
     }
   },
   created() {
-    getFUTUREList().then(res => {
+    getFutureDictionaryList().then(res => {
       this.dataDictionary = res.data
-      this.startWebSokets()
+      this.openWebSocket('market/tickers', this.handleTickers).then(() => this.$emit('baseDataLoaded'))
     })
+  },
+  computed: {
+    baseWSurl() {
+      return process.env.VUE_APP_WS_API
+    }
   },
   destroyed: function() {
     this.websockets.forEach(soket => soket.close())
   },
   methods: {
-    startWebSokets() {
-      this.initSoketConfigs()
-      this.initWebSocket()
-    },
-    initSoketConfigs() {
-      const baseUrl = process.env.VUE_APP_WS_API
-      this._soketConfigs = [
-        { url: baseUrl + 'market/tickers', onmessage: this.handleTickers },
-        { url: baseUrl + 'orderbook/FUTURE_BTCUSD/0/1/20', onmessage: this.handleBTCUSD }
-      ]
-    },
-    initWebSocket() {
-      if (!this._soketConfigs.length) return this.$emit('dataLoaded')
-      const soketConfig = this._soketConfigs.splice(0, 1)[0]
-      const soket = new WebSocket(soketConfig.url)
-      this.websockets.push(soket)
-      soket.onopen = () => console.log(`${soketConfig.url}连接成功`)
-      soket.onerror = () => console.log(`${soketConfig.url}连接发生错误`)
-      soket.onclose = () => console.log(`${soketConfig.url}链接关闭`)
-      soket.onmessage = e => {
-        const res = JSON.parse(e.data)
-        if (res.code !== 0) return console.log(`服务器异常`)
-        new Promise(resolve => {
-          soketConfig.onmessage(res.data)
-          resolve()
-        }).then(this.initWebSocket)
-      }
-    },
     handleTickers(data) {
       const matchArr = ['FUTURE', 'INDEX', 'MARKET']
       const dictionary = [...this.dataDictionary]
@@ -60,10 +33,24 @@ export default {
         return curr
       }, {})
       this.tickersData = objArr
-      // console.log(this.socketData)
     },
-    handleBTCUSD(data) {
-      this.delegateData = data
+
+    openWebSocket(wsurl, callBack = () => {}) {
+      return new Promise((resolve, reject) => {
+        const websocket = new WebSocket(`${this.baseWSurl}${wsurl}`)
+        websocket.onopen = () => console.log(`${wsurl}连接成功`)
+        websocket.onerror = () => console.log(`${wsurl}连接发生错误`)
+        websocket.onclose = () => console.log(`${wsurl}链接关闭`)
+        this.websockets.push(websocket)
+        websocket.onmessage = e => {
+          const res = JSON.parse(e.data)
+          res.code === 0 && (resolve(res.data), callBack(res.data)) || reject(res)
+        }
+      })
+    },
+    closeWebSocket(wsurl) {
+      const index = this.websockets.findIndex(item => item.url === `${this.baseWSurl}${wsurl}`)
+      index !== -1 && this.websockets.splice(index, 1)[0].close()
     }
   }
 }

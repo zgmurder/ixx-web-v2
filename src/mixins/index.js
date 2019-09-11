@@ -1,5 +1,4 @@
-import { capitalizeLower } from '@/utils'
-import Big from 'big.js/big.mjs'
+import { capitalizeLower, parseTime } from '@/utils'
 
 export default {
   computed: {
@@ -17,5 +16,8 @@ export default {
     $tR(keyPath, locale) {
       return this.$t(`${capitalizeLower(this.thisName)}.${keyPath}`, locale)
     }
+  },
+  filters: {
+    parseTime
   }
 }

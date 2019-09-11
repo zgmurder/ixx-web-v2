@@ -1,13 +1,14 @@
 <template>
   <div class="share-option" flex="main:justify cross:strech">
     <div class="share-option-bg" />
+
     <div class="left-side-bar">
       <div v-for="(value,key) in mapComponentNames" :key="key" :class="{active:drawerIsOpen && activeName === key}" @click="handleClickTab(key)">
         <svg-icon icon-class="chart" style="font-size:24px" />
         <p>{{ value }}</p>
       </div>
     </div>
-    <transition name="fade">
+    <transition name="fade" @after-leave="afterLeaveOrEnter" @enter="afterLeaveOrEnter">
       <div v-if="drawerIsOpen" class="left-drawer">
         <div slot="title" flex="cross:center main:justify" style="height:40px">
           <p>最新价格<span class="share-text-info" style="font-size:12px;">(USDT/USD)</span></p>
@@ -16,9 +17,19 @@
         <i class="el-icon-close" @click="drawerIsOpen = false" />
       </div>
     </transition>
-    <div class="content" box="mean">
-      <charts-dynamic-update />
+    <div class="content" flex="dir:bottom">
+      <charts-dynamic-update ref="dynamic-charts" style="width:100%" class="dynamic-update" />
+      <ul class="time-tab" flex="main:justify cross:center box:mean">
+        <li class="active">2m</li>
+        <li>5m</li>
+        <li>15m</li>
+        <li>30m</li>
+        <li>3h</li>
+        <li>1d</li>
+        <li>7d</li>
+      </ul>
     </div>
+    <!-- <charts-dynamic-update class="content" /> -->
     <div class="right-side-bar">
       <div class="content-top hover-scale">
         <p class="share-text-info"> 投资 </p>
@@ -51,11 +62,14 @@
 </template>
 <script>
 import chartsDynamicUpdate from './componets/dynamic-update'
+import websoketMixin from '@/mixins/soket'
+
 export default {
   name: 'ShareOption',
   components: {
     chartsDynamicUpdate
   },
+  mixins: [websoketMixin],
   data() {
     return {
       drawerIsOpen: false,
@@ -71,14 +85,25 @@ export default {
         'ranking-list': '排行榜',
         'teach-view': '教学视频'
       }
+    },
+    dynamicChart() {
+      return this.$refs['dynamic-charts'].chart
     }
   },
+  created() {
+    // this.openWebSocket('wss://fota.com/apioption/wsoption?brokerId=1', res => {
+    //   console.log(res)
+    // })
+  },
   methods: {
-    async handleClickTab(name) {
+    handleClickTab(name) {
       if (this.activeName === name && this.drawerIsOpen) return
       this.drawerIsOpen = true
       this.activeName = name
       this.temComponet = require(`./componets/${name}.vue`).default
+    },
+    afterLeaveOrEnter(el) {
+      this.dynamicChart.reflow()
     }
   }
 }
@@ -100,6 +125,7 @@ export default {
     background: rgba($color: $--contract-table-bg, $alpha: .9);
     z-index: -1;
   }
+
   .left-side-bar{
     color: #6C7482;
     background: $--share-bg-color;
@@ -141,8 +167,29 @@ export default {
     }
   }
   .content{
+    position: relative;
     flex: 1;
-
+    &>.dynamic-update{
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 35px;
+    };
+    &>.time-tab{
+      height: 34px;
+      text-align: center;
+      background: #363E4F;
+      line-height: 34px;
+      color: #999;
+      &>li{
+        &.active,&:hover{
+          box-shadow: 0 2px 0 0 #fff inset;
+          background: #4F596D;
+          color: #fff;
+          cursor: pointer;
+        }
+      }
+  }
     // background: rgba$--share-bg-color;
   }
   .right-side-bar{

@@ -6,7 +6,6 @@ import 'normalize.css'
 import 'flex.css'
 
 import ElementUI from 'element-ui'
-import '@/styles/theme/index.css'
 import '@/styles/index.scss' // global css
 // import locale from 'element-ui/lib/locale/lang/en'
 // import 'element-ui/lib/theme-chalk/index.css'

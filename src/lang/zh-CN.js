@@ -71,6 +71,9 @@ export default {
     'login_by_phone': '手机登录'
   },
   contract: {
+    sheet: '张',
+    buy: '卖入',
+    sell: '卖出',
     'mapTabs': {
       BTC: `BTC永续`,
       ETH: `ETH永续`,
@@ -83,8 +86,24 @@ export default {
       volume_24h: '24H成交量',
       markPrice: '标记价格',
       increment_24h: '涨跌额'
+    },
+    mapDelegateList: {
+      'entrust-list': '委托列表',
+      'depth': '深度',
+      'return-dish': '返回盘口',
+      'new-bargain': '最新成交',
+      mapHeader1: {
+        'price': '价格',
+        'amount': '数量',
+        'total': '累计'
+      },
+      mapHeader2: {
+        'direction': '方向',
+        'transaction-price ': '成交价',
+        'trading-volume': '成交量',
+        'time': '时间'
+      }
     }
-
   }
   // 'signup': '创建帐号',
   // 'signin': '登录',

@@ -1,3 +1,5 @@
+@import './theme/ixx/index.css';
+
 @import './variables.scss';
 // @import './mixin.scss';
 @import './transition.scss';
@@ -8,14 +10,16 @@
 
 html,body {
   height: 100%;
-  // color: #fff;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
 }
-ul,dl,dd,p{ list-style: none;margin: 0;padding: 0;box-sizing: border-box}
+ul,dl,dd,p,h1,h2,h3,h4,h5{ list-style: none;margin: 0;padding: 0;box-sizing: border-box}
 a {color: inherit;text-decoration: none}
+
+
+
 .container{
   width: 1200px;
   margin: 0 auto;

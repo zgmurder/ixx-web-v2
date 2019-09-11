@@ -73,7 +73,7 @@ export default {
         // loading_screen:{ backgroundColor: "#000000",foregroundColor: "#000000", }//todo:do it
         interval: '60',
         // timeframe:'',//todo: na koncu
-        toolbar_bg: '#20334d',
+        toolbar_bg: '#0c1222',
         // saved_data: this_vue.savedData,
         allow_symbol_change: true,
         time_frames: [
@@ -111,9 +111,9 @@ export default {
           'compare_symbol',
           'border_around_the_chart',
           'timezone_menu',
-          // "header_resolutions",//todo: przetestowac
-          // "control_bar",//todo: przetestowac
-          // "edit_buttons_in_legend",//todo: przetestowac
+          'header_resolutions', // todo: przetestowac
+          'control_bar', // todo: przetestowac
+          'edit_buttons_in_legend', // todo: przetestowac
           'remove_library_container_border'
         ],
         enabled_features: [
@@ -132,7 +132,7 @@ export default {
         },
         overrides: {
           'symbolWatermarkProperties.color': 'rgba(0,0,0, 0)',
-          'paneProperties.background': '#20334d',
+          'paneProperties.background': '#0c1222',
           'paneProperties.vertGridProperties.color': '#344568',
           'paneProperties.horzGridProperties.color': '#344568',
           'paneProperties.crossHairProperties.color': '#58637a',
@@ -164,7 +164,7 @@ export default {
           'paneProperties.legendProperties.showSeriesOHLC': true,
           'scalesProperties.showLeftScale': false,
           'scalesProperties.showRightScale': true,
-          'scalesProperties.backgroundColor': '#20334d',
+          'scalesProperties.backgroundColor': '#0c1222',
           'scalesProperties.lineColor': '#46587b',
           'scalesProperties.textColor': '#8f98ad',
           'scalesProperties.scaleSeriesOnly': false,
@@ -232,11 +232,9 @@ export default {
   },
   methods: {
     getChartData: function() {
-      console.log('GET CHART DATA')
       _this = this
       this.$http.get('/api/getChartData', this.parseToSend({ pair: this.currentPair.code }))
         .then(response => {
-          console.log('GET CHART DATA', response.body)
           response.body.forEach(order => {
             _this.$data.bars.push({
               close: Number(order.close),
@@ -247,7 +245,6 @@ export default {
               time: Number(order.time)
             })
           })
-          console.log(_this.$data.bars)
           this.log('@@@', response.body)
           // this.$data.bars = response.body;
           // this.$data.activeOffers = response.body;
@@ -262,7 +259,6 @@ export default {
         this.feed._fireEvent('pair_change')
         this.chart.activeChart().resetData()
         this.chart.activeChart().setSymbol(this.currency1 + ':' + this.currency2, function() {
-          console.log('GOWNO :: proba zmiany', this_vue.currency1, this_vue.currency2)
         })
       }
     },
@@ -422,7 +418,6 @@ export default {
       Datafeed.Container.prototype._logMessage = function(message) {
         if (this._enableLogging) {
           var now = new Date()
-          console.log('CHART LOGS: ' + now.toLocaleTimeString() + '.' + now.getMilliseconds() + '> ' + message)
         }
       }
 
