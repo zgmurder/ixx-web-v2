@@ -173,7 +173,7 @@ export default {
       position: absolute;
       top: 0;
       right: 0;
-      bottom: 35px;
+      bottom: 40px;
     };
     &>.time-tab{
       height: 34px;

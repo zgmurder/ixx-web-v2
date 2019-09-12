@@ -11,15 +11,21 @@
 import Highcharts from 'highcharts/highcharts'
 import HighMap from 'highcharts/modules/map.js'
 import websoketMixin from '@/mixins/soket'
+import CountUp from 'countup/dist/countUp.min'
+import lineBox from './line'
 HighMap(Highcharts)
 export default {
-  mixins: [websoketMixin],
   // props: {
   //   'isReflow': Boolean
   // },
+  components: {
+    lineBox
+  },
+  mixins: [websoketMixin],
   data() {
     return {
-      isLoading: false
+      isLoading: false,
+      isNoScroll: true
     }
   },
   mounted() {
@@ -32,23 +38,88 @@ export default {
         })
         this.chart = this.initCharts(data)
         console.log(this.chart)
+        console.log(this.$el, lineBox, this)
 
+        this.countUp = new CountUp(this.chart.yAxis[0].plotLinesAndBands[0].label.element.children[0], data[data.length - 1].y, data[data.length - 1].y, 4, 1, {
+          formattingFn(res) {
+            if (!res) return res
+            const arr = String(res).split('.')
+            return `<span>${arr[0]}.<span style="font-size:16px;position:absolute;margin-left:-5px">${arr[1]}</span></span>`
+          }
+        })
+        // const xPixels = this.chart.xAxis[0].toPixels(data[data.length - 1].x)
+        // const yPixels = this.chart.yAxis[0].toPixels(data[data.length - 1].y)
+        this.chart.renderer.label(`<div class="time-line white  opacity" style="transform: translate(1113.44px, 0px);">
+      <div class="time-line-main">
+        <div class="box">下一轮</div>
+        <div class="time-lineL" />
+        <svg class="icon" aria-hidden="true">
+          <use xlink:href="#icon-flag" />
+        </svg></div>
+      <div class="mask" />
+    </div>`).add()
+        // this.chart.xAxis[0].update({ min: data })
+        // this.chart.mapZoom(1, 1, 1, 1, 1)
+        this.chart.pointer.onContainerMouseWheel = (e) => {
+          // this.chart.xAxis[0].setExtremes(dataMin, res.lineBinaryOptionPriceIndex.time + 120000)
+          // console.log(this.chart)
+          // console.log(e)
+
+          const { min, max } = this.chart.xAxis[0].getExtremes()
+          // const calcMin = min - 60 * e.deltaY
+          this.chart.xAxis[0].update({ min: Math.min(min - 60 * e.deltaY, max) })
+          this.isNoScroll && this.chart.showResetZoom()
+          this.isNoScroll = false
+          // console.log(Highcharts.map)
+          // const element = this.chart.renderer.button('重置', 10, 10).attr({
+          //   fill: '#FFFFEF',
+          //   stroke: 'gray',
+          //   'stroke-width': 1,
+          //   zIndex: 4
+          // }).add()
+          // element.on('click', function(a) {
+          //   console.dir(this)
+          //   console.log(element)
+          //   element.fadeOut()
+          //   // this.destroy()
+          // })
+          // this.chart.showResetZoom()
+        }
         // this.chart.series[0].setData(data)
         // this.chart.xAxis[0].setExtremes(data[0].x, Number(data[data.length - 1].x) + 120000)
         // [Number howMuch], [Number centerX], [Number centerY], [Number mouseX], [Number mouseY]
-        this.chart.mapZoom([2])
+        // this.chart.mapZoom(4)
         // console.log(this.chart)
 
         // this.chart.yAxis[0].setExtremes(yMin - 20, yMax + 20)
         this.isLoading = false
       } else if (res.lineBinaryOptionPriceIndex) {
-        // const xAxis = this.chart.xAxis[0]
         // const yAxis = this.chart.yAxis[0]
-        // const { dataMin } = xAxis.getExtremes()
+        const { min } = this.chart.xAxis[0].getExtremes()
         // xAxis.update({ max: dataMax + 120000 })
         // yAxis.update({ max: yAxis.getExtremes().dataMax, min: yAxis.getExtremes().dataMin })
         // this.chart.xAxis[0].setExtremes(dataMin, res.lineBinaryOptionPriceIndex.time + 120000)
-        this.chart.series[0].addPoint([res.lineBinaryOptionPriceIndex.time, Number(res.lineBinaryOptionPriceIndex.price)])
+        const price = Number(res.lineBinaryOptionPriceIndex.price)
+        // const xPixels = this.chart.xAxis[0].toPixels(res.lineBinaryOptionPriceIndex.time)
+        const plotLinesAndBand = this.chart.yAxis[0].plotLinesAndBands[0]
+        plotLinesAndBand.options.value = price
+        // plotLinesAndBand.label.element.children[0].innerText = price
+
+        this.countUp.update(price)
+        // console.log(this.chart.yAxis[0].plotLinesAndBands[0].renderLabel())
+        // this.chart.yAxis[0].plotLinesAndBands[0].label.alignOptions.formatter.call()
+        // this.chart.yAxis[0].plotLinesAndBands[0].label.alignOptions.formatter()
+        // this.chart.yAxis[0].plotLinesAndBands[1].options.value = price
+
+        // this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d = price
+        // const linePath = this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d.split(' ')
+        // linePath.splice(4, 1, xPixels)
+        // this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d = linePath.join(' ')
+
+        this.chart.series[0].addPoint([res.lineBinaryOptionPriceIndex.time, price])
+
+        const dataCout = this.chart.series[0].data.filter(item => item.x > min).length
+        if (dataCout > 100 && this.isNoScroll) this.initxAxis()
       } else {
         // console.log(res)
       }
@@ -61,19 +132,21 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    initxAxis() {
+      const dataArr = this.chart.series[0].data
+      this.chart.xAxis[0].update({ min: dataArr[dataArr.length - 43].x })
+    },
     initCharts(dataArr) {
       Highcharts.setOptions({
-        global: {
-          useUTC: false
-        }
+        global: { useUTC: false }
       })
       // function activeLastPointToolip(chart) {
       //   var points = chart.series[0].points
       //   chart.tooltip.refresh(points[points.length - 1])
       // }
+      const that = this
       return Highcharts.chart('container', {
-        rangeSelector: {
-          selected: 1
+        rangeSelector: { selected: 1
         },
         title: {
           text: ''
@@ -81,13 +154,20 @@ export default {
         chart: {
           className: 'myChart',
           marginRight: 10,
-          marginBottom: 20,
+          // marginBottom: 20,
           spacingRight: 100,
+          // spacing: 60,
           // panning: !1,
-          panning: true,
-          panKey: 'shift',
+          // panning: true,
+          // panKey: 'shift',
           backgroundColor: 'transparent',
           // animation: Fl.animation,
+          resetZoomButton: {
+            position: {
+              align: 'left', // by default
+              x: 10
+            }
+          },
           events: {
             load: function() {
               // var n = C()(this.series, 1)
@@ -97,9 +177,16 @@ export default {
               // fs(Fl.ws1time)
             },
             selection: function() {
-              console.log(111)
+              that.initxAxis()
+              that.isNoScroll = true
+              // this.resetZoomButton
+              // console.dir(this.resetZoomButton.element)
+              // this.resetZoomButton.element.style.display = 'none'
+              // this.resetZoomButton.element.innerHTML = ''
+              this.resetZoomButton.fadeOut()
 
-              return !1
+              // this.resetZoomButton.opacity = 0
+              // this.resetZoomButton.destroy()
             }
           }
         },
@@ -115,7 +202,7 @@ export default {
           series: {
             lineColor: '#fff',
             lineWidth: 2,
-            fillOpacity: 0.9,
+            fillOpacity: 0.05,
             stickyTracking: !1,
             dataLabels: {
               enabled: !1
@@ -123,6 +210,7 @@ export default {
             marker: {
               enabled: !1
             }
+            // pointInterval: 1000
           },
           cursor: 'pointer'
         },
@@ -141,15 +229,18 @@ export default {
         },
         mapNavigation: {
           enabled: true,
-          enableButtons: false
+          enableButtons: false,
+          enableMouseWheelZoom: true,
+          enableDoubleClickZoomTo: false
         },
         xAxis: {
           type: 'datetime',
           lineWidth: 0,
           tickColor: 'transparent',
-          // tickInterval: 1000 * 30,
-          // tickPixelInterval: 3000,
+          // tickInterval: 10,
+          // tickPixelInterval: 60 * 1000,
           title: null,
+          // min: dataArr[dataArr.length - 43].x,
           dateTimeLabelFormats: {
             second: '%H:%M:%S'
           },
@@ -174,6 +265,7 @@ export default {
         yAxis: {
           offset: -60,
           opposite: !0,
+          // tickPixelInterval: 500,
           tickPositioner: function() {
             // console.log(this.max, this.min)
 
@@ -205,7 +297,24 @@ export default {
           //   }
           // },
           gridLineColor: 'rgba(167, 174, 196, 0.1)',
-          gridLineWidth: 2
+          gridLineWidth: 2,
+          plotLines: [{
+            color: '#cccccc',
+            width: 1,
+            dashStyle: 'Dash',
+            value: dataArr[dataArr.length - 1].y,
+            label: {
+              align: 'right',
+              x: -0,
+              useHTML: true,
+              formatter: function() {
+                return `
+                  <div class="priceTag plotline">${this.options.value}</div>
+                  <div class="line up"></div>
+                  <div class="line down"></div> `
+              }
+            }
+          }]
         },
         series: [{
           type: 'area',
@@ -221,7 +330,7 @@ export default {
               x2: 0,
               y2: 1
             },
-            stops: [[0, 'rgba(117,122,136,0.6)'], [1, 'rgba(88,91,114,0)']]
+            stops: [[0, 'rgba(117,122,136,0.5)'], [1, 'rgba(88,91,114,0)']]
           }
         }]
       })
@@ -341,46 +450,74 @@ export default {
 }
 </script>
 <style lang="scss" scope="this api replaced by slot-scope in 2.5.0+">
-.myChart .highcharts-range-selector-group {
+#container{
+  .myChart .highcharts-range-selector-group {
   display: none; }
 
-.myChart .highcharts-exporting-group {
-  display: none; }
-.priceTag{
-  position: relative;
-  z-index: 3;
-  width: 78px;
-  height: 26px;
-  line-height: 26px;
-  border: 1px solid #4F596D;
-  border-radius: 13px;
-  background-color: #171C29;
-  text-align: center;
-  font-size: 12px;
-  color: #8F97AE;
-  cursor: pointer;
-  &:hover{
-    color: #fff;
-    & ~ div{
-      display: block
+  .myChart .highcharts-exporting-group {
+    display: none; }
+  .priceTag{
+    position: relative;
+    z-index: 3;
+    width: 78px;
+    height: 26px;
+    line-height: 26px;
+    border: 1px solid #4F596D;
+    border-radius: 13px;
+    background-color: #171C29;
+    text-align: center;
+    font-size: 12px;
+    color: #8F97AE;
+    cursor: pointer;
+    opacity: 0.6;
+    &:hover{
+      // color: #fff;
+      opacity: 1;
+      & ~ div{
+        display: block
+      }
+    }
+    &.plotline{
+      background: #ccc;
+      border-radius: 2px 0 0 2px;
+      color: #171C29;
+      opacity: 1;
+      line-height: 30px;
+      height: 30px;
+      width: 100px;
+      text-align: left;
+      text-indent: 5px;
+      &:before {
+          content: '';
+          width: 0;
+          height: 0;
+          border-width: 15px;
+          border-style: solid;
+          border-color:transparent #ccc transparent transparent;
+          position: absolute;
+          left: -30px;
+          top: 0px;
+          z-index: -1;
+      }
     }
   }
+  .line{
+    width: 100vw;
+    z-index: 1;
+    height: 100px;
+    right: 0;
+    // background: #000;
+    position: absolute;
+    display: none
+  }
+  .up{
+    top: 50%;
+    background: linear-gradient(to bottom, rgba(202,38,38,0.3), transparent);
+  }
+  .down{
+    bottom: 50%;
+    background: linear-gradient(to top, rgba(30,139,33,0.3), transparent);
+  }
 }
-.line{
-  width: 100vw;
-  z-index: 1;
-  height: 100px;
-  right: 0;
-  // background: #000;
-  position: absolute;
-  display: none
-}
-.up{
-  top: 50%;
-  background: linear-gradient(to bottom, rgba(202,38,38,0.3), transparent);
-}
-.down{
-  bottom: 50%;
-  background: linear-gradient(to top, rgba(30,139,33,0.3), transparent);
-}
+
 </style>
