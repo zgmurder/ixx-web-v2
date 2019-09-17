@@ -12,15 +12,11 @@ import Highcharts from 'highcharts/highcharts'
 import HighMap from 'highcharts/modules/map.js'
 import websoketMixin from '@/mixins/soket'
 import CountUp from 'countup/dist/countUp.min'
-import lineBox from './line'
 HighMap(Highcharts)
 export default {
   // props: {
   //   'isReflow': Boolean
   // },
-  components: {
-    lineBox
-  },
   mixins: [websoketMixin],
   data() {
     return {
@@ -38,7 +34,7 @@ export default {
         })
         this.chart = this.initCharts(data)
         console.log(this.chart)
-        console.log(this.$el, lineBox, this)
+        // console.log(this.$el, lineBox, this)
 
         this.countUp = new CountUp(this.chart.yAxis[0].plotLinesAndBands[0].label.element.children[0], data[data.length - 1].y, data[data.length - 1].y, 4, 1, {
           formattingFn(res) {
@@ -49,15 +45,46 @@ export default {
         })
         // const xPixels = this.chart.xAxis[0].toPixels(data[data.length - 1].x)
         // const yPixels = this.chart.yAxis[0].toPixels(data[data.length - 1].y)
-        this.chart.renderer.label(`<div class="time-line white  opacity" style="transform: translate(1113.44px, 0px);">
-      <div class="time-line-main">
-        <div class="box">下一轮</div>
-        <div class="time-lineL" />
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-flag" />
-        </svg></div>
-      <div class="mask" />
-    </div>`).add()
+        // const orderTime = new Date(res.timeStamp).setSeconds(40)
+        // const finishTime = orderTime + 20000
+        // const orderPixels = this.chart.xAxis[0].toPixels(orderTime)
+        // const finishPixels = this.chart.xAxis[0].toPixels(finishTime)
+
+        const { orderPixels, finishPixels } = this.handleLinePixelsByTime(res.timeStamp)
+        this.chart.renderer.label(`<div id="orderTime" class="time-line white  opacity" style="transform: translate(${orderPixels}px, 0px);">
+          <div class="time-line-main">
+            <div class="box"></div>
+            <div class="time-lineL" />
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-flag" />
+            </svg>
+            <div class="mask" style="width:0" />
+          </div>
+        </div>`, 0, 0, 'rect', 0, 0, true).add()
+        // this.chart.renderer.label(`<div id="ripple" class="ripple"></div>`, 0, 0, 'rect', 0, 0, true).add()
+
+        this.chart.renderer.label(`<div id="finishTime" class="time-line  opacity" style="transform: translate(${finishPixels}px, 0px);">
+          <div class="time-line-main">
+            <div class="box" style="background:none;color:red">00 : 19</div>
+            <div class="time-lineL yellow" />
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-time" />
+            </svg></div>
+        </div>`, 0, 0, 'rect', 0, 0, true).add()
+
+        this.orderTimeElement = document.querySelector('#orderTime')
+        this.finishTimeElement = document.querySelector('#finishTime')
+        this.rippleElement = document.querySelector('#ripple')
+        const orderBoxElement = this.orderTimeElement.querySelector('.box')
+
+        const yetTime = (new Date(res.timeStamp).setSeconds(40) - res.timeStamp) / 1000 - 1
+        this.orderBoxCountUp = new CountUp(orderBoxElement, yetTime, 0, 0, yetTime, {
+          useEasing: false,
+          prefix: '00 ：'
+        })
+        this.orderBoxCountUp.start()
+        // const finishBoxElement = this.finishTimeElement.querySelector('.box')
+
         // this.chart.xAxis[0].update({ min: data })
         // this.chart.mapZoom(1, 1, 1, 1, 1)
         this.chart.pointer.onContainerMouseWheel = (e) => {
@@ -110,16 +137,42 @@ export default {
         // this.chart.yAxis[0].plotLinesAndBands[0].label.alignOptions.formatter.call()
         // this.chart.yAxis[0].plotLinesAndBands[0].label.alignOptions.formatter()
         // this.chart.yAxis[0].plotLinesAndBands[1].options.value = price
+        const resTime = res.lineBinaryOptionPriceIndex.time
+        const { orderPixels, finishPixels } = this.handleLinePixelsByTime(resTime)
+        // console.log(orderPixels, finishPixels)
+        this.orderTimeElement.style.transform = `translate(${orderPixels}px, 0px)`
+        this.finishTimeElement.style.transform = `translate(${finishPixels}px, 0px)`
+        this.rippleElement.style.right = this.chart.containerWidth - this.chart.xAxis[0].toPixels(resTime, true) - 19 + 'px'
+        // this.rippleElement.style.top = this.chart.yAxis[0].toPixels(price, true) + 'px'
 
+        const markElement = this.orderTimeElement.querySelector('.mask')
+        const orderBoxElement = this.orderTimeElement.querySelector('.box')
+        const finishBoxElement = this.finishTimeElement.querySelector('.box')
+        if (resTime >= new Date(resTime).setSeconds(40)) {
+          if (orderBoxElement.innerText !== '下一轮') {
+            const finishCountUp = new CountUp(finishBoxElement, 20, 0, 0, 20, { useEasing: false, prefix: '00 ：' })
+            finishCountUp.start()
+          }
+          orderBoxElement.innerText = '下一轮'
+        } else {
+          finishBoxElement.innerText = ''
+          if (orderBoxElement.innerText === '下一轮') {
+            // this.orderBoxCountUp.reset()
+            this.orderBoxCountUp = new CountUp(orderBoxElement, 40, 0, 0, 40, { useEasing: false, prefix: '00 ：' })
+            this.orderBoxCountUp.start()
+          }
+        }
+        markElement.style.width = resTime >= new Date(resTime).setSeconds(40) ? '50vw' : 0
         // this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d = price
         // const linePath = this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d.split(' ')
         // linePath.splice(4, 1, xPixels)
         // this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d = linePath.join(' ')
 
-        this.chart.series[0].addPoint([res.lineBinaryOptionPriceIndex.time, price])
+        this.chart.series[0].addPoint([resTime, price])
 
         const dataCout = this.chart.series[0].data.filter(item => item.x > min).length
-        if (dataCout > 100 && this.isNoScroll) this.initxAxis()
+
+        if (dataCout > 400 && this.isNoScroll) this.initxAxis()
       } else {
         // console.log(res)
       }
@@ -132,9 +185,16 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    handleLinePixelsByTime(time) {
+      const orderTime = new Date(time).setSeconds(40)
+      const finishTime = orderTime + 20000
+      const orderPixels = this.chart.xAxis[0].toPixels(orderTime, true)
+      const finishPixels = this.chart.xAxis[0].toPixels(finishTime, true)
+      return { orderPixels, finishPixels }
+    },
     initxAxis() {
       const dataArr = this.chart.series[0].data
-      this.chart.xAxis[0].update({ min: dataArr[dataArr.length - 43].x })
+      this.chart.xAxis[0].update({ min: dataArr[dataArr.length - 200].x })
     },
     initCharts(dataArr) {
       Highcharts.setOptions({
@@ -150,6 +210,9 @@ export default {
         },
         title: {
           text: ''
+        },
+        animation: {
+          duration: 1000
         },
         chart: {
           className: 'myChart',
@@ -221,8 +284,11 @@ export default {
           useHTML: !0,
           xDateFormat: '%H:%M:%S',
           backgroundColor: 'rgba(79,89,109,0.8)',
-          formatter: function() {
-            return ''
+          formatter: function(a, b) {
+            return `<div>
+              <p style="color:#fff; margin-bottom:5px;"><span style="color:#A8ACBB; margin-right:5px;">：${this.x}</span></p>
+              <p style="color:#fff; margin-bottom:0px;"><span style="color:#A8ACBB;margin-right:5px;">${this.y}</p>
+              </div>`
           },
           borderColor: 'transparent',
           borderRadius: 8
@@ -237,8 +303,8 @@ export default {
           type: 'datetime',
           lineWidth: 0,
           tickColor: 'transparent',
-          // tickInterval: 10,
-          // tickPixelInterval: 60 * 1000,
+          tickPixelInterval: 200,
+          // tickInterval: 60 * 1000,
           title: null,
           // min: dataArr[dataArr.length - 43].x,
           dateTimeLabelFormats: {
@@ -265,7 +331,7 @@ export default {
         yAxis: {
           offset: -60,
           opposite: !0,
-          // tickPixelInterval: 500,
+          tickPixelInterval: 200,
           tickPositioner: function() {
             // console.log(this.max, this.min)
 
@@ -311,7 +377,8 @@ export default {
                 return `
                   <div class="priceTag plotline">${this.options.value}</div>
                   <div class="line up"></div>
-                  <div class="line down"></div> `
+                  <div class="line down"></div> 
+                  <div id="ripple" class="ripple"></div>`
               }
             }
           }]
@@ -336,117 +403,6 @@ export default {
       })
     }
   }
-  //   initCharts(dataArr) {
-  //     Highcharts.setOptions({
-  //       global: {
-  //         useUTC: false
-  //       }
-  //     })
-  //     // function activeLastPointToolip(chart) {
-  //     //   var points = chart.series[0].points
-  //     //   chart.tooltip.refresh(points[points.length - 1])
-  //     // }
-  //     return Highcharts.chart('container', {
-  //       credits: { enabled: false },
-  //       navigation: {
-  //         menuStyle: {
-  //           display: 'none'
-  //         }
-  //       },
-  //       chart: {
-  //         type: 'area',
-  //         // zoomType: 'x',
-  //         // panning: true,
-  //         // panKey: 'shift',
-  //         backgroundColor: 'rgba(0,0,0,0)'
-  //       },
-  //       rangeSelector: {
-  //         buttons: [{
-  //           count: 1,
-  //           type: 'minute',
-  //           text: '1M'
-  //         }, {
-  //           count: 5,
-  //           type: 'minute',
-  //           text: '5M'
-  //         }, {
-  //           type: 'all',
-  //           text: 'All'
-  //         }],
-  //         inputEnabled: false,
-  //         selected: 0
-  //       },
-  //       mapNavigation: {
-  //         enabled: true,
-  //         enableButtons: false
-  //       },
-  //       plotOptions: {
-  //         // 设置区域的透明度 fillOpacity: num 最大为1
-  //         area: { color: '#fff' },
-  //         series: {
-  //           fillOpacity: 0.05,
-  //           marker: { enabled: false },
-  //           animation: { duration: 1000 }
-  //           // pointInterval: 1000
-  //         },
-  //         threshold: null
-  //       },
-  //       title: {
-  //         text: '动态模拟实时数据'
-  //       },
-  //       xAxis: {
-  //         type: 'datetime',
-  //         // tickPixelInterval: 3000,
-  //         tickInterval: 1000 * 15,
-  //         // minRange: 20000,
-  //         crosshair: { width: 1, color: 'rgba(167, 174, 196, 0.5)', snap: false }
-  //         // endOnTick: true,
-  //         // gridLineColor: 'rgba(167, 174, 196, 0.1)',
-  //         // gridLineWidth: 1,
-  //         // tickAmount: 6
-  //       },
-  //       yAxis: {
-  //         title: { text: null },
-  //         crosshair: {
-  //           width: 1,
-  //           color: 'rgba(167, 174, 196, 0.5)',
-  //           snap: false
-  //         },
-  //         gridLineColor: 'rgba(167, 174, 196, 0.1)',
-  //         tickPixelInterval: 1000,
-  //         tickInterval: 1,
-  //         tickAmount: 12,
-  //         min: 10230,
-  //         opposite: true,
-  //         labels: {
-  //           useHTML: true,
-  //           formatter: function() {
-  //             return `
-  //               <div class="priceTag">${this.value}</div>
-  //               <div class="line up"></div>
-  //               <div class="line down"></div>
-  //             `
-  //           },
-  //           x: -80
-  //           // step: 2
-  //           // reserveSpace: false
-  //         }
-  //       },
-  //       // tooltip: {
-  //       //   formatter: function() {
-  //       //     return `<b>${this.series.name}</b><br/>${Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x)}<br/>${Highcharts.numberFormat(this.y, 2)}`
-  //       //   }
-  //       // },
-  //       legend: {
-  //         enabled: false
-  //       },
-  //       series: [{
-  //         type: 'area',
-  //         data: dataArr
-  //       }]
-  //     })
-  //   }
-  // }
 }
 </script>
 <style lang="scss" scope="this api replaced by slot-scope in 2.5.0+">
@@ -508,16 +464,117 @@ export default {
     right: 0;
     // background: #000;
     position: absolute;
-    display: none
+    display: none;
+    &.up{
+      top: 50%;
+      background: linear-gradient(to bottom, rgba(202,38,38,0.3), transparent);
+    }
+    &.down{
+      bottom: 50%;
+      background: linear-gradient(to top, rgba(30,139,33,0.3), transparent);
+    }
   }
-  .up{
-    top: 50%;
-    background: linear-gradient(to bottom, rgba(202,38,38,0.3), transparent);
+
+  .time-line {
+    position: absolute;
+    top: 20px;
+    // bottom: 78px;
+    // left: 65px;
+    z-index: 9;
+    height: calc(100vh - 150px);
+    // height: 500;
+    transition: transform .5s linear;
+    will-change: transform, opacity;
+    pointer-events: none;
+    &.yellow{
+      left: 20px;
+    }
+    .time-line-main {
+      position: relative;
+      z-index: 11;
+      height: 100%;
+      &>.txt {
+        font-size: 14px;
+        transform: translateX(-50%);
+        will-change: contents;
+      };
+      &>.box {
+        position: relative;
+        z-index: 12;
+        min-width: 60px;
+        line-height: 2;
+        border-radius: 4px;
+        background: #fff;
+        opacity: .8;
+        font-size: 12px;
+        color: #000;
+        text-align: center;
+        transform: translateX(-50%);
+      }
+      .icon {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 11;
+        width: 20px;
+        height: 20px;
+        font-size: 30px;
+        transform: translateX(-50%);
+        border:2px solid #fff;
+        border-radius: 50%;
+        padding: 5px;
+        background: #000;
+      }
+    };
+    .time-lineL {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      // left: -1px;
+      width: 2px;
+      background: linear-gradient(to top, rgba(30,139,33,1), transparent);
+    }
+    .time-lineL.yellow {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      // left: -1px;
+      width: 2px;
+      background: linear-gradient(to top, red, transparent);
+    }
+    .mask {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50vw;
+      z-index: -1;
+      opacity: .3;
+      transition: width .4s, opacity .5s;
+      background-image: linear-gradient(to right, #28677A, transparent);
+      // animation: maskIn .25s linear;
+      animation-fill-mode: forwards;
+    }
   }
-  .down{
-    bottom: 50%;
-    background: linear-gradient(to top, rgba(30,139,33,0.3), transparent);
+  .ripple{
+    display: block;
+    width: 4px;
+    height: 4px;
+    // margin: 160px auto;
+    animation: ripple 0.6s linear infinite;
+    border-radius: 50px;
+    background-color: red;
+    position: absolute;
+    top: 13px;
+    // transform: translateY(-50%);
+    right: 500px;
   }
 }
-
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 128, 0, 0.1), 0 0 0 20px rgba(0, 128, 0, 0.1), 0 0 0 40px rgba(0, 128, 0, 0.1), 0 0 0 60px rgba(0, 128, 0, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 0 20px rgba(0, 128, 0, 0.1), 0 0 0 40px rgba(0, 128, 0, 0.1), 0 0 0 60px rgba(0, 128, 0, 0.1), 0 0 0 80px rgba(0, 128, 0, 0);
+  }
+}
 </style>

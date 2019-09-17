@@ -13,6 +13,7 @@
         </div>
       </li>
     </ul>
+    <span class="xiaoguo" />
   </div>
 </template>
 <style lang="scss" scope>
@@ -26,5 +27,7 @@
       font-size: 12px;
     }
   }
+
 }
+
 </style>
