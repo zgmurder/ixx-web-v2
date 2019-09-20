@@ -1,34 +1,17 @@
 <template>
-  <el-form
-    ref="form"
-    :class="{'form-flex':schema.length>2}"
-    class="com-form"
-    label-width="100px"
-  >
+  <el-form ref="form" class="custom-form" v-bind="$attrs">
     <slot name="title" />
-    <el-form-item
-      v-for="(field, index) in schema"
-      v-show="handleControl(field.controlBy) && !field.hidden"
-      :key="index"
-      :label="field.label"
-      :required="field.required"
-      :error="field.error"
-      :style="{width: field.width}"
-      class="schema-form-item"
-    >
-      <component
-        :is="'el-'+field.fieldType"
-        v-model="field[field.vModel]"
-        :default-first-option="true"
-        v-bind="field"
-        style="width: 100%"
-        clearable
+    <el-form-item v-for="(field, index) in schema" :key="index" v-bind="filterFormItemAttrs(field)">
+      <!--  v-show="handleControl(field.controlBy) && !field.hidden" -->
+      <!--
         @input="handleInput($event,field)"
         @change="handleChange($event,field,index)"
-        @select="handleChange($event,field,index)"
-      >
-        <i v-if="field.fieldType === 'upload'" class="el-icon-upload" />
-        <template v-if="field.fieldType === 'select'">
+        @select="handleChange($event,field,index)" -->
+      <component :is="field.fieldType?'el-'+field.fieldType:field" v-model="field[field.vModel]" :default-first-option="true" v-bind="filterComponentAttrsfield(field)" clearable>
+        <div v-if="field.slotDefault">{{ field.slotDefault }}</div>
+        <!-- <component :is="field.append" /> -->
+        <!-- <i v-if="field.fieldType === 'upload'" class="el-icon-upload" /> -->
+        <!-- <template v-if="field.fieldType === 'select'">
           <el-option
             v-for="(item,i) in field.options||[]"
             :key="i"
@@ -44,45 +27,12 @@
             :disabled="item.disabled"
             :label="handleValue(item,field,i)"
           >{{ handleLabel(item,field,i) }}</el-radio>
-        </template>
+        </template> -->
       </component>
-      <!-- <component v-if="field.component" :is="field.component"></component>
-      <component
-        clearable
-        v-else
-        :type="field.type"
-        :multiple="field.multiple"
-        :no-data-text="field.emptyText"
-        :is="'el-'+field.fieldType"
-        v-model="field[field._name]"
-        style="width: 100%"
-        :label="field.label"
-        :allow-create="field.allowCreate"
-        :default-first-option="field.allowCreate||field.filterable"
-        :border="field.border"
-        :filterable="field.allowCreate||field.filterable"
-        :disabled="!!field.disabled"
-        @change="(value)=>field.change && field.change(value,field)"
-        :placeholder="field.placeholder"
-      >
-        <el-option
-          v-if="field.options"
-          v-for="(item,index) in field.options"
-          :key="index"
-          :label="item"
-          :value="field.valueIsIndex ? index : item"
-        ></el-option>
-        <el-option
-          v-if="field.keyOptions"
-          v-for="(item,index) in field.keyOptions"
-          :key="index"
-          :label="item.name"
-          :value="item.name"
-        ></el-option>
-      </component>-->
+      <el-button v-if="field.append" :type="field.append.type || 'pramiry'" :disabled="field.append.disabled" :style="field.append.style" class="custom-input-append">{{ field.append.text }}</el-button>
     </el-form-item>
 
-    <el-form-item class="btn-box">
+    <el-form-item v-if="submitBtn" class="btn-box">
       <el-button v-if="!editing" type="primary" @click="onSubmit">立即创建</el-button>
       <el-button v-else type="warning" plain @click="onSubmit">修改</el-button>
     </el-form-item>
@@ -93,6 +43,7 @@
 // import { isEmpty } from '../units'
 const isEmpty = obj => JSON.stringify(obj) === '[]' || JSON.stringify(obj) === '{}' || !obj
 // import ElDivider1 from '@/components/divider/main'
+// demo:{ fieldType: 'input', placeholder: '场地类型', label: '场地类型', vModel: 'name', name: '', required: true },
 export default {
   name: 'ComForm',
   components: {
@@ -106,31 +57,34 @@ export default {
     editing: {
       type: Boolean,
       default: false
+    },
+    submitBtn: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
     return {
       showMessage: false
+
     }
-  },
-  computed: {
-    // newSchema() {
-    //   this.schema.forEach(item => {
-    //     this.$set(item, item.vModel, item[item.vModel]);
-    //     if (item.required) this.$set(item, "error", "");
-    //   });
-    //   console.log(2)
-    //   return this.schema;
-    // }
   },
   watch: {},
   created() {
-    this._initValues = this.schema.map(item => [item.hidden, item[item.vModel]])
+    this._initValues = this.schema.map(item => [item.hidden, item.default])
     this.schema.forEach(item => {
-      this.$set(item, item.vModel, item[item.vModel])
+      this.$set(item, item.vModel, item.default)
       if (item.required) this.$set(item, 'error', '')
     })
     console.log(this._initValues)
+  },
+  mounted() {
+    this.$nextTick((callback) => {
+      const inputNodes = document.querySelectorAll('input[inputstyle]')
+      inputNodes.forEach(inputNode => {
+        inputNode.style = inputNode.getAttribute('inputstyle')
+      })
+    })
   },
   methods: {
     onSubmit() {
@@ -184,33 +138,48 @@ export default {
       if (!controlBy || isEmpty(controlBy)) return true
       const found = this.schema.find(item => item.vModel === controlBy.name)
       return found ? (controlBy.handle && controlBy.handle(found[found.vModel])) : true
+    },
+    filterFormItemAttrs(field) {
+      const { label, required, error, formItemStyle } = field
+      return { label, required, error, style: formItemStyle }
+    },
+    filterComponentAttrsfield(field) {
+      return field.fieldType ? field : {}
     }
   }
 }
 </script>
-
 <style scoped lang="scss">
-.com-form {
-  position: relative;
-  &.form-flex {
-    display: flex;
-    flex-wrap: wrap;
-    & > div {
-      width: 33%;
-    }
-  }
-  & > .btn-box {
-    width: 100% !important;
-    display: flex;
-    justify-content: flex-end;
-  }
-  /deep/ .el-transfer-panel {
-    width: 38%;
-  }
-  /deep/ .el-form-item__label {
-    white-space: nowrap;
-    text-overflow:ellipsis;
-    overflow: hidden;
+.custom-form{
+  .custom-input-append{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border: solid 1px #ddd;
+    border-radius: 0 4px 4px 0;
   }
 }
+// .com-form {
+//   position: relative;
+//   &.form-flex {
+//     display: flex;
+//     flex-wrap: wrap;
+//     & > div {
+//       width: 33%;
+//     }
+//   }
+//   & > .btn-box {
+//     width: 100% !important;
+//     display: flex;
+//     justify-content: flex-end;
+//   }
+//   /deep/ .el-transfer-panel {
+//     width: 38%;
+//   }
+//   /deep/ .el-form-item__label {
+//     white-space: nowrap;
+//     text-overflow:ellipsis;
+//     overflow: hidden;
+//   }
+// }
 </style>

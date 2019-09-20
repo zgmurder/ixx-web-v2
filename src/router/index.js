@@ -13,6 +13,7 @@ import fund_assets_node_buyRouter from './modules/fund_assets_node_buy'
 import contractRouter from './modules/contract'
 import bidTitleRouter from './modules/bidTitle'
 import share_optionRouter from './modules/share_option'
+import userRouter from './modules/user'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -69,19 +70,21 @@ export const constantRoutes = [
         component: () => import('@/views/home/index')
       },
       {
-        path: '/login',
-        name: 'login',
-        component: () => import('@/views/login/index'),
+        path: '/register',
+        name: 'register',
+        component: () => import('@/views/login/old'),
         hidden: true
       }
     ]
   },
+
   otc_tradeRouter,
   tradingRouter,
   fund_assets_node_buyRouter,
   contractRouter,
   bidTitleRouter,
-  share_optionRouter
+  share_optionRouter,
+  userRouter
   // {
   //   path: '/404',
   //   component: () => import('@/views/error-page/404'),

@@ -46,10 +46,10 @@
             <p><svg-icon icon-class="clipboard" />0.71</p>
           </div>
         </div>
-        <el-button class="center-btn success" :disabled="false" type="success">成功按钮</el-button>
+        <el-button class="center-btn success" :disabled="false" type="success" @click="addLabels('green')" @mouseover.native="dynamicChart.activeHover('success')" @mouseout.native="dynamicChart.disableHover('success')">看涨</el-button>
       </div>
       <div class="content-center hover-scale" flex="dir:top main:justify cross:center box:mean">
-        <el-button class="center-btn danger" :disabled="false" type="danger">成功按钮</el-button>
+        <el-button class="center-btn danger" :disabled="false" type="danger" @click="addLabels('red')" @mouseover.native="dynamicChart.activeHover('danger')" @mouseout.native="dynamicChart.disableHover('danger')">看跌</el-button>
         <div flex="main:center cross:center" class="center-info">
           <div class="share-text-info">
             <span>+70.16%</span>
@@ -58,6 +58,16 @@
         </div>
       </div>
     </div>
+    <div ref="square-container" class="square-container" flex="dir:top box:mean">
+      <div class="text">看涨 <br><span>{{ up }}%</span></div>
+      <div class="mark-box" flex="dir:top box:mean">
+        <div class="top" :style="{height:up+'%'}" />
+        <div class="bottom" />
+      </div>
+      <div class="text"><span>{{ 100-up }}%</span><br>看跌 </div>
+    </div>
+    <!-- <div class="test" style="margin-left:40px" />
+    <div class="test" /> -->
   </div>
 </template>
 <script>
@@ -74,7 +84,8 @@ export default {
     return {
       drawerIsOpen: false,
       activeName: '',
-      temComponet: null
+      temComponet: null,
+      up: 100
     }
   },
   computed: {
@@ -87,13 +98,13 @@ export default {
       }
     },
     dynamicChart() {
-      return this.$refs['dynamic-charts'].chart
+      return this.$refs['dynamic-charts']
     }
   },
   created() {
-    // this.openWebSocket('wss://fota.com/apioption/wsoption?brokerId=1', res => {
-    //   console.log(res)
-    // })
+    setInterval(() => {
+      this.up = Math.ceil(Math.random() * 100)
+    }, 1000)
   },
   methods: {
     handleClickTab(name) {
@@ -103,7 +114,11 @@ export default {
       this.temComponet = require(`./componets/${name}.vue`).default
     },
     afterLeaveOrEnter(el) {
-      this.dynamicChart.reflow()
+      this.$refs['square-container'].style.left = el.clientWidth + 75 + 'px'
+      this.dynamicChart.chart.reflow()
+    },
+    addLabels(color) {
+      this.dynamicChart.addLabels(color)
     }
   }
 }
@@ -133,7 +148,7 @@ export default {
     text-align: center;
     border-right:1px solid $--share-border-color;
     line-height: 1.8;
-    z-index: 1;
+    z-index: 4;
     &>div{
       padding: 10px 0;
       margin-bottom: 10px;
@@ -279,6 +294,95 @@ export default {
       }
     }
   }
+  .square-container{
+    position: absolute;
+    left:75px;
+    top: 10px;
+    bottom: 75px;
+    opacity: .5;
+    &>.text{
+      flex: none;
+      flex-basis: 40px;
+      font-size: 12px;
+      line-height: 20px;
+      width: 26px;
+      color: #ccc
+    }
+    &>.mark-box{
+      &>.top{
+        transition: all .5s ease-out;
+        flex: none;
+        border-top:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
+        z-index: 0;
+        position: relative;
+        border-bottom:5px solid rgba($color: rgb(116, 116, 116), $alpha: .2);
+        // border-left:13px solid rgba($color: red, $alpha: .8);
+        border-right:13px solid rgba($color: red, $alpha: .6);
+        transform: translate(-13px,5px);
+        &::before{
+          content: '';
+          position: absolute;
+          top: -5px;
+          height: 100%;
+          left: 26px;
+          border-top:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
+          border-bottom:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
+          border-left:13px solid rgba($color: rgb(68, 2, 2), $alpha: .6);
+          // transform: translateX(13px);
+        }
+      }
+      &>.bottom{
+        // height:0px;
+        border-top:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
+        z-index: -1;
+        position: relative;
+        border-bottom:5px solid rgba($color: rgb(116, 116, 116), $alpha: .6);
+        // border-left:13px solid rgba($color: red, $alpha: .8);
+        border-right:13px solid rgba($color: green, $alpha: .6);
+        transform: translate(-13px,-5px);
+        &::before{
+          content: '';
+          position: absolute;
+          top: -5px;
+          height: 100%;
+          left: 26px;
+          border-top:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
+          border-bottom:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
+          border-left:13px solid rgba($color: rgb(0, 36, 0), $alpha: .8);
+          // transform: translateX(13px);
+        }
+      }
+      // &.bottom{
+      //   // height:10px;
+      //   position: relative;
+      //   z-index: -1;
+      //   border-top:5px solid rgba($color: rgb(116, 116, 116), $alpha: 0);
+      //   border-bottom:0;
+      //   border-left:13px solid rgba($color: green, $alpha: .8);
+      //   border-right:13px solid rgba($color: rgb(0, 36, 0), $alpha: .8);
+      //   // transform: translateY(-10px);
+      // }
+    }
+  }
+  .test{
+    position: fixed;
+    left: 40%;
+    // width: 200px;
+    height: 200px;
+    border-left: 10px solid red;
+    border-right: 10px solid green;
+    border-top: 10px solid steelblue;
+    border-bottom: 10px solid hotpink;
+    transform: skewY(45deg);
+  }
 }
-
+ /*添加动画效果*/
+//  @keyframes rotateanimation{
+//      0%{
+//          transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+//      }
+//      100%{
+//          transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+//      }
+//  }
 </style>

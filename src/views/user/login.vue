@@ -34,7 +34,7 @@ export default {
           return <div flex='main:justify cross:center'>
             <el-checkbox checked={true}>记住密码</el-checkbox>
             <div>
-              <el-link type='info' underline={false}>注册账号</el-link>
+              <el-link type='info' onClick={() => this.$router.push('/user/register')} underline={false}>注册账号</el-link>
               <el-divider direction='vertical' />
               <el-link type='info' underline={false}>忘记密码</el-link>
             </div>

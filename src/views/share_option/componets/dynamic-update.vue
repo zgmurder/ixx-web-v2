@@ -10,9 +10,11 @@
 <script>
 import Highcharts from 'highcharts/highcharts'
 import HighMap from 'highcharts/modules/map.js'
+import Annotations from 'highcharts/modules/annotations.js'
 import websoketMixin from '@/mixins/soket'
 import CountUp from 'countup/dist/countUp.min'
 HighMap(Highcharts)
+Annotations(Highcharts)
 export default {
   // props: {
   //   'isReflow': Boolean
@@ -28,129 +30,43 @@ export default {
     this.isLoading = true
     this.openWebSocket('wss://fota.com/apioption/wsoption?brokerId=1', res => {
       if (res.spotIndexDTOList) {
-        const data = res.spotIndexDTOList.map(item => {
-          const numPrice = Number(item.price)
-          return { x: item.time, y: numPrice }
-        })
-        this.chart = this.initCharts(data)
-        console.log(this.chart)
-        // console.log(this.$el, lineBox, this)
-
-        this.countUp = new CountUp(this.chart.yAxis[0].plotLinesAndBands[0].label.element.children[0], data[data.length - 1].y, data[data.length - 1].y, 4, 1, {
-          formattingFn(res) {
-            if (!res) return res
-            const arr = String(res).split('.')
-            return `<span>${arr[0]}.<span style="font-size:16px;position:absolute;margin-left:-5px">${arr[1]}</span></span>`
-          }
-        })
-        // const xPixels = this.chart.xAxis[0].toPixels(data[data.length - 1].x)
-        // const yPixels = this.chart.yAxis[0].toPixels(data[data.length - 1].y)
-        // const orderTime = new Date(res.timeStamp).setSeconds(40)
-        // const finishTime = orderTime + 20000
-        // const orderPixels = this.chart.xAxis[0].toPixels(orderTime)
-        // const finishPixels = this.chart.xAxis[0].toPixels(finishTime)
-
-        const { orderPixels, finishPixels } = this.handleLinePixelsByTime(res.timeStamp)
-        this.chart.renderer.label(`<div id="orderTime" class="time-line white  opacity" style="transform: translate(${orderPixels}px, 0px);">
-          <div class="time-line-main">
-            <div class="box"></div>
-            <div class="time-lineL" />
-            <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-flag" />
-            </svg>
-            <div class="mask" style="width:0" />
-          </div>
-        </div>`, 0, 0, 'rect', 0, 0, true).add()
-        // this.chart.renderer.label(`<div id="ripple" class="ripple"></div>`, 0, 0, 'rect', 0, 0, true).add()
-
-        this.chart.renderer.label(`<div id="finishTime" class="time-line  opacity" style="transform: translate(${finishPixels}px, 0px);">
-          <div class="time-line-main">
-            <div class="box" style="background:none;color:red">00 : 19</div>
-            <div class="time-lineL yellow" />
-            <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-time" />
-            </svg></div>
-        </div>`, 0, 0, 'rect', 0, 0, true).add()
+        const data = res.spotIndexDTOList.map((item, index) => ({ x: item.time, y: Number(item.price) }))
+        this.initCharts(data)
+        this.handlePlotLinesByCountUp(data)
+        this.creatTwoLineByTime(res.timeStamp)
 
         this.orderTimeElement = document.querySelector('#orderTime')
         this.finishTimeElement = document.querySelector('#finishTime')
         this.rippleElement = document.querySelector('#ripple')
-        const orderBoxElement = this.orderTimeElement.querySelector('.box')
 
-        const yetTime = (new Date(res.timeStamp).setSeconds(40) - res.timeStamp) / 1000 - 1
-        this.orderBoxCountUp = new CountUp(orderBoxElement, yetTime, 0, 0, yetTime, {
-          useEasing: false,
-          prefix: '00 ：'
-        })
-        this.orderBoxCountUp.start()
-        // const finishBoxElement = this.finishTimeElement.querySelector('.box')
+        this.initOrderLineByCountUp(res.timeStamp)
 
-        // this.chart.xAxis[0].update({ min: data })
-        // this.chart.mapZoom(1, 1, 1, 1, 1)
-        this.chart.pointer.onContainerMouseWheel = (e) => {
-          // this.chart.xAxis[0].setExtremes(dataMin, res.lineBinaryOptionPriceIndex.time + 120000)
-          // console.log(this.chart)
-          // console.log(e)
+        this.chart.pointer.onContainerMouseWheel = this.handleScroll
 
-          const { min, max } = this.chart.xAxis[0].getExtremes()
-          // const calcMin = min - 60 * e.deltaY
-          this.chart.xAxis[0].update({ min: Math.min(min - 60 * e.deltaY, max) })
-          this.isNoScroll && this.chart.showResetZoom()
-          this.isNoScroll = false
-          // console.log(Highcharts.map)
-          // const element = this.chart.renderer.button('重置', 10, 10).attr({
-          //   fill: '#FFFFEF',
-          //   stroke: 'gray',
-          //   'stroke-width': 1,
-          //   zIndex: 4
-          // }).add()
-          // element.on('click', function(a) {
-          //   console.dir(this)
-          //   console.log(element)
-          //   element.fadeOut()
-          //   // this.destroy()
-          // })
-          // this.chart.showResetZoom()
-        }
-        // this.chart.series[0].setData(data)
-        // this.chart.xAxis[0].setExtremes(data[0].x, Number(data[data.length - 1].x) + 120000)
-        // [Number howMuch], [Number centerX], [Number centerY], [Number mouseX], [Number mouseY]
-        // this.chart.mapZoom(4)
-        // console.log(this.chart)
-
-        // this.chart.yAxis[0].setExtremes(yMin - 20, yMax + 20)
         this.isLoading = false
       } else if (res.lineBinaryOptionPriceIndex) {
-        // const yAxis = this.chart.yAxis[0]
         const { min } = this.chart.xAxis[0].getExtremes()
-        // xAxis.update({ max: dataMax + 120000 })
-        // yAxis.update({ max: yAxis.getExtremes().dataMax, min: yAxis.getExtremes().dataMin })
-        // this.chart.xAxis[0].setExtremes(dataMin, res.lineBinaryOptionPriceIndex.time + 120000)
         const price = Number(res.lineBinaryOptionPriceIndex.price)
-        // const xPixels = this.chart.xAxis[0].toPixels(res.lineBinaryOptionPriceIndex.time)
-        const plotLinesAndBand = this.chart.yAxis[0].plotLinesAndBands[0]
-        plotLinesAndBand.options.value = price
-        // plotLinesAndBand.label.element.children[0].innerText = price
+
+        this.chart.yAxis[0].plotLinesAndBands[0].options.value = price
 
         this.countUp.update(price)
-        // console.log(this.chart.yAxis[0].plotLinesAndBands[0].renderLabel())
-        // this.chart.yAxis[0].plotLinesAndBands[0].label.alignOptions.formatter.call()
-        // this.chart.yAxis[0].plotLinesAndBands[0].label.alignOptions.formatter()
-        // this.chart.yAxis[0].plotLinesAndBands[1].options.value = price
+        this.countUp.isUp = this.countUp.endVal - this.countUp.startVal > 0
+
         const resTime = res.lineBinaryOptionPriceIndex.time
         const { orderPixels, finishPixels } = this.handleLinePixelsByTime(resTime)
-        // console.log(orderPixels, finishPixels)
         this.orderTimeElement.style.transform = `translate(${orderPixels}px, 0px)`
         this.finishTimeElement.style.transform = `translate(${finishPixels}px, 0px)`
-        this.rippleElement.style.right = this.chart.containerWidth - this.chart.xAxis[0].toPixels(resTime, true) - 19 + 'px'
-        // this.rippleElement.style.top = this.chart.yAxis[0].toPixels(price, true) + 'px'
+
+        this.rippleElement.style.right = this.chart.containerWidth - this.chart.xAxis[0].toPixels(resTime, true) - 20 + 'px'
 
         const markElement = this.orderTimeElement.querySelector('.mask')
         const orderBoxElement = this.orderTimeElement.querySelector('.box')
         const finishBoxElement = this.finishTimeElement.querySelector('.box')
         if (resTime >= new Date(resTime).setSeconds(40)) {
           if (orderBoxElement.innerText !== '下一轮') {
-            const finishCountUp = new CountUp(finishBoxElement, 20, 0, 0, 20, { useEasing: false, prefix: '00 ：' })
+            const yetTime = (new Date(resTime).setSeconds(60) - resTime) / 1000
+            const finishCountUp = new CountUp(finishBoxElement, yetTime, 0, 0, yetTime, { useEasing: false, prefix: '00 ：' })
             finishCountUp.start()
           }
           orderBoxElement.innerText = '下一轮'
@@ -160,15 +76,22 @@ export default {
             // this.orderBoxCountUp.reset()
             this.orderBoxCountUp = new CountUp(orderBoxElement, 40, 0, 0, 40, { useEasing: false, prefix: '00 ：' })
             this.orderBoxCountUp.start()
+            const userOptions = { ...this.chart.annotations[0].userOptions }
+            this.chart.annotations[0].remove()
+            this.chart.addAnnotation(userOptions)
+            // this.chart.annotations[0] = new Annotations(Highcharts)
           }
         }
         markElement.style.width = resTime >= new Date(resTime).setSeconds(40) ? '50vw' : 0
-        // this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d = price
-        // const linePath = this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d.split(' ')
-        // linePath.splice(4, 1, xPixels)
-        // this.chart.yAxis[0].plotLinesAndBands[0].svgElem.d = linePath.join(' ')
-
+        this.lastPoint = {
+          x: resTime,
+          y: price,
+          xAxis: 0,
+          yAxis: 0
+        }
         this.chart.series[0].addPoint([resTime, price])
+
+        // this.chart.addAnnotation({ labels: [{ point: { x: resTime, y: price }}] })
 
         const dataCout = this.chart.series[0].data.filter(item => item.x > min).length
 
@@ -205,7 +128,7 @@ export default {
       //   chart.tooltip.refresh(points[points.length - 1])
       // }
       const that = this
-      return Highcharts.chart('container', {
+      this.chart = Highcharts.chart('container', {
         rangeSelector: { selected: 1
         },
         title: {
@@ -253,6 +176,9 @@ export default {
             }
           }
         },
+        annotations: [{
+          points: []
+        }],
         credits: {
           enabled: !1
         },
@@ -273,7 +199,6 @@ export default {
             marker: {
               enabled: !1
             }
-            // pointInterval: 1000
           },
           cursor: 'pointer'
         },
@@ -376,8 +301,8 @@ export default {
               formatter: function() {
                 return `
                   <div class="priceTag plotline">${this.options.value}</div>
-                  <div class="line up"></div>
-                  <div class="line down"></div> 
+                  <div class="line up" style="height:300px" id="plotline-danger"></div>
+                  <div class="line down" style="height:300px" id="plotline-success"></div> 
                   <div id="ripple" class="ripple"></div>`
               }
             }
@@ -399,8 +324,146 @@ export default {
             },
             stops: [[0, 'rgba(117,122,136,0.5)'], [1, 'rgba(88,91,114,0)']]
           }
-        }]
+        }],
+        defs: {
+          marker0: {
+            tagName: 'marker',
+            render: false, // if false it does not render the element to the dom
+            id: 'custom-shape',
+            children: [{
+              tagName: 'path',
+              d: 'M 10,0 C 0,0 0,10 10,10 C 12.5,7.5 12.5,7.5 20,5 C 12.5,2.5 12.5,2.5 10,0 Z'
+            }],
+            markerWidth: 40,
+            markerHeight: 40,
+            refX: 20,
+            refY: 5
+          },
+          marker1: {
+            children: [{
+              tagName: 'circle',
+              r: 4,
+              cx: 10,
+              cy: 10,
+              fill: 'rgba(42, 172, 62, 0.6)'
+            }],
+            tagName: 'marker',
+            id: 'green',
+            markerWidth: 25,
+            markerHeight: 25,
+            refX: 10,
+            refY: 10
+          },
+          marker2: {
+            children: [{
+              tagName: 'circle',
+              r: 4,
+              cx: 10,
+              cy: 10,
+              fill: 'rgba(232, 79, 67, 0.6)'
+            }],
+            tagName: 'marker',
+            id: 'red',
+            markerWidth: 25,
+            markerHeight: 25,
+            refX: 10,
+            refY: 10
+          }
+        }
+
       })
+    },
+    afterInitChartsCharts() {
+      // 临时变量
+
+    },
+    handlePlotLinesByCountUp(data) {
+      this.countUp = new CountUp(this.chart.yAxis[0].plotLinesAndBands[0].label.element.children[0], data[data.length - 1].y, data[data.length - 1].y, 4, 0.5, {
+        formattingFn(res) {
+          if (!res) return res
+          const arr = String(res).split('.')
+          return `<span>${arr[0]}.<span style="font-size:16px;position:absolute;margin-left:-5px;color:${this.isUp ? 'green' : 'red'}">${arr[1]}</span></span>`
+        }
+      })
+    },
+    creatTwoLineByTime(timeStamp) {
+      const { orderPixels, finishPixels } = this.handleLinePixelsByTime(timeStamp)
+      this.chart.renderer.label(`<div id="orderTime" class="time-line white  opacity" style="transform: translate(${orderPixels}px, 0px);">
+          <div class="time-line-main">
+            <div class="box"></div>
+            <div class="time-lineL" />
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-flag" />
+            </svg>
+            <div class="mask" style="width:0" />
+          </div>
+        </div>`, 0, 0, 'rect', 0, 0, true).add()
+      // this.chart.renderer.label(`<div id="ripple" class="ripple"></div>`, 0, 0, 'rect', 0, 0, true).add()
+      this.chart.renderer.label(`<div id="finishTime" class="time-line  opacity" style="transform: translate(${finishPixels}px, 0px);">
+          <div class="time-line-main">
+            <div class="box" style="background:none;color:red"></div>
+            <div class="time-lineL yellow" />
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-time" />
+            </svg></div>
+        </div>`, 0, 0, 'rect', 0, 0, true).add()
+    },
+    initOrderLineByCountUp(timeStamp) {
+      const orderBoxElement = this.orderTimeElement.querySelector('.box')
+      const yetTime = (new Date(timeStamp).setSeconds(40) - timeStamp) / 1000 - 1
+      this.orderBoxCountUp = new CountUp(orderBoxElement, yetTime, 0, 0, yetTime, {
+        useEasing: false,
+        prefix: '00 ：'
+      })
+      this.orderBoxCountUp.start()
+    },
+    handleScroll(e) {
+      const { min, max } = this.chart.xAxis[0].getExtremes()
+      this.chart.xAxis[0].update({ min: Math.min(min - 60 * e.deltaY, max) })
+      this.isNoScroll && this.chart.showResetZoom()
+      this.isNoScroll = false
+    },
+    activeHover(stateName) {
+      const element = document.querySelector(`#plotline-${stateName}`)
+      if (!element) return
+      element.style.display = 'block'
+    },
+    disableHover(stateName) {
+      const element = document.querySelector(`#plotline-${stateName}`)
+      if (!element) return
+      element.style.display = 'none'
+    },
+    addLabels(color, value = 1) {
+      this.chart.annotations[0].initLabel({
+        point: this.lastPoint,
+        // text: '1',
+        // shape: 'circle',
+        shape: 'connector',
+        backgroundColor: 'white',
+        useHTML: true,
+        formatter() {
+          return `
+            <div class="annotations-box ${color}">
+              <svg class="icon" aria-hidden="true" width="10px" height="10px">
+                <use xlink:href="#icon-time" />
+              </svg>
+              <span>${value}</span>
+            </div>
+          `
+        }
+      })
+      this.chart.annotations[0].initShape({
+        fill: 'none',
+        stroke: color,
+        strokeWidth: 1,
+        type: 'path',
+        markerStart: color,
+        points: [this.lastPoint, {
+          x: this.lastPoint.x + 1000 * 60 * 60,
+          y: this.lastPoint.y,
+          xAxis: 0,
+          yAxis: 0
+        }] })
     }
   }
 }
@@ -567,6 +630,23 @@ export default {
     top: 13px;
     // transform: translateY(-50%);
     right: 500px;
+  }
+  .annotations-box{
+    position: absolute;
+    // margin-left: -5px;
+    margin-top: 10px;
+    height: 20px;
+    line-height: 18px;
+    border-radius: 10px 10px 10px 1px;
+    font-size: 12px;
+    color: #fff;
+    padding: 0 8px 0 6px;
+    &.green{
+      background: rgba(42, 172, 62, 0.6)
+    }
+    &.red{
+      background: rgba(232, 79, 67, 0.6)
+    }
   }
 }
 @keyframes ripple {

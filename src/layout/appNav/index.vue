@@ -1,21 +1,17 @@
 <template>
-  <div class="app-nav" :style="appNavBackground">
-    <div class="container" flex="main:justify cross:center">
-      <div flex class="nav-left-container">
-        <img src="@/assets/ixx_logo.png" height="40px" alt="" @click="$router.push('/')">
-        <ul flex="main:justify cross:center" class="nav-list">
-          <li v-for="(item,index) in navDataArr" :key="index" class="text-nowrap" :class="{active:$route.path.includes(item.path)}" @click="$router.push(item.path)">{{ $t(item.keyPath) }}</li>
-        </ul>
-      </div>
-      <div class="nav-right-container">
-        <el-link :type="$route.path === '/login'? 'primary':'info'" @click="$router.push('/login')">{{ $tR('signin') }}</el-link>
-        <i class="separator">|</i>
-        <el-link type="info">{{ $tR('signup') }}</el-link>
-        <select-lang />
-      </div>
+  <div class="app-nav" :style="appNavBackground" flex="main:justify cross:center">
+    <div flex class="nav-left-container">
+      <img src="@/assets/ixx_logo.png" height="40px" alt="" @click="$router.push('/')">
+      <ul flex="main:justify cross:center" class="nav-list">
+        <li v-for="(item,index) in navDataArr" :key="index" class="text-nowrap" :class="{active:$route.path.includes(item.path)}" @click="$router.push(item.path)">{{ $t(item.keyPath) }}</li>
+      </ul>
     </div>
-    <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
-    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+    <div class="nav-right-container">
+      <el-link :type="$route.path === '/user/login'? 'primary':'info'" @click="$router.push('/user/login')">{{ $tR('signin') }}</el-link>
+      <i class="separator">|</i>
+      <el-link :type="$route.path === '/user/register'? 'primary':'info'" @click="$router.push('/user/register')">{{ $tR('signup') }}</el-link>
+      <select-lang />
+    </div>
   </div>
 </template>
 
@@ -61,6 +57,7 @@ export default {
     }
     .nav-right-container{
       font-size: 14px;
+      margin-right: 20px;
       .separator{
         display: inline-block;
         padding: 0 12px;
