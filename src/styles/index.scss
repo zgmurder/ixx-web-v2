@@ -43,6 +43,13 @@ a {color: inherit;text-decoration: none}
 .share-active-bg{
   color: $--color-success
 }
+.custom-form{
+  /deep/ .el-input__inner{
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
 // label {
 //   font-weight: 700;
 // }

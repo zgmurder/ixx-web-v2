@@ -4,6 +4,7 @@ import store from './store'
 
 import 'normalize.css'
 import 'flex.css'
+import 'hover.css'
 
 import ElementUI from 'element-ui'
 import '@/styles/index.scss' // global css

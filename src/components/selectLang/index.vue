@@ -1,12 +1,4 @@
 <template>
-  <!-- <el-dropdown class="custom-dropdown" @command="handleCommand">
-    <span class="el-dropdown-link custom-dropdown-link">
-      {{ mapLang[selectKey] }}<i class="el-icon-arrow-down el-icon--right" />
-    </span>
-    <el-dropdown-menu slot="dropdown">
-      <el-dropdown-item v-for="(value,key) in mapLang" :key="key" :style="{backgroundColor:selectKey === key && '#000'||'none'}" :command="key">{{ value }}</el-dropdown-item>
-    </el-dropdown-menu>
-  </el-dropdown> -->
   <el-select v-model="selectKey" size="mini" class="custom-select" @change="handleChange">
     <el-option
       v-for="(value,key) in mapLang"

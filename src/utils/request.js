@@ -13,8 +13,6 @@ const service = axios.create({
 // request interceptor
 service.interceptors.request.use(
   config => {
-    console.log(config)
-
     // do something before request is sent
     if (!config.url.startsWith('http'))config.url = process.env.VUE_APP_BASE_API_I + config.url
     if (store.getters.token) {

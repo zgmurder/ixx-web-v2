@@ -68,7 +68,10 @@ export default {
   },
   login: {
     'login_by_email': '邮箱登录',
-    'login_by_phone': '手机登录'
+    'login_by_phone': '手机登录',
+    'login_by_count': '登录',
+    'register_count': '注册账号',
+    'forget_pass': '忘记密码'
   },
   contract: {
     sheet: '张',

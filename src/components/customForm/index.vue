@@ -1,13 +1,13 @@
 <template>
   <el-form ref="form" class="custom-form" v-bind="$attrs">
     <slot name="title" />
-    <el-form-item v-for="(field, index) in schema" :key="index" v-bind="filterFormItemAttrs(field)">
+    <el-form-item v-for="(field, index) in schema" :key="index" class="custom-form-item" v-bind="filterFormItemAttrs(field)">
       <!--  v-show="handleControl(field.controlBy) && !field.hidden" -->
       <!--
         @input="handleInput($event,field)"
         @change="handleChange($event,field,index)"
         @select="handleChange($event,field,index)" -->
-      <component :is="field.fieldType?'el-'+field.fieldType:field" v-model="field[field.vModel]" :default-first-option="true" v-bind="filterComponentAttrsfield(field)" clearable>
+      <component :is="field.fieldType?'el-'+field.fieldType:field" v-model="field[field.vModel]" :default-first-option="true" v-bind="filterComponentAttrsfield(field)" clearable v-on="resetEvent(field)">
         <div v-if="field.slotDefault">{{ field.slotDefault }}</div>
         <!-- <component :is="field.append" /> -->
         <!-- <i v-if="field.fieldType === 'upload'" class="el-icon-upload" /> -->
@@ -29,13 +29,13 @@
           >{{ handleLabel(item,field,i) }}</el-radio>
         </template> -->
       </component>
-      <el-button v-if="field.append" :type="field.append.type || 'pramiry'" :disabled="field.append.disabled" :style="field.append.style" class="custom-input-append">{{ field.append.text }}</el-button>
+      <el-button v-if="field.append" :type="field.append.type || 'pramiry'" :disabled="field.append.disabled" :style="field.append.style" class="custom-input-append" @click="e=>field.append.click && field.append.click(e,field.append)">{{ field.append.text }}</el-button>
     </el-form-item>
 
-    <el-form-item v-if="submitBtn" class="btn-box">
+    <!-- <el-form-item v-if="submitBtn" class="btn-box">
       <el-button v-if="!editing" type="primary" @click="onSubmit">立即创建</el-button>
       <el-button v-else type="warning" plain @click="onSubmit">修改</el-button>
-    </el-form-item>
+    </el-form-item> -->
   </el-form>
 </template>
 
@@ -66,7 +66,6 @@ export default {
   data() {
     return {
       showMessage: false
-
     }
   },
   watch: {},
@@ -76,18 +75,13 @@ export default {
       this.$set(item, item.vModel, item.default)
       if (item.required) this.$set(item, 'error', '')
     })
-    console.log(this._initValues)
+    // console.log(this._initValues)
   },
   mounted() {
-    this.$nextTick((callback) => {
-      const inputNodes = document.querySelectorAll('input[inputstyle]')
-      inputNodes.forEach(inputNode => {
-        inputNode.style = inputNode.getAttribute('inputstyle')
-      })
-    })
+
   },
   methods: {
-    onSubmit() {
+    verifyAll() {
       const obj = {}
       this.schema.forEach(item => {
         // if (typeof item[item.vModel] === "string")
@@ -98,10 +92,8 @@ export default {
         obj[item.vModel] = item[item.vModel]
       })
       const dataIsOk = !this.schema.some(item => !!item.error)
-      if (dataIsOk) {
-        delete obj.underfine
-        this.$emit('formFinish', obj)
-      }
+      delete obj.undefined
+      return dataIsOk && obj
     },
     initForm() {
       this.schema.splice(this._initValues.length, this.schema.length - this._initValues.length)
@@ -139,24 +131,39 @@ export default {
       const found = this.schema.find(item => item.vModel === controlBy.name)
       return found ? (controlBy.handle && controlBy.handle(found[found.vModel])) : true
     },
+
     filterFormItemAttrs(field) {
       const { label, required, error, formItemStyle } = field
       return { label, required, error, style: formItemStyle }
     },
     filterComponentAttrsfield(field) {
       return field.fieldType ? field : {}
+    },
+    resetEvent(field) {
+      const res = {}
+      if (field.on) Object.keys(field.on).forEach(key => (res[key] = (...arg) => field.on[key].apply(null, [{ elementArgs: arg, field, context: this }])))
+      if (field.fieldType === 'input' && !(field.on || {}).input) {
+        res.input = value => {
+          if (field.required && !field[field.vModel]) field.error = field.errorMassage
+          else field.error = ''
+        }
+      }
+      return res
     }
   }
 }
 </script>
 <style scoped lang="scss">
 .custom-form{
-  .custom-input-append{
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    border: solid 1px #ddd;
-    border-radius: 0 4px 4px 0;
+  .custom-form-item{
+    .custom-input-append{
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      width: 112px;
+      border: solid 1px #ddd;
+      border-radius: 0 4px 4px 0;
+    }
   }
 }
 // .com-form {

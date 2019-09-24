@@ -3,7 +3,7 @@
     <background />
     <customForm class="custom-form" :schema="schema" :submit-btn="false" label-width="0">
       <div slot="title" class="title-container" flex="main:justify cross:bottom">
-        <h2>{{ $tR('login_by_phone') }}</h2>
+        <h2>{{ $tR('login_by_count') }}</h2>
         <!-- <div>
           <el-link :type="isEmail ? 'primary':'info'" @click="isEmail=true">{{ $tR('login_by_email') }}</el-link>
           <el-divider direction="vertical" />
@@ -26,9 +26,9 @@ export default {
     return {
       isEmail: false,
       schema: [
-        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', vModel: 'username', default: 'admin', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
-        { fieldType: 'input', append: { text: `获取验证码`, disabled: false, click(that) { console.log(111, that) } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
-        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '密码', vModel: 'password', default: '123456', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', vModel: 'username', default: '', required: true },
+        { fieldType: 'input', append: { text: `获取验证码`, disabled: true, click(that) { console.log(111, that) } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '密码', vModel: 'password', default: '', required: true },
         { fieldType: 'button', slotDefault: '登录', style: { width: '100%' }, type: 'primary' },
         { render() {
           return <div flex='main:justify cross:center'>

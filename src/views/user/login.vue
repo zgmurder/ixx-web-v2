@@ -1,9 +1,9 @@
 <template>
   <div class="login-container" flex="main:center cross:center">
     <background />
-    <customForm class="custom-form" :schema="schema" :submit-btn="false" label-width="0">
+    <customForm ref="customForm" class="custom-form" :schema="schema" :submit-btn="false" label-width="0">
       <div slot="title" class="title-container" flex="main:justify cross:bottom">
-        <h2>{{ $tR('login_by_phone') }}</h2>
+        <h2>{{ $tR('login_by_count') }}</h2>
         <!-- <div>
           <el-link :type="isEmail ? 'primary':'info'" @click="isEmail=true">{{ $tR('login_by_email') }}</el-link>
           <el-divider direction="vertical" />
@@ -16,6 +16,9 @@
 <script>
 import background from './components/background'
 import customForm from '@/components/customForm'
+import { loginByEmail2, checkEmail, loginByEmail, loginByPhone } from '@/api/user'
+import { validEmail, validPhone } from '@/utils/validate'
+import { setUser } from '@/utils/auth'
 export default {
   name: 'Login',
   components: {
@@ -26,17 +29,55 @@ export default {
     return {
       isEmail: false,
       schema: [
-        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', vModel: 'username', default: 'admin', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
-        { fieldType: 'input', append: { text: `获取验证码`, disabled: false, click(that) { console.log(111, that) } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
-        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '密码', vModel: 'password', default: '123456', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
-        { fieldType: 'button', slotDefault: '登录', style: { width: '100%' }, type: 'primary' },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', vModel: 'username', default: '294069733@qq.com', required: true },
+        // { fieldType: 'input', append: { text: `获取验证码`, disabled: false, click(e, append) {
+        //   checkEmail('294069733@qq.com').then(res => {
+        //     console.log(res)
+        //   })
+        //   append.disabled = true
+        //   const initValue = append.text
+        //   append.text = 45
+        //   const timer = setInterval(() => {
+        //     if (!append.text) {
+        //       append.disabled = false
+        //       append.text = initValue
+        //       return clearInterval(timer)
+        //     }
+        //     append.text--
+        //   }, 1000)
+        // } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', type: 'password', placeholder: '密码', vModel: 'password', default: 'Awuhao123', required: true },
+        { fieldType: 'button', slotDefault: '登录', on: { click: ({ context }) => {
+          const res = context.verifyAll()
+          if (!res) return
+          const { username, ...data } = res
+          validEmail(username) && (data.email = username)
+          validPhone(username) && (data.phone = username, data.region = 86)
+          const handleRes = res => {
+            setUser(JSON.stringify(res.data))
+            this.$store.commit('SET_USERDATA', res.data)
+            this.$message.success('登录成功')
+            this.$router.push('/user/index')
+          }
+          if (validEmail(username)) {
+            data.email = username
+            loginByEmail(data).then(handleRes)
+          } else if (validPhone(username)) {
+            data.phone = username
+            data.region = 86
+            loginByPhone(data).then(handleRes)
+          } else {
+            this.$message.warning('输入的账号名格式有误')
+          }
+        }
+        }, style: { width: '100%' }, type: 'primary' },
         { render() {
           return <div flex='main:justify cross:center'>
             <el-checkbox checked={true}>记住密码</el-checkbox>
             <div>
               <el-link type='info' onClick={() => this.$router.push('/user/register')} underline={false}>注册账号</el-link>
               <el-divider direction='vertical' />
-              <el-link type='info' underline={false}>忘记密码</el-link>
+              <el-link type='info' onClick={() => this.$router.push('/user/forget')} underline={false}>忘记密码</el-link>
             </div>
           </div>
         }, formItemStyle: { marginTop: '-20px' }}

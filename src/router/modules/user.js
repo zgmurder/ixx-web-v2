@@ -6,7 +6,11 @@ const userRouter = {
   path: '/user',
   component: layout,
   name: 'user',
-  redirect: '/user/login',
+  redirect: '/user/index',
+  meta: {
+    needSign: true,
+    title: '用户中心'
+  },
   children: [
     {
       path: '/user/login',
@@ -15,6 +19,14 @@ const userRouter = {
     {
       path: '/user/register',
       component: () => import('@/views/user/register')
+    },
+    {
+      path: '/user/forget',
+      component: () => import('@/views/user/forget')
+    },
+    {
+      path: '/user/index',
+      component: () => import('@/views/user/index')
     }
   ]
 }

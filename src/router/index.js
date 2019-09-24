@@ -77,24 +77,24 @@ export const constantRoutes = [
       }
     ]
   },
-
   otc_tradeRouter,
   tradingRouter,
   fund_assets_node_buyRouter,
   contractRouter,
   bidTitleRouter,
   share_optionRouter,
-  userRouter
-  // {
-  //   path: '/404',
-  //   component: () => import('@/views/error-page/404'),
-  //   hidden: true
-  // },
-  // {
-  //   path: '/401',
-  //   component: () => import('@/views/error-page/401'),
-  //   hidden: true
-  // },
+  userRouter,
+  { path: '*', redirect: '/404', hidden: true },
+  {
+    path: '/404',
+    component: () => import('@/views/error-page/404'),
+    hidden: true
+  },
+  {
+    path: '/401',
+    component: () => import('@/views/error-page/401'),
+    hidden: true
+  }
 ]
 
 /**

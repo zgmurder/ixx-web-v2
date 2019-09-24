@@ -3,7 +3,7 @@
     <background />
     <customForm class="custom-form" :schema="schema" :submit-btn="false" label-width="0">
       <div slot="title" class="title-container" flex="main:justify cross:bottom">
-        <h2>{{ $tR('login_by_phone') }}</h2>
+        <h2>{{ $tR('register_count') }}</h2>
         <!-- <div>
           <el-link :type="isEmail ? 'primary':'info'" @click="isEmail=true">{{ $tR('login_by_email') }}</el-link>
           <el-divider direction="vertical" />
@@ -26,17 +26,17 @@ export default {
     return {
       isEmail: false,
       schema: [
-        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', vModel: 'username', default: 'admin', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
-        { fieldType: 'input', append: { text: `获取验证码`, disabled: false, click(that) { console.log(111, that) } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
-        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '密码', vModel: 'password', default: '123456', required: true, inputStyle: 'background:transparent;border: 1px solid rgba(255, 255, 255, 0.1);' },
-        { fieldType: 'button', slotDefault: '登录', style: { width: '100%' }, type: 'primary' },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', vModel: 'username', default: '', required: true },
+        { fieldType: 'input', append: { text: `获取验证码`, disabled: false, click(that) { console.log(111, that) } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '密码', vModel: 'password', default: '', required: true },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '确认密码', vModel: 'password', default: '', required: true },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邀请码', vModel: 'password', default: '', required: true },
+        { fieldType: 'button', slotDefault: '注册', style: { width: '100%' }, type: 'primary' },
         { render() {
           return <div flex='main:justify cross:center'>
-            <el-checkbox checked={true}>记住密码</el-checkbox>
+            <el-checkbox checked={true}>我已阅读并同意 <el-link type='warning' underline={false}>服务条款</el-link> <el-link type='warning' underline={false}>隐私协议</el-link></el-checkbox>
             <div>
-              <el-link type='info' underline={false}>注册账号</el-link>
-              <el-divider direction='vertical' />
-              <el-link type='info' underline={false}>忘记密码</el-link>
+              <el-link type='info' onClick={() => this.$router.push('/user/login')} underline={false}>返回登录</el-link>
             </div>
           </div>
         }, formItemStyle: { marginTop: '-20px' }}

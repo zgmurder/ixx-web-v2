@@ -7,6 +7,9 @@ const contractRouter = {
   component: layout,
   name: 'contract',
   redirect: '/contract/index',
+  meta: {
+    title: '合约交易'
+  },
   children: [
     {
       path: '/contract/index',
