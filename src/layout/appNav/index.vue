@@ -8,9 +8,8 @@
     </div>
     <div class="nav-right-container" flex="cross:center">
       <template v-if="$store.state.userData">
-        <el-link>我的资产</el-link>
-        <dropdown :menu-options="[{href:'aa',label:'bbb'}]">个人中心</dropdown>
-
+        <dropdown style="margin-left:20px" :menu-options="mapBalanceMenu"><div :class="{active:$route.path.includes('property')}" @click="$router.push('/user/property')">资产管理</div></dropdown>
+        <dropdown style="margin-left:20px" :menu-options="mapUserCenter"><div :class="{active:$route.path.includes('/user/index')}" @click="$router.push('/user/index')">{{ $store.state.userData.email }}</div></dropdown>
       </template>
       <template v-else>
         <el-link :type="$route.path === '/user/login'? 'primary':'info'" @click="$router.push('/user/login')">{{ $tR('signin') }}</el-link>
@@ -29,6 +28,8 @@
 import selectLang from '@/components/selectLang'
 import { mapNavBackground } from '@/const'
 import dropdown from '@/components/dropdown'
+import { removeUser } from '@/utils/auth'
+import { loginout } from '@/api/user'
 export default {
   name: 'AppNav',
   components: {
@@ -50,6 +51,24 @@ export default {
     appNavBackground() {
       const key = Object.keys(mapNavBackground).find(key => this.$route.path.includes(key))
       return key ? { backgroundColor: mapNavBackground[key] } : {}
+    },
+    mapBalanceMenu() {
+      return [
+        { label: '资产管理' },
+        { label: '充币' },
+        { label: '提币' },
+        { label: '资金划转' }
+      ]
+    },
+    mapUserCenter() {
+      return [
+        { label: '个人中心', path: '/user/index' },
+        { label: '退出', click: () => loginout().then(res => {
+          removeUser()
+          this.$store.commit('SET_USERDATA', null)
+          location.reload()
+        }) }
+      ]
     }
   },
   created() {
@@ -57,7 +76,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
   .app-nav{
     height: 60px;
     color: #dadada;
@@ -81,6 +100,10 @@ export default {
       font-size: 14px;
       margin-right: 20px;
       height: 100%;
+      .active{
+        cursor: pointer;
+        color: $--color-primary;
+      }
     }
   }
 </style>

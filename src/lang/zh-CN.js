@@ -77,13 +77,13 @@ export default {
     sheet: '张',
     buy: '卖入',
     sell: '卖出',
-    'mapTabs': {
+    mapTabs: {
       BTC: `BTC永续`,
       ETH: `ETH永续`,
       EOS: `EOS永续`,
       BHD: `BHD永续`
     },
-    'mapDishInfo': {
+    mapDishInfo: {
       current: '最新价',
       change_24h: '涨跌幅',
       volume_24h: '24H成交量',
@@ -106,6 +106,29 @@ export default {
         'trading-volume': '成交量',
         'time': '时间'
       }
+    }
+  },
+  userCenter: {
+    mapMenuList: {
+      'person-info': '个人信息',
+      'safe-approve': '安全认证',
+      'identity-verify': '身份验证',
+      'api-manage': 'API 管理',
+      'my-invite': '我的邀请',
+      'other-set': '消息设置'
+    }
+  },
+  personInfo: {
+    gotoBind: '去绑定',
+    mapTableInfo: {
+      name: '用户姓名',
+      phone: '手机号',
+      email: '邮箱'
+    },
+    mapHistoryColumns: {
+      'date': '时间',
+      'address': 'IP地址',
+      'area': '地区'
     }
   }
   // 'signup': '创建帐号',

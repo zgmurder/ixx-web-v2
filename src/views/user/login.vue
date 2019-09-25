@@ -1,7 +1,7 @@
 <template>
   <div class="login-container" flex="main:center cross:center">
     <background />
-    <customForm ref="customForm" class="custom-form" :schema="schema" :submit-btn="false" label-width="0">
+    <customForm ref="customForm" class="login-custom-form" :schema="schema" :submit-btn="false" label-width="0">
       <div slot="title" class="title-container" flex="main:justify cross:bottom">
         <h2>{{ $tR('login_by_count') }}</h2>
         <!-- <div>
@@ -16,9 +16,9 @@
 <script>
 import background from './components/background'
 import customForm from '@/components/customForm'
-import { loginByEmail2, checkEmail, loginByEmail, loginByPhone } from '@/api/user'
+import { loginByEmail, loginByPhone, getEmailCode } from '@/api/user'
 import { validEmail, validPhone } from '@/utils/validate'
-import { setUser } from '@/utils/auth'
+import { setUser, setSession } from '@/utils/auth'
 export default {
   name: 'Login',
   components: {
@@ -57,6 +57,20 @@ export default {
             setUser(JSON.stringify(res.data))
             this.$store.commit('SET_USERDATA', res.data)
             this.$message.success('登录成功')
+            // setSession(res.data.session_id)
+            // getEmailCode().then(res => {
+            //   console.log(res)
+            // })
+            // this.$prompt('请输入邮箱验证码', '邮箱验证', {
+            //   cancelButtonText: '取消',
+            //   inputPattern: /\d{6}/,
+            //   inputErrorMessage: '请输入6位数验证码'
+            // }).then(({ value }) => {
+            //   this.$message({
+            //     type: 'success',
+            //     message: '你的邮箱是: ' + value
+            //   })
+            // })
             this.$router.push('/user/index')
           }
           if (validEmail(username)) {
@@ -86,7 +100,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scope="this api replaced by slot-scope in 2.5.0+">
+<style lang="scss" scoped="this api replaced by slot-scope in 2.5.0+">
 .login-container{
   position: absolute;
   width: 100%;
@@ -95,7 +109,7 @@ export default {
   top: 0;
   bottom: 0;
   margin-top: 60px;
-  .custom-form{
+  .login-custom-form{
     padding-bottom:160px;
     width: 20%;
     .title-container{

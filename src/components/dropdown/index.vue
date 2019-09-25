@@ -1,14 +1,9 @@
 <template>
   <span class="drop-down-wrap">
     <slot />
-    <div class="menu-box">
-      <ul class="menu">
-        <!-- <router-link v-for="(item,index) in menuOptions" :key="index" :to="item.href" tag="li">
-          {{ item.label }}
-        </router-link> -->
-        <li v-for="(item,index) in menuOptions" :key="index" @click="handle(item)">{{ item.label }}</li>
-      </ul>
-    </div>
+    <ul class="menu-box">
+      <li v-for="(item,index) in menuOptions" :key="index" class="item" @click="handle(item)">{{ item.label }}</li>
+    </ul>
   </span>
 </template>
 <script>
@@ -21,47 +16,71 @@ export default {
   },
   methods: {
     handle(item) {
-      console.log(item.href)
-      this.$router.push({ path: '/snowball/bazaar' })
+      item.click && item.click(item) || this.$router.push({ path: item.path })
     }
   }
 }
 </script>
-<style lang="scss" scope="this api replaced by slot-scope in 2.5.0+">
+<style lang="scss" scoped="this api replaced by slot-scope in 2.5.0+">
 .drop-down-wrap{
   position: relative;
   height: 100%;
+  display: flex;
+  align-items: center;
   &:hover{
+    color: #01CED1;
+    cursor: pointer;
     .menu-box{
       display: block;
-      // height: auto;
     }
   }
   .menu-box{
-    margin-top: -5px;
+    // margin-top: -5px;
     position: absolute;
-    z-index: 1000;
-    padding-top: 24px;
-    min-width: 100px;
-    // transition: all 1s ease-in-out;
-        box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+    top: 100%;
     display: none;
-    // height: 0;
-    .menu{
-      // margin-top: 20px;
-      line-height: 32px;
-      background:#2B2B2B;
-      border-radius: 5px;
-      text-indent: 10px;
-      color: #f0f0f0;
+    background: rgba(255,255,255,1);
+    box-shadow: 0 0 20px 0 rgba(69,97,137,.2);
+    border-radius: 4px;
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    z-index: 10;
+    min-width: 120px;
+    padding: 5px;
+    display: none;
+    &>.item{
+      height: 40px;
       font-size: 14px;
-      &>li{
-        width: 100%;
-        &.active,&:hover{
-          color: #01CED1
-        }
+      font-weight: 400;
+      line-height: 40px;
+      // background: #fff;
+      white-space: nowrap;
+      text-indent: 10px;
+      text-decoration: none;
+      color: #999;
+      &:not(:last-child){
+        border-bottom: 1px solid #dadada
+      }
+      &:hover{
+        color: #000
       }
     }
+    // .menu{
+    //   // margin-top: 20px;
+    //   line-height: 32px;
+    //   // background:#2B2B2B;
+    //   // border-radius: 5px;
+    //   text-indent: 10px;
+    //   // color: #f0f0f0;
+    //   // font-size: 14px;
+    //   &>li{
+    //     width: 100%;
+    //     &.active,&:hover{
+    //       color: #01CED1
+    //     }
+    //   }
+    // }
   }
 
 }

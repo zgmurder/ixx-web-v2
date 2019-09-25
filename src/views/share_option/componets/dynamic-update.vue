@@ -403,8 +403,8 @@ export default {
           <div class="time-line-main">
             <div class="box" style="background:none;color:red"></div>
             <div class="time-lineL yellow" />
-            <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-time" />
+            <svg class="icon" aria-hidden="true" width="20px">
+              <use xlink:href="#icon-user" />
             </svg></div>
         </div>`, 0, 0, 'rect', 0, 0, true).add()
     },

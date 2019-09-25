@@ -37,7 +37,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 
 .custom-dropdown-active{
   background-color:$--background-active-bg;

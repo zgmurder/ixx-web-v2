@@ -1,7 +1,7 @@
 <template>
   <div class="login-container" flex="main:center cross:center">
     <background />
-    <customForm class="custom-form" :schema="schema" :submit-btn="false" label-width="0">
+    <customForm class="login-custom-form" :schema="schema" :submit-btn="false" label-width="0">
       <div slot="title" class="title-container" flex="main:justify cross:bottom">
         <h2>{{ $tR('register_count') }}</h2>
         <!-- <div>
@@ -45,7 +45,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scope="this api replaced by slot-scope in 2.5.0+">
+<style lang="scss" scoped="this api replaced by slot-scope in 2.5.0+">
 .login-container{
   position: absolute;
   width: 100%;

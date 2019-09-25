@@ -15,8 +15,5 @@ export default new Vuex.Store({
     SET_USERDATA: (state, userData) => {
       state.userData = userData
     }
-  },
-  actions: {
-
   }
 })

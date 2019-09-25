@@ -60,7 +60,7 @@
         </div>
         <div class="container-bottom">
           <custom-table v-loading="loading" :table-list="tableList" :table-columns="tableColumns" border @change="handlePageChange">
-            <div slot="handlerDom" slot-scope="data">
+            <div slot="handlerDom"><!--  slot-scope="data" -->
               <el-button size="mini" :type="isBuy ? 'success' : 'danger'">{{ isBuy ? $tR(`otc_side_1`):$tR(`otc_side_2`) }}{{ digitalActive }}</el-button>
             </div>
           </custom-table>
@@ -181,7 +181,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 .legalTender{
   color: $--secondary-text;
   padding-top: 60px;

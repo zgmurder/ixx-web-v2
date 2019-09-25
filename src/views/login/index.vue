@@ -45,7 +45,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scope="this api replaced by slot-scope in 2.5.0+">
+<style lang="scss" scoped="this api replaced by slot-scope in 2.5.0+">
 .login-container{
   position: absolute;
   width: 100%;

@@ -31,7 +31,7 @@ export default {
   name: 'SpotIndex'
 }
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 .drawer-box{
   .drawer-content{
     &>li{

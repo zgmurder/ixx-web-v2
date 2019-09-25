@@ -10,7 +10,7 @@
       <component :is="field.fieldType?'el-'+field.fieldType:field" v-model="field[field.vModel]" :default-first-option="true" v-bind="filterComponentAttrsfield(field)" clearable v-on="resetEvent(field)">
         <div v-if="field.slotDefault">{{ field.slotDefault }}</div>
         <!-- <component :is="field.append" /> -->
-        <!-- <i v-if="field.fieldType === 'upload'" class="el-icon-upload" /> -->
+        <component :is="field.slot" v-if="field.slot" />
         <!-- <template v-if="field.fieldType === 'select'">
           <el-option
             v-for="(item,i) in field.options||[]"

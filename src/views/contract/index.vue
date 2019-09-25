@@ -289,7 +289,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 .is-danger{
   color: $--color-danger
 }
@@ -359,7 +359,7 @@ export default {
         text-align: left;
         line-height: 32px;
         &>div{
-          flex-basis: 140px;
+          flex-basis: 150px;
         }
       }
   }
