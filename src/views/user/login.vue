@@ -10,15 +10,16 @@
           <el-link :type="isEmail ? 'info':'primary'" @click="isEmail=false">{{ $tR('login_by_phone') }}</el-link>
         </div> -->
       </div>
+
     </customForm>
   </div>
 </template>
 <script>
 import background from './components/background'
 import customForm from '@/components/customForm'
-import { loginByEmail, loginByPhone, getEmailCode } from '@/api/user'
+import { loginByEmail, loginByPhone, getEmailCode, checkEmail, loginByEmail2 } from '@/api/user'
 import { validEmail, validPhone } from '@/utils/validate'
-import { setUser, setSession } from '@/utils/auth'
+import { setUser } from '@/utils/auth'
 export default {
   name: 'Login',
   components: {
@@ -47,31 +48,39 @@ export default {
         //   }, 1000)
         // } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true },
         { fieldType: 'input', prefixIcon: 'el-icon-search', type: 'password', placeholder: '密码', vModel: 'password', default: 'Awuhao123', required: true },
-        { fieldType: 'button', slotDefault: '登录', on: { click: ({ context }) => {
+        { fieldType: 'button', slotDefault: '登录', loading: false, on: { click: ({ field, context }) => {
           const res = context.verifyAll()
           if (!res) return
+          field.loading = true
           const { username, ...data } = res
           validEmail(username) && (data.email = username)
           validPhone(username) && (data.phone = username, data.region = 86)
-          const handleRes = res => {
-            setUser(JSON.stringify(res.data))
-            this.$store.commit('SET_USERDATA', res.data)
-            this.$message.success('登录成功')
-            // setSession(res.data.session_id)
-            // getEmailCode().then(res => {
-            //   console.log(res)
-            // })
-            // this.$prompt('请输入邮箱验证码', '邮箱验证', {
-            //   cancelButtonText: '取消',
-            //   inputPattern: /\d{6}/,
-            //   inputErrorMessage: '请输入6位数验证码'
-            // }).then(({ value }) => {
-            //   this.$message({
-            //     type: 'success',
-            //     message: '你的邮箱是: ' + value
-            //   })
-            // })
-            this.$router.push('/user/index')
+          const handleRes = async() => {
+            await this.getEmailCode(username)
+            this.$prompt(`系统已为账号 <span style="color:#13ce66">${username}</span> 发送验证码，请注意查收<br/>没有收到验证码？点击 <a href="javascript:;" style="color:#ff4949" onclick="getEmailCode('${username}')" rel="noopener noreferrer">重新获取验证码</a>`, '邮箱验证', {
+              showConfirmButton: false,
+              showCancelButton: false,
+              closeOnClickModal: false,
+              dangerouslyUseHTMLString: true,
+              inputPattern: /^\d{6}$/,
+              inputErrorMessage: '请输入6位数验证码',
+              inputPlaceholder: '请输入邮箱验证码',
+              callback: action => action === 'cancel' && (field.loading = false),
+              inputValidator: value => {
+                loginByEmail2(username, value).then(res => {
+                  this.$message.success('登录成功')
+                  setUser(JSON.stringify(res.data))
+                  this.$store.commit('SET_USERDATA', res.data)
+                  const node = document.querySelector('div.el-message-box__wrapper')
+                  const nodeModal = document.querySelector('div.v-modal')
+                  node.parentNode.removeChild(node)
+                  nodeModal.parentNode.removeChild(nodeModal)
+                  this.$router.push('/user/index')
+                }).catch(() => false)
+              }
+            }).then(res => {
+              console.log(res)
+            }).catch(() => false)
           }
           if (validEmail(username)) {
             data.email = username
@@ -96,6 +105,17 @@ export default {
           </div>
         }, formItemStyle: { marginTop: '-20px' }}
       ]
+    }
+  },
+  created() {
+    window.getEmailCode = this.getEmailCode
+  },
+  destroyed() {
+    window.getEmailCode = undefined
+  },
+  methods: {
+    getEmailCode(username) {
+      return getEmailCode(username).then(res => Promise.resolve(this.$message.success('成功发送验证码')))
     }
   }
 }

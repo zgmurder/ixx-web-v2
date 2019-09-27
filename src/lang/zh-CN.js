@@ -126,9 +126,9 @@ export default {
       email: '邮箱'
     },
     mapHistoryColumns: {
-      'date': '时间',
-      'address': 'IP地址',
-      'area': '地区'
+      'login_time': '时间',
+      'ip': 'IP地址',
+      'address': '地区'
     }
   }
   // 'signup': '创建帐号',

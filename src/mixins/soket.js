@@ -25,10 +25,11 @@ export default {
       return new Promise((resolve, reject) => {
         const websocket = new WebSocket(wsurl)
         websocket.onopen = () => {
-          websocket.send(`{"reqType":13,"param":{"assetCode":1,"time":1}}`)
-          websocket.send(`{"reqType":3,"param":{"assetCode":1,"period":1}}`)
-          // websocket.send(`{"reqType":9,"param":{"id":1,"period":1,"optionType":1}}`)
-          // websocket.send(`{"reqType":1,"param":{"assetCode":1,"optionType":1}}`)
+          // websocket.send(`{"reqType":13,"param":{"assetCode":1,"time":1}}`)
+          // websocket.send(`{"reqType":3,"param":{"assetCode":1,"period":1}}`)
+          websocket.send(`{"reqType": 2, "args":["BTCUSD"]}`)
+          websocket.send(`{"reqType": 1, "args":["1","BTCUSD"]}`)
+          // websocket.send(`{"reqType":3,"param":{"assetCode":1,"period":1}}`)
           console.log(`${wsurl}连接成功`)
         }
         websocket.onerror = () => console.log(`${wsurl}连接发生错误`)

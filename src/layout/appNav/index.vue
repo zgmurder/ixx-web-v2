@@ -64,9 +64,9 @@ export default {
       return [
         { label: '个人中心', path: '/user/index' },
         { label: '退出', click: () => loginout().then(res => {
+          location.reload()
           removeUser()
           this.$store.commit('SET_USERDATA', null)
-          location.reload()
         }) }
       ]
     }

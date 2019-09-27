@@ -3,12 +3,12 @@ import request from '@/utils/request'
 export const checkEmail = email => request({
   url: 'user/email/check',
   method: 'post',
-  params: { email, region: 86 }
-})
-export const loginByEmail2 = email => request({
-  url: 'user/login/email/code',
-  method: 'post',
   data: { email, region: 86 }
+})
+export const loginByEmail2 = (email, code) => request({
+  url: 'user/login/email2',
+  method: 'post',
+  data: { code, email }
 })
 
 export const loginByEmail = data => request({
@@ -16,11 +16,12 @@ export const loginByEmail = data => request({
   method: 'post',
   data
 })
-export const getEmailCode = () => request({
+
+export const getEmailCode = (email) => request({
   url: 'user/login/email/code',
   method: 'post',
   data: {
-    email: '294069733@qq.com',
+    email,
     region: 86
   }
 })
@@ -34,7 +35,12 @@ export const loginout = () => request({
   url: 'user/logout',
   method: 'post'
 })
+
 export const getHistorys = () => request({
   url: 'user/login/history',
+  method: 'post'
+})
+export const getSession = () => request({
+  url: 'user/session',
   method: 'post'
 })

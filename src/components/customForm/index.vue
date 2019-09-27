@@ -8,7 +8,7 @@
         @change="handleChange($event,field,index)"
         @select="handleChange($event,field,index)" -->
       <component :is="field.fieldType?'el-'+field.fieldType:field" v-model="field[field.vModel]" :default-first-option="true" v-bind="filterComponentAttrsfield(field)" clearable v-on="resetEvent(field)">
-        <div v-if="field.slotDefault">{{ field.slotDefault }}</div>
+        <span v-if="field.slotDefault">{{ field.slotDefault }}</span>
         <!-- <component :is="field.append" /> -->
         <component :is="field.slot" v-if="field.slot" />
         <!-- <template v-if="field.fieldType === 'select'">

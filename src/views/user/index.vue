@@ -1,13 +1,15 @@
 <template>
   <div class="user-center">
-    <div class="container" flex="main:justify box:mean">
+    <div class="container user-center-container" flex="main:justify box:mean">
       <div class="container-left">
         <ul class="menu-list">
           <li v-for="(value,key) in mapMenuList" :key="key" :class="{active:activeKey === key}" @click="handleClick(key)">{{ $tR(`mapMenuList.${key}`) }}</li>
         </ul>
       </div>
       <div class="container-right">
-        <component :is="componentId"><h3>{{ $tR(`mapMenuList.${activeKey}`) }}</h3></component>
+        <keep-alive>
+          <component :is="componentId"><h3 flex="main:justify cross:center">{{ $tR(`mapMenuList.${activeKey}`) }}<el-button size="mini" type="primary">资产管理<i class="el-icon-arrow-right" /></el-button></h3></component>
+        </keep-alive>
       </div>
     </div>
   </div>
@@ -58,7 +60,8 @@ export default {
     height: calc(100vh - 60px);
     box-sizing: border-box;
     overflow: hidden;
-    .container{
+    .user-center-container{
+      height: 100%;
       &>.container-left{
         flex: none;
         width: 210px;

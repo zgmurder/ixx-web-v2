@@ -28,7 +28,7 @@ export default {
   },
   mounted() {
     this.isLoading = true
-    this.openWebSocket('wss://fota.com/apioption/wsoption?brokerId=1', res => {
+    this.openWebSocket('ws://192.168.2.105:2032/v2', res => {
       if (res.spotIndexDTOList) {
         const data = res.spotIndexDTOList.map((item, index) => ({ x: item.time, y: Number(item.price) }))
         this.initCharts(data)
