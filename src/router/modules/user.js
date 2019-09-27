@@ -27,6 +27,10 @@ const userRouter = {
     {
       path: '/user/index',
       component: () => import('@/views/user/index')
+    },
+    {
+      path: '/user/property',
+      component: () => import('@/views/user/property')
     }
   ]
 }

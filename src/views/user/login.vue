@@ -17,7 +17,7 @@
 <script>
 import background from './components/background'
 import customForm from '@/components/customForm'
-import { loginByEmail, loginByPhone, getEmailCode, checkEmail, loginByEmail2 } from '@/api/user'
+import { loginByEmail, loginByPhone, getEmailCode, loginByEmail2 } from '@/api/user'
 import { validEmail, validPhone } from '@/utils/validate'
 import { setUser } from '@/utils/auth'
 export default {
