@@ -3,7 +3,8 @@
     <slot />
     <el-divider />
     <custom-table v-loading="loading" :table-list="tableList" :table-columns="tableColumns" :show-header="false">
-      <div slot="handlerDom" slot-scope="data" style="float:right">
+      <!--  slot-scope="data" -->
+      <div slot="handlerDom" style="float:right">
         <el-button size="mini" type="danger">aaa</el-button>
       </div>
     </custom-table>

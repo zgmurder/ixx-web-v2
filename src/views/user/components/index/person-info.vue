@@ -12,7 +12,7 @@
           </tr>
         </tbody>
       </table>
-      <h3 style="margin-top:30px">登录历史</h3>
+      <h3 style="margin-top:30px">{{ $tR(`history`) }}</h3>
       <el-divider />
     </div>
     <custom-table v-loading="loading" style="flex:1" height="100%" :table-list="tableList" :table-columns="tableColumns">
@@ -48,17 +48,10 @@ export default {
     },
     userData() {
       return this.$store.state.userData
-    },
-    tableHeight() {
-      console.log(this.$el, 111)
-      return 250
     }
   },
   created() {
-    getHistorys().then(res => {
-      console.log(res.data)
-      this.tableList = res.data
-    })
+    getHistorys().then(res => (this.tableList = res.data))
   }
 }
 </script>

@@ -1,11 +1,10 @@
 import axios from 'axios'
 import { Message } from 'element-ui'
-import store from '@/store'
-// import { getUser } from '@/utils/auth'
+// import store from '@/store'
+import { getUser } from '@/utils/auth'
 
 // create an axios instance
 // axios.defaults.withCredentials = true
-
 const service = axios.create({
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   withCredentials: true, // send cookies when cross-domain requests
@@ -16,14 +15,15 @@ service.interceptors.request.use(
   config => {
     // do something before request is sent
     if (!config.url.startsWith('http'))config.url = process.env.VUE_APP_BASE_API_I + config.url
-    const userData = store.state.userData
-    if (userData) {
-      config.headers['token'] = store.state.userData.token
+    const userDataStr = getUser()
+    if (userDataStr) {
+      const userData = JSON.parse(userDataStr)
+      config.headers['token'] = userData.token
       // config.headers['ix_session_id'] = store.state.userData.ix_session_id
     }
     // config.headers.Origin = 'https://staging.ixex.pro'
     config.headers['from'] = 'ixx'
-    config.headers['lang'] = store.state.locale
+    config.headers['lang'] = localStorage.getItem('locale') || 'zh-CN'
     return config
   },
   error => {

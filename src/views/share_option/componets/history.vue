@@ -16,6 +16,11 @@
     <span class="xiaoguo" />
   </div>
 </template>
+<script>
+export default {
+  name: 'ShareHistory'
+}
+</script>
 <style lang="scss" scoped>
 .history{
   .content{

@@ -36,9 +36,11 @@ export default {
         websocket.onclose = () => console.log(`${wsurl}链接关闭`)
         this.websockets.push(websocket)
         websocket.onmessage = e => {
-          // websocket.send(`{"reqType":9,"param":{"id":1,"period":1,"optionType":1}}`)
-          const res = JSON.parse(e.data)
-          res.code === 0 && (resolve(websocket), callBack(res.data)) || reject(res)
+          let res = JSON.parse(e.data)
+          res = res.code === 0 ? res.data : res
+          resolve(websocket)
+          callBack(res)
+          // res.code === 0 && (resolve(websocket), callBack(res.data)) || reject(res)
         }
       })
     },

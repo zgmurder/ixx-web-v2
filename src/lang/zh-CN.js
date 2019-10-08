@@ -120,6 +120,7 @@ export default {
   },
   personInfo: {
     gotoBind: '去绑定',
+    history: '登录历史',
     mapTableInfo: {
       name: '用户姓名',
       phone: '手机号',
@@ -129,6 +130,24 @@ export default {
       'login_time': '时间',
       'ip': 'IP地址',
       'address': '地区'
+    }
+  },
+  property: {
+    mapMenuList: {
+      'property-manage': '资产管理',
+      'capital-account': '资金账户',
+      'deal-account': '交易账户',
+      'address-manage': '地址管理'
+    }
+  },
+  propertyManage: {
+    mapAccoutColumns: {
+      currency: '币名',
+      available: '可用量',
+      withdrawing: '提币锁定量',
+      quota: '当前提币剩余额度',
+      max_quota: '当前提币总额度',
+      rates: ' 汇率对象'
     }
   }
   // 'signup': '创建帐号',

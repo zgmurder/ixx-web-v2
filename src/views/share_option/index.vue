@@ -4,7 +4,7 @@
 
     <div class="left-side-bar">
       <div v-for="(value,key) in mapComponentNames" :key="key" :class="{active:drawerIsOpen && activeName === key}" @click="handleClickTab(key)">
-        <svg-icon icon-class="chart" style="font-size:24px" />
+        <svg-icon :icon-class="mapIcons[key]" style="font-size:24px" />
         <p>{{ value }}</p>
       </div>
     </div>
@@ -13,58 +13,57 @@
         <div slot="title" flex="cross:center main:justify" style="height:40px">
           <p>最新价格<span class="share-text-info" style="font-size:12px;">(USDT/USD)</span></p>
         </div>
-        <component :is="temComponet" />
+        <component :is="temComponet" :data="temComponet.name=== 'ShareHistory'?marketData:historyData" />
         <i class="el-icon-close" @click="drawerIsOpen = false" />
       </div>
     </transition>
     <div class="content" flex="dir:bottom">
-      <charts-dynamic-update ref="dynamic-charts" style="width:100%" class="dynamic-update" />
+      <charts-dynamic-update ref="dynamic-charts" style="width:100%" class="dynamic-update" @handleTabClick="handleTabClick" @pushData="data=>(marketData = data)" />
       <ul class="time-tab" flex="main:justify cross:center box:mean">
-        <li class="active">2m</li>
-        <li>5m</li>
-        <li>15m</li>
-        <li>30m</li>
-        <li>3h</li>
-        <li>1d</li>
-        <li>7d</li>
+        <li v-for="(item,index) in mapTabTimes" :key="index" :class="{active:+activeTime === index}" @click="handleTabClick(index)">{{ item }}</li>
       </ul>
+      <selectLang style="position:absolute;top:20px;left:30px" />
     </div>
     <!-- <charts-dynamic-update class="content" /> -->
     <div class="right-side-bar">
       <div class="content-top hover-scale">
         <p class="share-text-info"> 投资 </p>
-        <input type="text" maxlength="8" value="10000">
+        <input v-model.number="orderCount" min="1" type="text" maxlength="8">
         <div class="btn-group">
-          <div> + </div>
-          <div> - </div>
+          <div @click="orderCount++"> + </div>
+          <div @click="orderCount>1 && orderCount--"> - </div>
         </div>
       </div>
       <div class="content-center hover-scale" flex="dir:top main:justify cross:center box:mean">
         <div flex="main:center cross:center" class="center-info">
-          <div class="share-text-info">
-            <span>+70.16%</span>
-            <p><svg-icon icon-class="clipboard" />0.71</p>
+          <div v-if="marketData" class="share-text-info">
+            <span>{{ marketData.BullishOdds|bigRound(2) }}%</span>
+            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*marketData.BullishOdds|bigRound(8) }}</p>
           </div>
         </div>
-        <el-button class="center-btn success" :disabled="false" type="success" @click="addLabels('green')" @mouseover.native="dynamicChart.activeHover('success')" @mouseout.native="dynamicChart.disableHover('success')">看涨</el-button>
+        <el-button class="center-btn success" :disabled="!$store.state.userData" type="success" @click="addLabels('green')" @mouseover.native="dynamicChart.activeHover('success')" @mouseout.native="dynamicChart.disableHover('success')">
+          <svg-icon icon-class="share-up" style="font-size:40px" /> <h2 style="margin-top:5px">看涨</h2>
+        </el-button>
       </div>
       <div class="content-center hover-scale" flex="dir:top main:justify cross:center box:mean">
-        <el-button class="center-btn danger" :disabled="false" type="danger" @click="addLabels('red')" @mouseover.native="dynamicChart.activeHover('danger')" @mouseout.native="dynamicChart.disableHover('danger')">看跌</el-button>
+        <el-button class="center-btn danger" :disabled="!$store.state.userData" type="danger" @click="addLabels('red')" @mouseover.native="dynamicChart.activeHover('danger')" @mouseout.native="dynamicChart.disableHover('danger')">
+          <svg-icon icon-class="share-down" style="font-size:40px" /> <h2 style="margin-top:5px">看跌</h2>
+        </el-button>
         <div flex="main:center cross:center" class="center-info">
-          <div class="share-text-info">
-            <span>+70.16%</span>
-            <p><svg-icon icon-class="clipboard" />0.71</p>
+          <div v-if="marketData" class="share-text-info">
+            <span>{{ marketData.BearishOdds|bigRound(2) }}%</span>
+            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*marketData.BearishOdds|bigRound(8) }}</p>
           </div>
         </div>
       </div>
     </div>
-    <div ref="square-container" class="square-container" flex="dir:top box:mean">
-      <div class="text">看涨 <br><span>{{ up }}%</span></div>
+    <div v-if="marketData" ref="square-container" class="square-container" flex="dir:top box:mean">
+      <div class="text">看涨 <br><span>{{ +marketData.Bullish*100 }}%</span></div>
       <div class="mark-box" flex="dir:top box:mean">
-        <div class="top" :style="{height:up+'%'}" />
+        <div class="top" :style="{height:+marketData.Bullish*100+'%'}" />
         <div class="bottom" />
       </div>
-      <div class="text"><span>{{ 100-up }}%</span><br>看跌 </div>
+      <div class="text"><span>{{ +marketData.Bearish*100 }}%</span><br>看跌 </div>
     </div>
     <!-- <div class="test" style="margin-left:40px" />
     <div class="test" /> -->
@@ -72,12 +71,14 @@
 </template>
 <script>
 import chartsDynamicUpdate from './componets/dynamic-update'
+import selectLang from '@/components/selectLang'
 import websoketMixin from '@/mixins/soket'
-
+import { createOrder, getHistory } from '@/api/share_option'
 export default {
   name: 'ShareOption',
   components: {
-    chartsDynamicUpdate
+    chartsDynamicUpdate,
+    selectLang
   },
   mixins: [websoketMixin],
   data() {
@@ -85,26 +86,44 @@ export default {
       drawerIsOpen: false,
       activeName: '',
       temComponet: null,
-      up: 100
+      historyData: null,
+
+      marketData: null,
+      activeTime: 0,
+
+      orderCount: 1
     }
   },
   computed: {
     mapComponentNames() {
       return {
         'spot-index': '现货指数',
-        'history': '历史记录',
-        'ranking-list': '排行榜',
-        'teach-view': '教学视频'
+        'history': '历史记录'
+        // 'ranking-list': '排行榜',
+        // 'teach-view': '教学视频'
+      }
+    },
+    mapIcons() {
+      return {
+        'spot-index': 'chart',
+        'history': 'history'
       }
     },
     dynamicChart() {
       return this.$refs['dynamic-charts']
+    },
+    mapTabTimes() {
+      return ['1M', '5M', '10M', '1H', '3H', '1D', '7D']
+    },
+    userData() {
+      return this.$store.state.userData
+    },
+    activeShareAccount() {
+      return this.$store.state.activeShareAccount
     }
   },
   created() {
-    setInterval(() => {
-      this.up = Math.ceil(Math.random() * 100)
-    }, 1000)
+    // this.userData && getShareAccountList().then(res => (this.userData.mapShareAccount = res.data))
   },
   methods: {
     handleClickTab(name) {
@@ -112,13 +131,31 @@ export default {
       this.drawerIsOpen = true
       this.activeName = name
       this.temComponet = require(`./componets/${name}.vue`).default
+      if (this.temComponet.name === 'ShareHistory') {
+        const params = {
+          user_id: this.userData.id,
+          currency: this.activeShareAccount.currency
+        }
+        getHistory(params).then(res => {
+          console.log(res)
+        })
+      }
     },
     afterLeaveOrEnter(el) {
       this.$refs['square-container'].style.left = el.clientWidth + 75 + 'px'
       this.dynamicChart.chart.reflow()
     },
     addLabels(color) {
-      this.dynamicChart.addLabels(color)
+      const tradeType = color === 'green' ? 0 : 1
+      createOrder({ user_id: this.userData.id, symbol: 'BTCUSD', amount: this.orderCount, currency: this.activeShareAccount.currency, 'trade_type': tradeType, period: this.mapTabTimes[this.activeTime] }).then(res => {
+        return this.$store.dispatch('getShareAccountList')
+      }).then(res => {
+        this.dynamicChart.addLabels(color, this.orderCount)
+      })
+    },
+    handleTabClick(index) {
+      this.activeTime = index
+      this.dynamicChart.initChartsByReqType(index)
     }
   }
 }
@@ -128,8 +165,12 @@ export default {
   height: calc(100vh - 60px);
   box-sizing: border-box;
   font-size: 13px;
-  background: url('./bg-chart.png') no-repeat center bottom;
+  background-image: url('./img/bj.png');
   background-size: 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
   position: relative;
   .share-option-bg{
     position: absolute;
@@ -219,7 +260,7 @@ export default {
     }
     .content-top{
       // background: $--share-bg-color;
-      background: rgba($color: $--contract-table-bg, $alpha: .6);
+      background: rgba($color: #fff, $alpha: .1);
       border-radius: 4px;
       box-sizing: border-box;
       .share-text-info{
@@ -264,7 +305,7 @@ export default {
     }
     .content-center{
       height: 200px;
-      background: rgba($color: $--contract-table-bg, $alpha: .6);
+      background: rgba($color: #fff, $alpha: .1);
       margin-top: 15px;
       border-radius: 6px;
       line-height: 26px;
@@ -317,7 +358,7 @@ export default {
         position: relative;
         border-bottom:5px solid rgba($color: rgb(116, 116, 116), $alpha: .2);
         // border-left:13px solid rgba($color: red, $alpha: .8);
-        border-right:13px solid rgba($color: red, $alpha: .6);
+        border-right:13px solid rgba($color: green, $alpha: .6);
         transform: translate(-13px,5px);
         &::before{
           content: '';
@@ -327,7 +368,7 @@ export default {
           left: 26px;
           border-top:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
           border-bottom:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
-          border-left:13px solid rgba($color: rgb(68, 2, 2), $alpha: .6);
+          border-left:13px solid rgba($color: rgb(0, 36, 0), $alpha: .8);
           // transform: translateX(13px);
         }
       }
@@ -338,7 +379,7 @@ export default {
         position: relative;
         border-bottom:5px solid rgba($color: rgb(116, 116, 116), $alpha: .6);
         // border-left:13px solid rgba($color: red, $alpha: .8);
-        border-right:13px solid rgba($color: green, $alpha: .6);
+        border-right:13px solid rgba($color: red, $alpha: .6);
         transform: translate(-13px,-5px);
         &::before{
           content: '';
@@ -348,7 +389,7 @@ export default {
           left: 26px;
           border-top:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
           border-bottom:5px solid rgba($color: rgb(0,0,0), $alpha: 0);
-          border-left:13px solid rgba($color: rgb(0, 36, 0), $alpha: .8);
+          border-left:13px solid rgba($color: rgb(68, 2, 2), $alpha: .6);
           // transform: translateX(13px);
         }
       }

@@ -252,12 +252,12 @@ export default {
       this.delegateData = null
       this.newBargainListData = []
       if (this.activeTabkey) {
-        this.closeWebSocket(`orderbook/FUTURE_${this.activeTabkey}USD/0/1/20`)
-        this.closeWebSocket(`deal/FUTURE_${this.activeTabkey}USD`)
+        this.closeWebSocket(`/orderbook/FUTURE_${this.activeTabkey}USD/0/1/20`)
+        this.closeWebSocket(`/deal/FUTURE_${this.activeTabkey}USD`)
       }
-      this.openWebSocket(`orderbook/FUTURE_${key}USD/0/1/20`, data => (this.delegateData = data)).then(() => this.$nextTick(() => this.dataLoaded()))
+      this.openWebSocket(`/orderbook/FUTURE_${key}USD/0/1/20`, data => (this.delegateData = data)).then(() => this.$nextTick(() => this.dataLoaded()))
       getFutureListByKey(key, { size: 16 }).then(res => (this.newBargainListData = res.data)).then(res => {
-        this.openWebSocket(`deal/FUTURE_${key}USD`, data => {
+        this.openWebSocket(`/deal/FUTURE_${key}USD`, data => {
           const last = data[data.length - 1]
           this.newBargainListData.length = this.newBargainListData.length - 1
           this.newBargainListData.unshift(last)

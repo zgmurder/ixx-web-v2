@@ -1,22 +1,40 @@
 <template>
   <span class="drop-down-wrap">
     <slot />
-    <ul class="menu-box">
-      <li v-for="(item,index) in menuOptions" :key="index" class="item" @click="handle(item)">{{ item.label }}</li>
+    <ul class="menu-box" :style="{'min-width':menuMinWidth+'px'}">
+      <li v-for="(item,index) in menuOptions" :key="index" flex="main:justify" class="item" :class="{active:item.label === (active||{}).label}" @click="handle(item)">
+        <el-tooltip :disabled="typeof item.describe !== 'object'" :content="item.label" placement="left" effect="light">
+          <span class="text-nowrap"><svg-icon v-if="item.icon" :icon-class="item.icon" /> {{ item.label }}</span>
+        </el-tooltip>
+        <span v-if="typeof item.describe === 'object'" @click="item.describe.click">{{ item.describe.label }}</span>
+      </li>
     </ul>
   </span>
 </template>
 <script>
 export default {
+  model: {
+    prop: 'active',
+    event: 'change'
+  },
   props: {
     menuOptions: {
       type: [Array, Object],
       default: () => []
+    },
+    menuMinWidth: {
+      type: [Number, String],
+      default: 'initial'
+    },
+    active: {
+      type: Object,
+      default: () => {}
     }
   },
   methods: {
     handle(item) {
       item.click && item.click(item) || this.$router.push({ path: item.path })
+      this.$emit('change', item)
     }
   }
 }
@@ -27,11 +45,17 @@ export default {
   height: 100%;
   display: flex;
   align-items: center;
+  i{
+    transition: all .5s ease-in;
+  }
   &:hover{
     color: #01CED1;
     cursor: pointer;
     .menu-box{
       display: block;
+    }
+    i{
+      transform: rotate(-180deg)
     }
   }
   .menu-box{
@@ -39,16 +63,17 @@ export default {
     position: absolute;
     top: 100%;
     display: none;
-    background: rgba(255,255,255,1);
+    background: $--contract-table-bd;
     box-shadow: 0 0 20px 0 rgba(69,97,137,.2);
     border-radius: 4px;
     display: block;
     box-sizing: border-box;
     position: absolute;
     z-index: 10;
-    min-width: 120px;
+    min-width: 100%;
     padding: 5px;
     display: none;
+    z-index: 2001;
     &>.item{
       height: 40px;
       font-size: 14px;
@@ -56,14 +81,20 @@ export default {
       line-height: 40px;
       // background: #fff;
       white-space: nowrap;
-      text-indent: 10px;
       text-decoration: none;
       color: #999;
+      padding: 0 10px;
       &:not(:last-child){
-        border-bottom: 1px solid #dadada
+        border-bottom: 1px solid rgba(69,97,137,.2)
       }
-      &:hover{
-        color: #000
+      &:hover,&.active{
+        color: #fff
+      }
+      &>.text-nowrap{
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
     // .menu{

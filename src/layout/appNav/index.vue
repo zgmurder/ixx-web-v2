@@ -8,8 +8,14 @@
     </div>
     <div class="nav-right-container" flex="cross:center">
       <template v-if="$store.state.userData">
-        <dropdown style="margin-left:20px" :menu-options="mapBalanceMenu"><div :class="{active:$route.path.includes('property')}" @click="$router.push('/user/property')">资产管理</div></dropdown>
-        <dropdown style="margin-left:20px" :menu-options="mapUserCenter"><div :class="{active:$route.path.includes('/user/index')}" @click="$router.push('/user/index')">{{ $store.state.userData.email }}</div></dropdown>
+        <!-- <dropdown style="margin-left:20px" :menu-options="mapBalanceMenu"><div :class="{active:$route.path.includes('property')}" @click="$router.push('/user/property')">资产管理 <i class="el-icon-caret-bottom" /></div></dropdown> -->
+        <dropdown style="margin-left:20px" :menu-options="mapUserCenter"><div :class="{active:$route.path.includes('/user/')}" @click="$router.push('/user/index')">{{ $store.state.userData.email }} <i class="el-icon-caret-bottom" /></div></dropdown>
+        <dropdown v-if="$route.path === '/share_option/index' && mapBalanceMenu.length" v-model="activeShareAccount" style="margin-left:20px" :menu-min-width="250" :menu-options="mapBalanceMenu">
+          <div>
+            {{ activeShareAccount.label }} <i class="el-icon-caret-bottom" />
+          </div>
+          <!-- <div></div> -->
+        </dropdown>
       </template>
       <template v-else>
         <el-link :type="$route.path === '/user/login'? 'primary':'info'" @click="$router.push('/user/login')">{{ $tR('signin') }}</el-link>
@@ -30,6 +36,7 @@ import { mapNavBackground } from '@/const'
 import dropdown from '@/components/dropdown'
 import { removeUser } from '@/utils/auth'
 import { loginout } from '@/api/user'
+import { bigRound } from '@/utils/handleNum'
 export default {
   name: 'AppNav',
   components: {
@@ -44,7 +51,8 @@ export default {
   },
   data() {
     return {
-      activeIndex2: '1'
+      activeIndex2: '1',
+      activeShareAccount: null
     }
   },
   computed: {
@@ -53,16 +61,26 @@ export default {
       return key ? { backgroundColor: mapNavBackground[key] } : {}
     },
     mapBalanceMenu() {
-      return [
-        { label: '资产管理' },
-        { label: '充币' },
-        { label: '提币' },
-        { label: '资金划转' }
-      ]
+      const mapIcon = ['btc', 'BTS', 'eth']
+      const arr = this.$store.state.mapShareAccount.map((item, index) => ({
+        index,
+        icon: mapIcon[index],
+        label: `${item.currency}账户 / ${bigRound(item.available, 4)}`,
+        describe: {
+          label: '充值',
+          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+          click: item => this.$router.push({ path: 'aaa', params: item })
+        },
+        ...item
+      }))
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      if (this.activeShareAccount) { this.activeShareAccount = arr[this.activeShareAccount.index] }
+      return arr
     },
     mapUserCenter() {
       return [
         { label: '个人中心', path: '/user/index' },
+        { label: '资产管理', path: '/user/property' },
         { label: '退出', click: () => loginout().then(res => {
           location.reload()
           removeUser()
@@ -71,8 +89,21 @@ export default {
       ]
     }
   },
+  watch: {
+    activeShareAccount: {
+      handler(newValue) {
+        if (newValue) {
+          localStorage.setItem('activeShareAccount', JSON.stringify(newValue))
+          this.$store.commit('SET_ACTIVESHAREACCOUNT', newValue)
+        }
+      }
+    }
+  },
   created() {
-    console.log(this.$store)
+    const tem = localStorage.getItem('activeShareAccount')
+    console.log(this.mapBalanceMenu)
+
+    this.activeShareAccount = tem ? JSON.parse(tem) : this.mapBalanceMenu[0]
   }
 }
 </script>

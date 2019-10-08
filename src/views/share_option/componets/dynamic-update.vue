@@ -13,6 +13,8 @@ import HighMap from 'highcharts/modules/map.js'
 import Annotations from 'highcharts/modules/annotations.js'
 import websoketMixin from '@/mixins/soket'
 import CountUp from 'countup/dist/countUp.min'
+import { bigRound } from '@/utils/handleNum'
+import { parseTime } from '@/utils'
 HighMap(Highcharts)
 Annotations(Highcharts)
 export default {
@@ -28,9 +30,13 @@ export default {
   },
   mounted() {
     this.isLoading = true
-    this.openWebSocket('ws://192.168.2.105:2032/v2', res => {
+    // wss://fota.com/apioption/wsoption?brokerId=1
+    this.openWebSocket('ws://192.168.2.102:2032/v2', res => {
       if (res.spotIndexDTOList) {
-        const data = res.spotIndexDTOList.map((item, index) => ({ x: item.time, y: Number(item.price) }))
+        const data = res.spotIndexDTOList.map((dataString, index) => {
+          const item = JSON.parse(dataString)
+          return { x: item.time, y: Number(item.price) }
+        })
         this.initCharts(data)
         this.handlePlotLinesByCountUp(data)
         this.creatTwoLineByTime(res.timeStamp)
@@ -39,39 +45,39 @@ export default {
         this.finishTimeElement = document.querySelector('#finishTime')
         this.rippleElement = document.querySelector('#ripple')
 
-        this.initOrderLineByCountUp(res.timeStamp)
-
+        // this.initOrderLineByCountUp(res.timeStamp)
         this.chart.pointer.onContainerMouseWheel = this.handleScroll
 
         this.isLoading = false
-      } else if (res.lineBinaryOptionPriceIndex) {
-        const { min } = this.chart.xAxis[0].getExtremes()
-        const price = Number(res.lineBinaryOptionPriceIndex.price)
+      } else {
+        this.$emit('pushData', res)
 
+        const { min } = this.chart.xAxis[0].getExtremes()
+        const price = Number(res.price)
         this.chart.yAxis[0].plotLinesAndBands[0].options.value = price
 
         this.countUp.update(price)
         this.countUp.isUp = this.countUp.endVal - this.countUp.startVal > 0
 
-        const resTime = res.lineBinaryOptionPriceIndex.time
-        const { orderPixels, finishPixels } = this.handleLinePixelsByTime(resTime)
-        this.orderTimeElement.style.transform = `translate(${orderPixels}px, 0px)`
-        this.finishTimeElement.style.transform = `translate(${finishPixels}px, 0px)`
-
-        this.rippleElement.style.right = this.chart.containerWidth - this.chart.xAxis[0].toPixels(resTime, true) - 20 + 'px'
+        const resTime = res.time
 
         const markElement = this.orderTimeElement.querySelector('.mask')
         const orderBoxElement = this.orderTimeElement.querySelector('.box')
         const finishBoxElement = this.finishTimeElement.querySelector('.box')
+
         if (resTime >= new Date(resTime).setSeconds(40)) {
           if (orderBoxElement.innerText !== '下一轮') {
             const yetTime = (new Date(resTime).setSeconds(60) - resTime) / 1000
             const finishCountUp = new CountUp(finishBoxElement, yetTime, 0, 0, yetTime, { useEasing: false, prefix: '00 ：' })
             finishCountUp.start()
+            orderBoxElement.innerText = '下一轮'
           }
           orderBoxElement.innerText = '下一轮'
         } else {
+          // orderBoxElement.innerText = orderBoxElement.innerText || '下一轮'
           finishBoxElement.innerText = ''
+
+          if (!orderBoxElement.innerText) this.initOrderLineByCountUp(resTime)
           if (orderBoxElement.innerText === '下一轮') {
             // this.orderBoxCountUp.reset()
             this.orderBoxCountUp = new CountUp(orderBoxElement, 40, 0, 0, 40, { useEasing: false, prefix: '00 ：' })
@@ -79,9 +85,17 @@ export default {
             const userOptions = { ...this.chart.annotations[0].userOptions }
             this.chart.annotations[0].remove()
             this.chart.addAnnotation(userOptions)
-            // this.chart.annotations[0] = new Annotations(Highcharts)
+
+            this.chart.tooltip.iscustom = true
+            const points = this.chart.series[0].points
+            this.chart.tooltip.refresh(points[points.length - 1])
+            setTimeout(() => {
+              this.chart.tooltip.hide()
+              this.chart.tooltip.iscustom = false
+            }, 2000)
           }
         }
+
         markElement.style.width = resTime >= new Date(resTime).setSeconds(40) ? '50vw' : 0
         this.lastPoint = {
           x: resTime,
@@ -89,19 +103,22 @@ export default {
           xAxis: 0,
           yAxis: 0
         }
-        this.chart.series[0].addPoint([resTime, price])
+        // console.log(new Date(resTime).getTime())
 
+        this.chart.series[0].addPoint([new Date(resTime).getTime(), price])
+        const { orderPixels, finishPixels } = this.handleLinePixelsByTime(resTime)
+        this.orderTimeElement.style.transform = `translate(${orderPixels + 5}px, 0px)`
+        this.finishTimeElement.style.transform = `translate(${finishPixels + 5}px, 0px)`
         // this.chart.addAnnotation({ labels: [{ point: { x: resTime, y: price }}] })
+        this.rippleElement.style.right = this.chart.containerWidth - this.chart.xAxis[0].toPixels(resTime, true) - 22 + 'px'
 
         const dataCout = this.chart.series[0].data.filter(item => item.x > min).length
 
         if (dataCout > 400 && this.isNoScroll) this.initxAxis()
-      } else {
-        // console.log(res)
       }
     }).then(websocket => {
-      websocket.send(`{"reqType":9,"param":{"id":1,"period":1,"optionType":1}}`)
-      websocket.send(`{"reqType":1,"param":{"assetCode":1,"optionType":1}}`)
+      // websocket.send(`{"reqType":9,"param":{"id":1,"period":1,"optionType":1}}`)
+      // websocket.send(`{"reqType":1,"param":{"assetCode":1,"optionType":1}}`)
     })
   },
   destroyed() {
@@ -109,7 +126,7 @@ export default {
   },
   methods: {
     handleLinePixelsByTime(time) {
-      const orderTime = new Date(time).setSeconds(40)
+      const orderTime = +bigRound(new Date(time).setSeconds(40), -2, 0)
       const finishTime = orderTime + 20000
       const orderPixels = this.chart.xAxis[0].toPixels(orderTime, true)
       const finishPixels = this.chart.xAxis[0].toPixels(finishTime, true)
@@ -117,7 +134,7 @@ export default {
     },
     initxAxis() {
       const dataArr = this.chart.series[0].data
-      this.chart.xAxis[0].update({ min: dataArr[dataArr.length - 200].x })
+      dataArr.length > 200 && this.chart.xAxis[0].update({ min: dataArr[dataArr.length - 200].x })
     },
     initCharts(dataArr) {
       Highcharts.setOptions({
@@ -134,9 +151,6 @@ export default {
         title: {
           text: ''
         },
-        animation: {
-          duration: 1000
-        },
         chart: {
           className: 'myChart',
           marginRight: 10,
@@ -150,8 +164,11 @@ export default {
           // animation: Fl.animation,
           resetZoomButton: {
             position: {
-              align: 'left', // by default
-              x: 10
+              align: 'right', // by default
+              x: -40
+            },
+            theme: {
+              fill: 'rgba(255,255,255,0.5)'
             }
           },
           events: {
@@ -177,7 +194,8 @@ export default {
           }
         },
         annotations: [{
-          points: []
+          points: [],
+          draggable: false
         }],
         credits: {
           enabled: !1
@@ -198,6 +216,10 @@ export default {
             },
             marker: {
               enabled: !1
+            },
+            animation: {
+              duration: 1000,
+              easing: 'easeOutBounce'
             }
           },
           cursor: 'pointer'
@@ -209,11 +231,11 @@ export default {
           useHTML: !0,
           xDateFormat: '%H:%M:%S',
           backgroundColor: 'rgba(79,89,109,0.8)',
-          formatter: function(a, b) {
-            return `<div>
-              <p style="color:#fff; margin-bottom:5px;"><span style="color:#A8ACBB; margin-right:5px;">：${this.x}</span></p>
-              <p style="color:#fff; margin-bottom:0px;"><span style="color:#A8ACBB;margin-right:5px;">${this.y}</p>
-              </div>`
+          formatter: function(instance) {
+            return !instance.iscustom ? `<div>
+              <p style="color:#fff; margin-bottom:5px;"><span style="color:#A8ACBB; margin-right:5px;">时间：${parseTime(this.x)}</span></p>
+              <p style="color:#fff; margin-bottom:0px;"><span style="color:#A8ACBB;margin-right:5px;">价格：${bigRound(this.y, 4)}</p>
+              </div>` : `<h2 style="color:green" ><span style="font-size:14px;color:#999">亏损：</span>+1111</h2>`
           },
           borderColor: 'transparent',
           borderRadius: 8
@@ -387,13 +409,14 @@ export default {
       })
     },
     creatTwoLineByTime(timeStamp) {
+      // <svg-icon icon-class="" />
       const { orderPixels, finishPixels } = this.handleLinePixelsByTime(timeStamp)
       this.chart.renderer.label(`<div id="orderTime" class="time-line white  opacity" style="transform: translate(${orderPixels}px, 0px);">
           <div class="time-line-main">
             <div class="box"></div>
             <div class="time-lineL" />
             <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-flag" />
+              <use xlink:href="#icon-qizhi" />
             </svg>
             <div class="mask" style="width:0" />
           </div>
@@ -404,7 +427,7 @@ export default {
             <div class="box" style="background:none;color:red"></div>
             <div class="time-lineL yellow" />
             <svg class="icon" aria-hidden="true" width="20px">
-              <use xlink:href="#icon-user" />
+              <use xlink:href="#icon-qizhi_hongse" />
             </svg></div>
         </div>`, 0, 0, 'rect', 0, 0, true).add()
     },
@@ -418,10 +441,23 @@ export default {
       this.orderBoxCountUp.start()
     },
     handleScroll(e) {
+      if (Math.ceil(this.chart.xAxis[0].tickInterval) <= 2000) return
       const { min, max } = this.chart.xAxis[0].getExtremes()
+
       this.chart.xAxis[0].update({ min: Math.min(min - 60 * e.deltaY, max) })
       this.isNoScroll && this.chart.showResetZoom()
       this.isNoScroll = false
+      // clearTimeout(this.timer)
+      // this.timer = setTimeout(() => {
+      //   const tickTime = ((max - min) / 60000).toFixed(1)
+      //   console.log(tickTime)
+      //   if (+tickTime > 24 * 60 * 6) this.$emit('handleTabClick', 6)
+      //   else if (+tickTime > 20 * 60) this.$emit('handleTabClick', 5)
+      //   else if (+tickTime > 160) this.$emit('handleTabClick', 4)
+      //   else if (+tickTime > 26) this.$emit('handleTabClick', 3)
+      //   else if (+tickTime > 13) this.$emit('handleTabClick', 2)
+      //   else if (+tickTime > 4) this.$emit('handleTabClick', 1)
+      // }, 100)
     },
     activeHover(stateName) {
       const element = document.querySelector(`#plotline-${stateName}`)
@@ -434,24 +470,45 @@ export default {
       element.style.display = 'none'
     },
     addLabels(color, value = 1) {
+      const obj = {
+        green: {
+          borderColor: 'rgba(42, 172, 62, 0.8)',
+          backgroundColor: 'rgba(42, 172, 62, 0.6)'
+        },
+        red: {
+          borderColor: 'rgba(232, 79, 67, 0.8)',
+          backgroundColor: 'rgba(232, 79, 67, 0.6)'
+        }
+      }
       this.chart.annotations[0].initLabel({
         point: this.lastPoint,
-        // text: '1',
-        // shape: 'circle',
-        shape: 'connector',
-        backgroundColor: 'white',
-        useHTML: true,
-        formatter() {
-          return `
-            <div class="annotations-box ${color}">
-              <svg class="icon" aria-hidden="true" width="10px" height="10px">
-                <use xlink:href="#icon-time" />
-              </svg>
-              <span>${value}</span>
-            </div>
-          `
-        }
+        text: value + ' ' + this.$store.state.activeShareAccount.currency,
+        borderRadius: 6,
+        shape: 'rect',
+        y: -6,
+        allowOverlap: true,
+        ...obj[color]
+        // className: 'annotations-box'
       })
+      // this.chart.annotations[0].initLabel({
+      //   point: this.lastPoint,
+      //   // text: '1',
+      //   // shape: 'circle',
+      //   shape: 'diamond',
+      //   backgroundColor: 'white',
+      //   useHTML: true,
+      //   allowOverlap: true,
+      //   formatter() {
+      //     return `
+      //       <div class="annotations-box ${color}">
+      //         <svg class="icon" aria-hidden="true" width="20px">
+      //           <use xlink:href="#icon-user" />
+      //         </svg>
+      //         <span>${value}</span>
+      //       </div>
+      //     `
+      //   }
+      // })
       this.chart.annotations[0].initShape({
         fill: 'none',
         stroke: color,
@@ -464,6 +521,20 @@ export default {
           xAxis: 0,
           yAxis: 0
         }] })
+
+      this.chart.annotations[0].initLabel({
+        point: this.lastPoint,
+        text: 'aaaa',
+        borderRadius: 6,
+        shape: 'rect',
+        y: -6,
+        allowOverlap: true,
+        ...obj[color]
+        // className: 'annotations-box'
+      })
+    },
+    initChartsByReqType(reqType) {
+      this.websockets[0].send(`{"reqType": 1, "args":["${+reqType + 1}","BTCUSD"]}`)
     }
   }
 }
@@ -546,7 +617,7 @@ export default {
     z-index: 9;
     height: calc(100vh - 150px);
     // height: 500;
-    transition: transform .5s linear;
+    transition: transform .8s ease;
     will-change: transform, opacity;
     pointer-events: none;
     &.yellow{
@@ -641,6 +712,7 @@ export default {
     font-size: 12px;
     color: #fff;
     padding: 0 8px 0 6px;
+    overflow: hidden;
     &.green{
       background: rgba(42, 172, 62, 0.6)
     }

@@ -16,7 +16,7 @@
           <p class="text-nowrap">{{ column.label }}</p>
         </template>
         <template slot-scope="scope">
-          <span>{{ scope.row[item.prop] }}</span>
+          <span>{{ scope.row[item.prop] | filterColumnValue(item.handleValue) }}</span>
           <!-- <component :is="column.component" v-if="column.component" :data="[scope.row,column,$attrs.data]" />
           <span
             v-else-if="column.handleValue"
@@ -37,10 +37,10 @@
           >{{ scope.row[column.prop] }}</span> -->
         </template>
       </el-table-column>
-      <el-table-column v-if="!hasHandlerDom">
-        <!-- <template slot="header">
-          <p class="text-nowrap">{{ $t(item.transitionPath) }}</p>
-        </template> -->
+      <el-table-column v-if="lastColumnConfig" v-bind="$attrs">
+        <template slot="header">
+          <p class="text-nowrap" :style="{textAlign:lastColumnConfig.headerAlign||'left'}">{{ lastColumnConfig.headerLabel }}</p>
+        </template>
         <template slot-scope=" { row }">
           <slot name="handlerDom" :data="row" />
         </template>
@@ -119,6 +119,11 @@
 <script>
 // import units from '@/config/tools'
 export default {
+  filters: {
+    filterColumnValue(value, callback) {
+      return callback && callback(value) || value
+    }
+  },
   // filters: {
   //   handler(row, value, handleValue) {
   //     const arr = value.split('.')
@@ -138,9 +143,9 @@ export default {
       type: Array,
       default: () => []
     },
-    hasHandlerDom: {
-      type: Boolean,
-      default: false
+    lastColumnConfig: {
+      type: Object,
+      default: () => {}
     }
   },
   data(vm) {

@@ -3,7 +3,7 @@ import store from './store'
 // import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
-import { getUser } from '@/utils/auth' // get token from cookie
+import { getUser, removeUser } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
@@ -25,8 +25,18 @@ router.beforeEach(async(to, from, next) => {
       next({ path: '/user/index' })
       NProgress.done()
     } else {
-      if (!store.state.userData)store.commit('SET_USERDATA', JSON.parse(user))
-      next()
+      if (!store.state.userData) {
+        const userData = JSON.parse(user)
+        store.commit('SET_USERDATA', userData)
+        store.dispatch('getShareAccountList', userData.id).then(res => next())
+        // const res = await getShareAccountList(userData.id).catch(res => removeUser())
+        // userData.mapShareAccount = res.data
+      } else {
+        next()
+      }
+
+      // if (!store.state.userData)store.commit('SET_USERDATA', JSON.parse(user))
+
       // determine whether the user has obtained his permission roles through getInfo
       // const hasRoles = store.getters.roles && store.getters.roles.length > 0
       // if (hasRoles) {

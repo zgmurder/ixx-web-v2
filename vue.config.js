@@ -9,33 +9,50 @@ module.exports = {
   css: {
     loaderOptions: { sass: { data: `@import "@/styles/variables.scss";` }}
   },
-  // devServer: {
-  //   proxy: {
-  //     'wss://fota.com/apioption/wsoption': { // 这里最好有一个 /
-  //       target: 'wss://ws.ixex.io/v1/market/tickers', // 后台接口域名
-  //       ws: true, // 如果要代理 websockets，配置这个参数
-  //       changeOrigin: true // 是否跨域
-  //       // pathRewrite: {
-  //       //   ['^' + 'wss://fota.com/']: ''
-  //       // }
-  //       // headers: {
-  //       //   'Accept-Encoding': 'gzip, deflate, br',
-  //       //   'Accept-Language': 'zh-CN,zh;q=0.9',
-  //       //   'Cache-Control': 'no-cache',
-  //       //   'Connection': 'Upgrade',
-  //       //   'Cookie': '__cfduid=dce877908d48e3b6d97831b6e2bf6635c1566884923; _ga=GA1.2.2012425230.1566885574; Hm_lvt_fca65bea641967eba58b189428d9fa15=1566884926,1566955312,1567042203,1567674273; SESSION=ZjYyNDlkZWItYWM3ZC00MzM5LTk4MDItMWRkNTAyMTk4YzNl; Hm_lpvt_fca65bea641967eba58b189428d9fa15=1567738820',
-  //       //   'Host': 'fota.com',
-  //       //   'Origin': 'https://fota.com',
-  //       //   'Pragma': 'no-cache',
-  //       //   'Sec-WebSocket-Extensions': 'permessage-deflate; client_max_window_bits',
-  //       //   'Sec-WebSocket-Key': 'Ju2O8xYprshHLUN4iU5uwQ==',
-  //       //   'Sec-WebSocket-Version': '13',
-  //       //   'Upgrade': 'websocket',
-  //       //   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.87 Safari/537.36'
-  //       // }
-  //     }
-  //   }
-  // },
+  devServer: {
+    port: 8081,
+    open: true,
+    overlay: {
+      warnings: false,
+      errors: true
+    },
+    proxy: {
+      // change xxx-api/login => mock/login
+      // detail: https://cli.vuejs.org/config/#devserver-proxy
+      'https://q.ixex.io/': {
+        target: `https://q.ixex.io/`,
+        changeOrigin: true,
+        pathRewrite: {
+          ['^' + 'https://q.ixex.io/']: ''
+        }
+      }
+    }
+    // proxy: {
+    //   'wss://fota.com/apioption/wsoption': { // 这里最好有一个 /
+    //     target: 'wss://ws.ixex.io/v1/market/tickers', // 后台接口域名
+    //     ws: true, // 如果要代理 websockets，配置这个参数
+    //     changeOrigin: true // 是否跨域
+    //     // pathRewrite: {
+    //     //   ['^' + 'wss://fota.com/']: ''
+    //     // }
+    //     // headers: {
+    //     //   'Accept-Encoding': 'gzip, deflate, br',
+    //     //   'Accept-Language': 'zh-CN,zh;q=0.9',
+    //     //   'Cache-Control': 'no-cache',
+    //     //   'Connection': 'Upgrade',
+    //     //   'Cookie': '__cfduid=dce877908d48e3b6d97831b6e2bf6635c1566884923; _ga=GA1.2.2012425230.1566885574; Hm_lvt_fca65bea641967eba58b189428d9fa15=1566884926,1566955312,1567042203,1567674273; SESSION=ZjYyNDlkZWItYWM3ZC00MzM5LTk4MDItMWRkNTAyMTk4YzNl; Hm_lpvt_fca65bea641967eba58b189428d9fa15=1567738820',
+    //     //   'Host': 'fota.com',
+    //     //   'Origin': 'https://fota.com',
+    //     //   'Pragma': 'no-cache',
+    //     //   'Sec-WebSocket-Extensions': 'permessage-deflate; client_max_window_bits',
+    //     //   'Sec-WebSocket-Key': 'Ju2O8xYprshHLUN4iU5uwQ==',
+    //     //   'Sec-WebSocket-Version': '13',
+    //     //   'Upgrade': 'websocket',
+    //     //   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.87 Safari/537.36'
+    //     // }
+    //   }
+    // }
+  },
   chainWebpack(config) {
     config.plugins.delete('preload') // TODO: need test
     config.plugins.delete('prefetch') // TODO: need test

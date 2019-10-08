@@ -2,9 +2,10 @@
   <div class="user-center">
     <div class="container user-center-container" flex="main:justify box:mean">
       <div class="container-left">
-        <ul class="menu-list">
+        <navMenu v-model="activeKey" :map-menu-list="mapMenuList" @change="handleClick" />
+        <!-- <ul class="menu-list">
           <li v-for="(value,key) in mapMenuList" :key="key" :class="{active:activeKey === key}" @click="handleClick(key)">{{ $tR(`mapMenuList.${key}`) }}</li>
-        </ul>
+        </ul> -->
       </div>
       <div class="container-right">
         <keep-alive>
@@ -16,11 +17,12 @@
 </template>
 <script>
 import customTable from '@/components/customTable'
-
+import navMenu from '@/components/nav-menu'
 export default {
   name: 'UserCenter',
   components: {
-    customTable
+    customTable,
+    navMenu
   },
   data() {
     return {
@@ -38,15 +40,18 @@ export default {
       }))
     },
     mapMenuList() {
-      return this.chineseLangData.mapMenuList
+      return Object.keys(this.chineseLangData.mapMenuList).map(key => ({
+        label: this.$tR(`mapMenuList.${key}`),
+        key
+      }))
     }
   },
   created() {
-    this.handleClick('person-info')
+    this.activeKey = 'person-info'
   },
   methods: {
     handleClick(key) {
-      this.componentId = () => import(`./components/${key}`)
+      this.componentId = () => import(`./components/index/${key}`)
       this.activeKey = key
     }
   }
@@ -66,29 +71,6 @@ export default {
         flex: none;
         width: 210px;
         margin-right: 40px;
-        &>.menu-list{
-          // border: 1px solid $border-color-lighter;
-          background: #fff;
-          &>li{
-            line-height: 40px;
-            height: 40px;
-            border: 1px solid $border-color-lighter;
-            text-align: center;
-            color: #999;
-            cursor: pointer;
-            &:not(:first-child){
-              border-top: none;
-            }
-            &:hover{
-              color: #333;
-              background: #fafafa
-            }
-            &.active{
-              box-shadow: inset 3px 0 0 0 $--color-primary;
-              background: $--background-active-bg;
-            }
-          }
-        }
       }
       &>.container-right{
         background: #fff;

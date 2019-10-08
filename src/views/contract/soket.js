@@ -9,7 +9,7 @@ export default {
   created() {
     getFutureDictionaryList().then(res => {
       this.dataDictionary = res.data
-      this.openWebSocket('market/tickers', this.handleTickers).then(() => this.$emit('baseDataLoaded'))
+      this.openWebSocket('/market/tickers', this.handleTickers).then(() => this.$emit('baseDataLoaded'))
     })
   },
   computed: {

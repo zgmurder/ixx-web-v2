@@ -20,6 +20,7 @@ export default {
   methods: {
     handleChange(command) {
       this.$i18n.locale = this.selectKey
+      localStorage.setItem('locale', this.selectKey)
     }
   }
 }

@@ -1,14 +1,14 @@
 
 import request from '@/utils/request'
 const I = process.env.VUE_APP_BASE_API_I
-const Q = process.env.VUE_APP_BASE_API_Q
+// const Q = process.env.VUE_APP_BASE_API_Q
 export const getFutureDictionaryList = query => request({
-  url: I + 'contract/symbol/list',
+  url: I + '/contract/symbol/list',
   method: 'post',
   params: query
 })
 export const getFutureListByKey = (key, query) => request({
-  url: `${Q}v1/deal/FUTURE_${key}USD`,
+  url: `https://q.ixex.io/v1/deal/FUTURE_${key}USD`,
   method: 'get',
   params: query
 })

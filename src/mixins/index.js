@@ -1,4 +1,5 @@
 import { capitalizeLower, parseTime } from '@/utils'
+import { bigRound } from '@/utils/handleNum'
 
 export default {
   computed: {
@@ -18,6 +19,7 @@ export default {
     }
   },
   filters: {
-    parseTime
+    parseTime,
+    bigRound
   }
 }

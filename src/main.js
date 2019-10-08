@@ -33,7 +33,7 @@ import zhCN from './lang/zh-CN'
 import zhHK from './lang/zh-HK'
 
 const i18n = new VueI18n({
-  locale: 'zh-CN', // 语言标识
+  locale: localStorage.getItem('locale') || 'zh-CN', // 语言标识
   silentFallbackWarn: true,
   messages: {
     en, ko,
