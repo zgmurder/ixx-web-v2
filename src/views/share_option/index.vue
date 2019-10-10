@@ -22,7 +22,7 @@
       <ul class="time-tab" flex="main:justify cross:center box:mean">
         <li v-for="(item,index) in mapTabTimes" :key="index" :class="{active:+activeTime === index}" @click="handleTabClick(index)">{{ item }}</li>
       </ul>
-      <selectLang style="position:absolute;top:20px;left:30px" />
+      <customSelect v-model="activeProduct" size="small" label="symbol" :map-data="mapProduct" style="position:absolute;top:20px;left:30px;z-index:14" />
     </div>
     <!-- <charts-dynamic-update class="content" /> -->
     <div class="right-side-bar">
@@ -71,14 +71,14 @@
 </template>
 <script>
 import chartsDynamicUpdate from './componets/dynamic-update'
-import selectLang from '@/components/selectLang'
+import customSelect from '@/components/customSelect'
 import websoketMixin from '@/mixins/soket'
-import { createOrder, getHistory } from '@/api/share_option'
+import { createOrder, getHistory, getProduct } from '@/api/share_option'
 export default {
   name: 'ShareOption',
   components: {
     chartsDynamicUpdate,
-    selectLang
+    customSelect
   },
   mixins: [websoketMixin],
   data() {
@@ -87,9 +87,11 @@ export default {
       activeName: '',
       temComponet: null,
       historyData: null,
+      mapProduct: [],
 
       marketData: null,
       activeTime: 0,
+      activeProduct: null,
 
       orderCount: 1
     }
@@ -123,6 +125,10 @@ export default {
     }
   },
   created() {
+    getProduct().then(res => {
+      this.mapProduct = res.data
+      this.activeProduct = this.mapProduct[0]
+    })
     // this.userData && getShareAccountList().then(res => (this.userData.mapShareAccount = res.data))
   },
   methods: {
@@ -132,12 +138,9 @@ export default {
       this.activeName = name
       this.temComponet = require(`./componets/${name}.vue`).default
       if (this.temComponet.name === 'ShareHistory') {
-        const params = {
-          user_id: this.userData.id,
-          currency: this.activeShareAccount.currency
-        }
+        const params = { user_id: this.userData.id, currency: this.activeShareAccount.currency }
         getHistory(params).then(res => {
-          console.log(res)
+          this.historyData = res.data
         })
       }
     },

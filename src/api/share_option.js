@@ -31,3 +31,7 @@ export const getHistory = user_id => request({
   method: 'post',
   data: { user_id }
 })
+export const getProduct = () => request({
+  url: '/opt/account/product',
+  method: 'post'
+})

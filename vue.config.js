@@ -15,17 +15,6 @@ module.exports = {
     overlay: {
       warnings: false,
       errors: true
-    },
-    proxy: {
-      // change xxx-api/login => mock/login
-      // detail: https://cli.vuejs.org/config/#devserver-proxy
-      'https://q.ixex.io/': {
-        target: `https://q.ixex.io/`,
-        changeOrigin: true,
-        pathRewrite: {
-          ['^' + 'https://q.ixex.io/']: ''
-        }
-      }
     }
     // proxy: {
     //   'wss://fota.com/apioption/wsoption': { // 这里最好有一个 /

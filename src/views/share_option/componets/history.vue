@@ -1,9 +1,9 @@
 <template>
   <div class="history">
     <ul class="content">
-      <li v-for="index in 6" :key="index">
+      <li v-for="(item,index) in data" :key="index">
         <div flex="main:justify cross:center">
-          <span class="rise_or_fall">BTC/USD<i class="iconfont icon-arrow1-down red" /></span>
+          <span class="rise_or_fall">{{ item.symbol }}<i class="iconfont icon-arrow1-down red" /></span>
           <span class="share-text-info">2019.8.27 22:43:09</span>
         </div>
         <div flex="main:justify cross:center">
@@ -18,7 +18,16 @@
 </template>
 <script>
 export default {
-  name: 'ShareHistory'
+  name: 'ShareHistory',
+  props: {
+    data: {
+      type: Object,
+      default: () => []
+    }
+  },
+  created() {
+    console.log(this.data)
+  }
 }
 </script>
 <style lang="scss" scoped>
