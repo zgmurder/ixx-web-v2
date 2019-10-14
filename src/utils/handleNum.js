@@ -19,3 +19,5 @@ export const bigTimes = (dataArr, fixed) => handler(dataArr, fixed, 'times')
 
 export const bigPlus = (dataArr, fixed) => handler(dataArr, fixed, 'plus')
 
+export const bigMinus = (dataArr, fixed) => handler(dataArr, fixed, 'minus')
+

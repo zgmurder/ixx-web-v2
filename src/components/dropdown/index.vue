@@ -2,11 +2,12 @@
   <span class="drop-down-wrap">
     <slot />
     <ul class="menu-box" :style="{'min-width':menuMinWidth+'px'}">
-      <li v-for="(item,index) in menuOptions" :key="index" flex="main:justify" class="item" :class="{active:item.label === (active||{}).label}" @click="handle(item)">
+      <li v-for="(item,index) in menuOptions" :key="index" flex="main:justify cross:center" class="item" :class="{active:index === activeIndex}" @click="handle(item,index)">
         <el-tooltip :disabled="typeof item.describe !== 'object'" :content="item.label" placement="left" effect="light">
-          <span class="text-nowrap"><svg-icon v-if="item.icon" :icon-class="item.icon" /> {{ item.label }}</span>
+          <span class="text-nowrap"> <slot name="item-prefix" :data="item" /> {{ handleLabel(item) }}</span>
         </el-tooltip>
-        <span v-if="typeof item.describe === 'object'" @click="item.describe.click">{{ item.describe.label }}</span>
+        <slot name="item-suffix" :data="item" />
+        <!-- <span v-if="typeof item.describe === 'object'" @click="item.describe.click">{{ item.describe.label }}</span> -->
       </li>
     </ul>
   </span>
@@ -31,10 +32,21 @@ export default {
       default: () => {}
     }
   },
+  data() {
+    return {
+      activeIndex: 0
+    }
+  },
   methods: {
-    handle(item) {
+    handle(item, index) {
       item.click && item.click(item) || this.$router.push({ path: item.path })
+      this.activeIndex = index
       this.$emit('change', item)
+    },
+    handleLabel(item) {
+      if (this.$attrs['handle-label']) return this.$attrs['handle-label'](item)
+      else if (this.$attrs.label) return item[this.$attrs.label]
+      else return item
     }
   }
 }

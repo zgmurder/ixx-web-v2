@@ -16,7 +16,7 @@
 export default {
   model: {
     prop: 'selectValue',
-    event: 'handleCommand'
+    event: 'change'
   },
   props: {
     mapData: {
@@ -39,12 +39,14 @@ export default {
       return this.mapData.find(item => item.value === this.selectKey)
     }
   },
-  created() {
-    console.log(this.selectKey)
+  watch: {
+    selectValue(newValue) {
+      this.selectKey = newValue
+    }
   },
   methods: {
-    handleChange(command) {
-      console.log(command)
+    handleChange(item) {
+      this.$emit('change', item)
 
       // this.$i18n.locale = this.selectKey
     }

@@ -140,7 +140,16 @@ export function parseTime(time, cFormat) {
 //   }
 //   return s
 // }
-
+export const deepCopy = obj => {
+  if (typeof obj !== 'object') return
+  var newObj = obj instanceof Array ? [] : {}
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      newObj[key] = typeof obj[key] === 'object' ? deepCopy(obj[key]) : obj[key]
+    }
+  }
+  return newObj
+}
 // /**
 //  * @param {Array} actual
 //  * @returns {Array}
@@ -263,7 +272,7 @@ export function parseTime(time, cFormat) {
 //  */
 export function debounce(func, wait, immediate) {
   let timeout, args, context, timestamp, result
-
+  args = [...arguments]
   const later = function() {
     // 据上一次触发时间间隔
     const last = +new Date() - timestamp
@@ -286,6 +295,7 @@ export function debounce(func, wait, immediate) {
     timestamp = +new Date()
     const callNow = immediate && !timeout
     // 如果延时不存在，重新设定延时
+
     if (!timeout) timeout = setTimeout(later, wait)
     if (callNow) {
       result = func.apply(context, args)

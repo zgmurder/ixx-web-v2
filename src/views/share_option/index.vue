@@ -3,7 +3,7 @@
     <div class="share-option-bg" />
 
     <div class="left-side-bar">
-      <div v-for="(value,key) in mapComponentNames" :key="key" :class="{active:drawerIsOpen && activeName === key}" @click="handleClickTab(key)">
+      <div v-for="(value,key) in mapComponentNames" :key="key" :class="{active:drawerIsOpen && activeName === key}" @click="handleClickleftTab(key)">
         <svg-icon :icon-class="mapIcons[key]" style="font-size:24px" />
         <p>{{ value }}</p>
       </div>
@@ -13,16 +13,20 @@
         <div slot="title" flex="cross:center main:justify" style="height:40px">
           <p>最新价格<span class="share-text-info" style="font-size:12px;">(USDT/USD)</span></p>
         </div>
-        <component :is="temComponet" :data="temComponet.name=== 'ShareHistory'?marketData:historyData" />
+        <component :is="temComponet" :data="temComponet.name=== 'ShareHistory'?historyData:marketData" />
         <i class="el-icon-close" @click="drawerIsOpen = false" />
       </div>
     </transition>
     <div class="content" flex="dir:bottom">
-      <charts-dynamic-update ref="dynamic-charts" style="width:100%" class="dynamic-update" @handleTabClick="handleTabClick" @pushData="data=>(marketData = data)" />
-      <ul class="time-tab" flex="main:justify cross:center box:mean">
-        <li v-for="(item,index) in mapTabTimes" :key="index" :class="{active:+activeTime === index}" @click="handleTabClick(index)">{{ item }}</li>
+      <charts-dynamic-update ref="dynamic-charts" style="width:100%" :income-obj="incomeObj" class="dynamic-update" @loadingData="showLoadBox" @handleTimeTabClick="handleTimeTabClick" @settleOrder="settleOrder" @pushData="data=>(marketData = data)" />
+      <ul v-if="activeCurrencyProduct" class="time-tab" flex="main:justify cross:center box:mean">
+        <li v-for="(item,index) in activeCurrencyProduct.periodList" :key="index" :class="{active:+activePeriod === +item.period}" @click="handleTimeTabClick(item.period)">{{ mapTabTimes[item.period] }}</li>
       </ul>
-      <customSelect v-model="activeProduct" size="small" label="symbol" :map-data="mapProduct" style="position:absolute;top:20px;left:30px;z-index:14" />
+      <div style="position:absolute;top:20px;left:30px;z-index:14">
+        <customSelect v-model="activeCurrencyProduct" size="small" label="symbol" :map-data="mapProduct" />
+        <!-- <customSelect v-if="activeCurrencyProduct" v-model="activePeriodProduct" size="small" label="period" :map-data="activeCurrencyProduct.periodList" /> -->
+      </div>
+      <div v-if="!!loadingBoxWidth" v-loading="!!loadingBoxWidth" element-loading-background="rgba(0, 0, 0, 0.1)" style="position:absolute;top:10px;bottom:76px;left:30px;z-index:14" :style="{width:loadingBoxWidth+'px'}" />
     </div>
     <!-- <charts-dynamic-update class="content" /> -->
     <div class="right-side-bar">
@@ -36,9 +40,10 @@
       </div>
       <div class="content-center hover-scale" flex="dir:top main:justify cross:center box:mean">
         <div flex="main:center cross:center" class="center-info">
-          <div v-if="marketData" class="share-text-info">
-            <span>{{ marketData.BullishOdds|bigRound(2) }}%</span>
-            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*marketData.BullishOdds|bigRound(8) }}</p>
+          <div v-if="activeShareAccount" class="share-text-info">
+            <!-- <span>{{ activeProductRate.up_rate|bigRound(2) }}%</span> -->
+            <span>{{ activeShareAccount.up_rate|bigRound(2) }}%</span>
+            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*(+activeShareAccount.up_rate)|bigRound(8) }}</p>
           </div>
         </div>
         <el-button class="center-btn success" :disabled="!$store.state.userData" type="success" @click="addLabels('green')" @mouseover.native="dynamicChart.activeHover('success')" @mouseout.native="dynamicChart.disableHover('success')">
@@ -50,20 +55,20 @@
           <svg-icon icon-class="share-down" style="font-size:40px" /> <h2 style="margin-top:5px">看跌</h2>
         </el-button>
         <div flex="main:center cross:center" class="center-info">
-          <div v-if="marketData" class="share-text-info">
-            <span>{{ marketData.BearishOdds|bigRound(2) }}%</span>
-            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*marketData.BearishOdds|bigRound(8) }}</p>
+          <div v-if="activeShareAccount" class="share-text-info">
+            <span>{{ activeShareAccount.down_rate|bigRound(2) }}%</span>
+            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*(+activeShareAccount.down_rate)|bigRound(8) }}</p>
           </div>
         </div>
       </div>
     </div>
     <div v-if="marketData" ref="square-container" class="square-container" flex="dir:top box:mean">
-      <div class="text">看涨 <br><span>{{ +marketData.Bullish*100 }}%</span></div>
+      <div class="text">看涨 <br><span>{{ +marketData.Bullish }}%</span></div>
       <div class="mark-box" flex="dir:top box:mean">
-        <div class="top" :style="{height:+marketData.Bullish*100+'%'}" />
+        <div class="top" :style="{height:+marketData.Bullish+'%'}" />
         <div class="bottom" />
       </div>
-      <div class="text"><span>{{ +marketData.Bearish*100 }}%</span><br>看跌 </div>
+      <div class="text"><span>{{ +marketData.Bearish }}%</span><br>看跌 </div>
     </div>
     <!-- <div class="test" style="margin-left:40px" />
     <div class="test" /> -->
@@ -74,6 +79,8 @@ import chartsDynamicUpdate from './componets/dynamic-update'
 import customSelect from '@/components/customSelect'
 import websoketMixin from '@/mixins/soket'
 import { createOrder, getHistory, getProduct } from '@/api/share_option'
+import { deepCopy } from '@/utils'
+import { bigMinus } from '@/utils/handleNum'
 export default {
   name: 'ShareOption',
   components: {
@@ -90,8 +97,12 @@ export default {
       mapProduct: [],
 
       marketData: null,
-      activeTime: 0,
-      activeProduct: null,
+      activePeriod: '',
+      activeCurrencyProduct: null,
+      activePeriodProduct: null,
+      incomeObj: {},
+
+      loadingBoxWidth: '',
 
       orderCount: 1
     }
@@ -122,27 +133,46 @@ export default {
     },
     activeShareAccount() {
       return this.$store.state.activeShareAccount
+    },
+    mapShareAccount() {
+      return this.$store.state.mapShareAccount
+    }
+  },
+  watch: {
+    activeCurrencyProduct: {
+      handler(product) {
+        this.activePeriodProduct = product.periodList[0]
+        this.activePeriod = this.activePeriodProduct.period
+        if (this.dynamicChart) {
+          this.dynamicChart.switchProduct(product.symbol)
+        }
+        this.$store.dispatch('getShareAccountList', { accountArr: this.activePeriodProduct.currencyList })
+      }
     }
   },
   created() {
     getProduct().then(res => {
       this.mapProduct = res.data
-      this.activeProduct = this.mapProduct[0]
+      this.activeCurrencyProduct = this.mapProduct[0]
     })
-    // this.userData && getShareAccountList().then(res => (this.userData.mapShareAccount = res.data))
   },
   methods: {
-    handleClickTab(name) {
+    handleClickleftTab(name) {
       if (this.activeName === name && this.drawerIsOpen) return
       this.drawerIsOpen = true
       this.activeName = name
       this.temComponet = require(`./componets/${name}.vue`).default
       if (this.temComponet.name === 'ShareHistory') {
-        const params = { user_id: this.userData.id, currency: this.activeShareAccount.currency }
-        getHistory(params).then(res => {
-          this.historyData = res.data
-        })
+        this.getHistory()
       }
+    },
+    getHistory() {
+      if (!this.userData) return
+      const params = { user_id: this.userData.id, currency: this.activeShareAccount.currency }
+      return getHistory(params).then(res => {
+        this.historyData = res.data.data
+        return Promise.resolve(res.data.data)
+      })
     },
     afterLeaveOrEnter(el) {
       this.$refs['square-container'].style.left = el.clientWidth + 75 + 'px'
@@ -150,15 +180,32 @@ export default {
     },
     addLabels(color) {
       const tradeType = color === 'green' ? 0 : 1
-      createOrder({ user_id: this.userData.id, symbol: 'BTCUSD', amount: this.orderCount, currency: this.activeShareAccount.currency, 'trade_type': tradeType, period: this.mapTabTimes[this.activeTime] }).then(res => {
-        return this.$store.dispatch('getShareAccountList')
+      createOrder({ user_id: this.userData.id, symbol: this.activeCurrencyProduct.symbol, amount: this.orderCount, currency: this.activeShareAccount.currency, 'trade_type': tradeType, period: this.activePeriod }).then(res => {
+        return this.$store.dispatch('getShareAccountList', { accountArr: this.activePeriodProduct.currencyList, isAssignment: true })
       }).then(res => {
-        this.dynamicChart.addLabels(color, this.orderCount)
+        this.dynamicChart.addLabels(color, this.orderCount, this.activeShareAccount.currency)
+        this.getHistory()
       })
     },
-    handleTabClick(index) {
-      this.activeTime = index
-      this.dynamicChart.initChartsByReqType(index)
+    handleTimeTabClick(period) {
+      this.activePeriod = period
+      this.dynamicChart.initChartsByReqType(+period)
+    },
+    settleOrder(callback) {
+      setTimeout(() => {
+        const mapShareAccount = deepCopy(this.mapShareAccount)
+        this.$store.dispatch('getShareAccountList', { accountArr: this.activePeriodProduct.currencyList, isAssignment: true }).then(dataArr => {
+          this.getHistory()
+          const incomeObj = dataArr.reduce((prev, curr, index) => {
+            prev[curr.currency] = bigMinus([curr.available, mapShareAccount[index].available], 4)
+            return prev
+          }, {})
+          this.userData && callback && callback(incomeObj)
+        })
+      }, 300)
+    },
+    showLoadBox(width) {
+      this.loadingBoxWidth = width
     }
   }
 }

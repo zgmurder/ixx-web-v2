@@ -137,6 +137,7 @@ export default {
       'property-manage': '资产管理',
       'capital-account': '资金账户',
       'deal-account': '交易账户',
+      'share-option': '期权账户',
       'address-manage': '地址管理'
     }
   },
@@ -148,6 +149,25 @@ export default {
       quota: '当前提币剩余额度',
       max_quota: '当前提币总额度',
       rates: ' 汇率对象'
+    }
+  },
+
+  shareOption: {
+    mapShareColumns: {
+      currency: ' 支付货币',
+      symbol: ' 产品类型',
+      period: '周期',
+      trade_type: '交易方向',
+      rate: ' 赔率',
+      amount: '下单金额',
+      income: '收益金额',
+      profile: '价值金额',
+      spot: '现货指数',
+      strike: '现货指数',
+      sett_price: '结算价格',
+      create_time: '下单时间',
+      sett_time: '结算时间',
+      state: '是否结算'
     }
   }
   // 'signup': '创建帐号',

@@ -8,7 +8,7 @@ export const getFutureDictionaryList = query => request({
   params: query
 })
 export const getFutureListByKey = (key, query) => request({
-  url: `https://q.ixex.io/v1/deal/FUTURE_${key}USD`,
+  url: `https://q.ixex.pro/v1/deal/FUTURE_${key}USD`,
   method: 'get',
   params: query
 })

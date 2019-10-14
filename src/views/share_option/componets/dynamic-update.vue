@@ -14,14 +14,18 @@ import Annotations from 'highcharts/modules/annotations.js'
 import websoketMixin from '@/mixins/soket'
 import CountUp from 'countup/dist/countUp.min'
 import { bigRound } from '@/utils/handleNum'
+import { debounce } from '@/utils'
 import { parseTime } from '@/utils'
 HighMap(Highcharts)
 Annotations(Highcharts)
 export default {
-  // props: {
-  //   'isReflow': Boolean
-  // },
   mixins: [websoketMixin],
+  props: {
+    incomeObj: {
+      type: Object,
+      default: () => {}
+    }
+  },
   data() {
     return {
       isLoading: false,
@@ -31,12 +35,14 @@ export default {
   mounted() {
     this.isLoading = true
     // wss://fota.com/apioption/wsoption?brokerId=1
-    this.openWebSocket('ws://192.168.2.102:2032/v2', res => {
+    this.openWebSocket('ws://ws.ixex.pro:2032/v2', res => {
       if (res.spotIndexDTOList) {
+        if (!res.spotIndexDTOList.length) return
         const data = res.spotIndexDTOList.map((dataString, index) => {
           const item = JSON.parse(dataString)
           return { x: item.time, y: Number(item.price) }
         })
+        if (!data.length) return
         this.initCharts(data)
         this.handlePlotLinesByCountUp(data)
         this.creatTwoLineByTime(res.timeStamp)
@@ -46,12 +52,12 @@ export default {
         this.rippleElement = document.querySelector('#ripple')
 
         // this.initOrderLineByCountUp(res.timeStamp)
-        this.chart.pointer.onContainerMouseWheel = this.handleScroll
+        this.chart.pointer.onContainerMouseWheel = debounce(this.handleScroll, 100, true)
 
         this.isLoading = false
       } else {
         this.$emit('pushData', res)
-
+        if (!this.chart) return
         const { min } = this.chart.xAxis[0].getExtremes()
         const price = Number(res.price)
         this.chart.yAxis[0].plotLinesAndBands[0].options.value = price
@@ -86,15 +92,21 @@ export default {
             this.chart.annotations[0].remove()
             this.chart.addAnnotation(userOptions)
 
-            this.chart.tooltip.iscustom = true
             const points = this.chart.series[0].points
-            this.chart.tooltip.refresh(points[points.length - 1])
-            setTimeout(() => {
-              this.chart.tooltip.hide()
-              this.chart.tooltip.iscustom = false
-            }, 2000)
+            this.$emit('settleOrder', incomeObj => {
+              this.chart.tooltip.iscustom = true
+              this.chart.tooltip.incomeObj = incomeObj
+              this.chart.tooltip.refresh(points[points.length - 1])
+              setTimeout(() => {
+                this.chart.tooltip.hide()
+                this.chart.tooltip.iscustom = false
+                this.chart.tooltip.incomeObj = {}
+              }, 2000)
+            })
           }
         }
+        const xData = this.chart.series[0].xData
+        this.isLoading = xData[xData.length - 5] === resTime
 
         markElement.style.width = resTime >= new Date(resTime).setSeconds(40) ? '50vw' : 0
         this.lastPoint = {
@@ -232,10 +244,11 @@ export default {
           xDateFormat: '%H:%M:%S',
           backgroundColor: 'rgba(79,89,109,0.8)',
           formatter: function(instance) {
+            const transformHtml = obj => Object.keys(obj).map(key => `<p style="color:#A8ACBB;">${key}：${+obj[key] >= 0 ? '+' : '-'}<span style="color:${+obj[key] >= 0 ? 'green' : 'red'}">${obj[key]}</span></p>`)
             return !instance.iscustom ? `<div>
               <p style="color:#fff; margin-bottom:5px;"><span style="color:#A8ACBB; margin-right:5px;">时间：${parseTime(this.x)}</span></p>
               <p style="color:#fff; margin-bottom:0px;"><span style="color:#A8ACBB;margin-right:5px;">价格：${bigRound(this.y, 4)}</p>
-              </div>` : `<h2 style="color:green" ><span style="font-size:14px;color:#999">亏损：</span>+1111</h2>`
+              </div>` : transformHtml(instance.incomeObj || {})
           },
           borderColor: 'transparent',
           borderRadius: 8
@@ -250,7 +263,7 @@ export default {
           type: 'datetime',
           lineWidth: 0,
           tickColor: 'transparent',
-          tickPixelInterval: 200,
+          tickPixelInterval: 120,
           // tickInterval: 60 * 1000,
           title: null,
           // min: dataArr[dataArr.length - 43].x,
@@ -309,6 +322,7 @@ export default {
           //     color: 'rgba(167, 174, 196, 0.5)'
           //   }
           // },
+          maxPadding: 0.2,
           gridLineColor: 'rgba(167, 174, 196, 0.1)',
           gridLineWidth: 2,
           plotLines: [{
@@ -440,24 +454,45 @@ export default {
       })
       this.orderBoxCountUp.start()
     },
-    handleScroll(e) {
-      if (Math.ceil(this.chart.xAxis[0].tickInterval) <= 2000) return
-      const { min, max } = this.chart.xAxis[0].getExtremes()
+    handleScroll(e, n) {
+      const xAxis = this.chart.xAxis[0]
+      // if (Math.ceil(xAxis.tickInterval) <= 2000) return
+      const { min, max, dataMin } = xAxis.getExtremes()
+      const rangeArr = [[1, 5], [5, 10], [10, 60], [60, 180], [180, 1440], [1440, 10080], [10080, 20000]]
+      const newMin = min - 60 * rangeArr[this.websocketArgs[0] - 1][1] * e.deltaY
 
-      this.chart.xAxis[0].update({ min: Math.min(min - 60 * e.deltaY, max) })
+      if (newMin > max - 60000) return
+      if (rangeArr[this.websocketArgs[0] - 1][0] >= 180 && e.deltaY < 0 && newMin > max - 60000 * rangeArr[this.websocketArgs[0] - 1][0]) return
+      xAxis.update({ min: Math.min(newMin, max) })
       this.isNoScroll && this.chart.showResetZoom()
       this.isNoScroll = false
-      // clearTimeout(this.timer)
-      // this.timer = setTimeout(() => {
-      //   const tickTime = ((max - min) / 60000).toFixed(1)
-      //   console.log(tickTime)
-      //   if (+tickTime > 24 * 60 * 6) this.$emit('handleTabClick', 6)
-      //   else if (+tickTime > 20 * 60) this.$emit('handleTabClick', 5)
-      //   else if (+tickTime > 160) this.$emit('handleTabClick', 4)
-      //   else if (+tickTime > 26) this.$emit('handleTabClick', 3)
-      //   else if (+tickTime > 13) this.$emit('handleTabClick', 2)
-      //   else if (+tickTime > 4) this.$emit('handleTabClick', 1)
-      // }, 100)
+      const tickTime = +((max - min) / 60000).toFixed(0)
+      if (xAxis.toPixels(dataMin) > 30) this.$emit('loadingData', xAxis.toPixels(dataMin) - 30)
+
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        if (xAxis.toPixels(dataMin) > 120) {
+          // this.$emit('loadingData', xAxis.toPixels(dataMin) - 30)
+          setTimeout(() => {
+            this.websockets[0].send(`{"reqType": 1, "args":${JSON.stringify([8, this.websocketArgs[1], newMin, this.websocketArgs[0]])}}`)
+            this.$emit('loadingData', 0)
+          }, 500)
+        }
+        const index = rangeArr.findIndex(item => tickTime >= item[0] && tickTime < item[1])
+        if (+this.websocketArgs[0] === index) {
+          this.$emit('handleTimeTabClick', this.websocketArgs[0])
+          this.$emit('loadingData', 0)
+        } else {
+          console.log(this.chart.xAxis[0])
+        }
+      }, 1000)
+
+      // const arr = [[]]
+      // if (tickTime > 3) {
+      //   console.log(1)
+      // } else if (tickTime > 5) {
+      //   console.log(22)
+      // }
     },
     activeHover(stateName) {
       const element = document.querySelector(`#plotline-${stateName}`)
@@ -522,19 +557,27 @@ export default {
           yAxis: 0
         }] })
 
-      this.chart.annotations[0].initLabel({
-        point: this.lastPoint,
-        text: 'aaaa',
-        borderRadius: 6,
-        shape: 'rect',
-        y: -6,
-        allowOverlap: true,
-        ...obj[color]
-        // className: 'annotations-box'
-      })
+      // this.chart.annotations[0].initLabel({
+      //   point: this.lastPoint,
+      //   text: 'aaaa',
+      //   borderRadius: 6,
+      //   shape: 'rect',
+      //   y: -6,
+      //   allowOverlap: true,
+      //   ...obj[color]
+      //   // className: 'annotations-box'
+      // })
     },
     initChartsByReqType(reqType) {
-      this.websockets[0].send(`{"reqType": 1, "args":["${+reqType + 1}","BTCUSD"]}`)
+      this.websocketArgs[0] = +reqType + 1
+      this.isLoading = true
+      this.websockets[0].send(`{"reqType": 1, "args":${JSON.stringify(this.websocketArgs)}}`)
+    },
+    switchProduct(product) {
+      this.websockets[0].send(`{"reqType": 3, "args":["${this.websocketArgs[1]}"]}`)
+      this.websocketArgs = ['1', product]
+      this.websockets[0].send(`{"reqType": 2, "args":["${product}"]}`)
+      this.websockets[0].send(`{"reqType": 1, "args":${JSON.stringify(this.websocketArgs)}}`)
     }
   }
 }

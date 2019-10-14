@@ -2,8 +2,9 @@
 export default {
   data() {
     return {
-      websockets: []
+      websockets: [],
       // tickersData: null
+      websocketArgs: ['1', 'BTCUSD']
     }
   },
   created() {
@@ -17,7 +18,7 @@ export default {
       return process.env.VUE_APP_WS_API
     }
   },
-  destroyed: function() {
+  destroyed() {
     this.websockets.forEach(soket => soket.close())
   },
   methods: {
@@ -28,7 +29,7 @@ export default {
           // websocket.send(`{"reqType":13,"param":{"assetCode":1,"time":1}}`)
           // websocket.send(`{"reqType":3,"param":{"assetCode":1,"period":1}}`)
           websocket.send(`{"reqType": 2, "args":["BTCUSD"]}`)
-          websocket.send(`{"reqType": 1, "args":["1","BTCUSD"]}`)
+          websocket.send(`{"reqType": 1, "args":${JSON.stringify(this.websocketArgs)}}`)
           // websocket.send(`{"reqType":3,"param":{"assetCode":1,"period":1}}`)
           console.log(`${wsurl}连接成功`)
         }

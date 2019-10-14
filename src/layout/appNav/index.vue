@@ -9,12 +9,11 @@
     <div class="nav-right-container" flex="cross:center">
       <template v-if="$store.state.userData">
         <!-- <dropdown style="margin-left:20px" :menu-options="mapBalanceMenu"><div :class="{active:$route.path.includes('property')}" @click="$router.push('/user/property')">资产管理 <i class="el-icon-caret-bottom" /></div></dropdown> -->
-        <dropdown style="margin-left:20px" :menu-options="mapUserCenter"><div :class="{active:$route.path.includes('/user/')}" @click="$router.push('/user/index')">{{ $store.state.userData.email }} <i class="el-icon-caret-bottom" /></div></dropdown>
-        <dropdown v-if="$route.path === '/share_option/index' && mapBalanceMenu.length" v-model="activeShareAccount" style="margin-left:20px" :menu-min-width="250" :menu-options="mapBalanceMenu">
-          <div>
-            {{ activeShareAccount.label }} <i class="el-icon-caret-bottom" />
-          </div>
-          <!-- <div></div> -->
+        <dropdown style="margin-left:20px" :menu-options="mapUserCenter" label="label"><div :class="{active:$route.path.includes('/user/')}" @click="$router.push('/user/index')">{{ $store.state.userData.email||$store.state.userData.phone }} <i class="el-icon-caret-bottom" /></div></dropdown>
+        <dropdown v-if="$route.path === '/share_option/index' && mapBalanceMenu.length" v-model="activeShareAccount" label="currency" :handle-label="item=>`${item.currency} 账户 / ${item.available}`" style="margin-left:20px" :menu-min-width="250" :menu-options="mapBalanceMenu">
+          <svg-icon slot="item-prefix" slot-scope="{data}" :icon-class="data.currency.toLowerCase()" />
+          <el-link slot="item-suffix" type="primary" :underline="false">充值</el-link>
+          <div v-if="activeShareAccount">{{ activeShareAccount.currency }} 账户 / {{ activeShareAccount.available }} <i class="el-icon-caret-bottom" /></div>
         </dropdown>
       </template>
       <template v-else>
@@ -34,9 +33,9 @@
 import selectLang from '@/components/selectLang'
 import { mapNavBackground } from '@/const'
 import dropdown from '@/components/dropdown'
-import { removeUser } from '@/utils/auth'
-import { loginout } from '@/api/user'
-import { bigRound } from '@/utils/handleNum'
+// import { removeUser } from '@/utils/auth'
+// import { loginout } from '@/api/user'
+// import { bigRound } from '@/utils/handleNum'
 export default {
   name: 'AppNav',
   components: {
@@ -51,8 +50,7 @@ export default {
   },
   data() {
     return {
-      activeIndex2: '1',
-      activeShareAccount: null
+      activeIndex2: '1'
     }
   },
   computed: {
@@ -61,49 +59,23 @@ export default {
       return key ? { backgroundColor: mapNavBackground[key] } : {}
     },
     mapBalanceMenu() {
-      const mapIcon = ['btc', 'BTS', 'eth']
-      const arr = this.$store.state.mapShareAccount.map((item, index) => ({
-        index,
-        icon: mapIcon[index],
-        label: `${item.currency}账户 / ${bigRound(item.available, 4)}`,
-        describe: {
-          label: '充值',
-          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-          click: item => this.$router.push({ path: 'aaa', params: item })
-        },
-        ...item
-      }))
-      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      if (this.activeShareAccount) { this.activeShareAccount = arr[this.activeShareAccount.index] }
-      return arr
+      return this.$store.state.mapShareAccount
     },
     mapUserCenter() {
       return [
         { label: '个人中心', path: '/user/index' },
         { label: '资产管理', path: '/user/property' },
-        { label: '退出', click: () => loginout().then(res => {
-          location.reload()
-          removeUser()
-          this.$store.commit('SET_USERDATA', null)
-        }) }
+        { label: '退出', click: () => this.$store.dispatch('loginout') }
       ]
-    }
-  },
-  watch: {
+    },
     activeShareAccount: {
-      handler(newValue) {
-        if (newValue) {
-          localStorage.setItem('activeShareAccount', JSON.stringify(newValue))
-          this.$store.commit('SET_ACTIVESHAREACCOUNT', newValue)
-        }
+      get() {
+        return this.$store.state.activeShareAccount
+      },
+      set(value) {
+        this.$store.commit('SET_ACTIVESHAREACCOUNT', value)
       }
     }
-  },
-  created() {
-    const tem = localStorage.getItem('activeShareAccount')
-    console.log(this.mapBalanceMenu)
-
-    this.activeShareAccount = tem ? JSON.parse(tem) : this.mapBalanceMenu[0]
   }
 }
 </script>

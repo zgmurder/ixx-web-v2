@@ -17,7 +17,7 @@
 <script>
 import background from './components/background'
 import customForm from '@/components/customForm'
-import { loginByEmail, loginByPhone, getEmailCode, loginByEmail2 } from '@/api/user'
+import { loginByEmail, loginByPhone, getEmailCode, getPhoneCode, loginByPhone2, loginByEmail2 } from '@/api/user'
 import { activeShareAccount } from '@/api/share_option'
 import { validEmail, validPhone } from '@/utils/validate'
 import { setUser, setSession } from '@/utils/auth'
@@ -32,7 +32,9 @@ export default {
       isEmail: false,
       loading: false,
       schema: [
-        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', vModel: 'username', default: '294069733@qq.com', required: true },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', errorMassage: '请输入正确邮箱或手机号码', validate: (obj) => {
+          return validEmail(obj.username) || validPhone(obj.username)
+        }, vModel: 'username', default: '', required: true },
         // { fieldType: 'input', append: { text: `获取验证码`, disabled: false, click(e, append) {
         //   checkEmail('294069733@qq.com').then(res => {
         //     console.log(res)
@@ -49,18 +51,19 @@ export default {
         //     append.text--
         //   }, 1000)
         // } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true },
-        { fieldType: 'input', prefixIcon: 'el-icon-search', type: 'password', placeholder: '密码', vModel: 'password', default: 'Awuhao123', required: true },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', type: 'password', placeholder: '密码', vModel: 'password', default: '', required: true },
         { fieldType: 'button', slotDefault: '登录', loading: false, on: { click: ({ field, context }) => {
-          const res = context.verifyAll()
-          if (!res) return
+          const userAccountObj = context.verifyAll()
+          if (!userAccountObj) return
           field.loading = true
-          const { username, ...data } = res
+          const { username, checked, ...data } = userAccountObj
           validEmail(username) && (data.email = username)
           validPhone(username) && (data.phone = username, data.region = 86)
           const handleRes = async res => {
+            localStorage.setItem('userAccountObj', checked ? JSON.stringify(userAccountObj) : '')
             setSession(res.data.session_id)
-            await this.getEmailCode(username).catch(res => (this.loading = false))
-            this.$prompt(`系统已为账号 <span style="color:#13ce66">${username}</span> 发送验证码，请注意查收<br/>没有收到验证码？点击 <a href="javascript:;" style="color:#ff4949" onclick="getEmailCode('${username}')" rel="noopener noreferrer">重新获取验证码</a>`, '邮箱验证', {
+            await this.getCode(username).catch(res => (this.loading = false))
+            this.$prompt(`系统已为账号 <span style="color:#13ce66">${username}</span> 发送验证码，请注意查收<br/>没有收到验证码？点击 <a href="javascript:;" style="color:#ff4949" onclick="getCode('${username}')" rel="noopener noreferrer">重新获取验证码</a>`, '邮箱验证', {
               showConfirmButton: false,
               showCancelButton: false,
               closeOnClickModal: false,
@@ -71,8 +74,9 @@ export default {
               callback: action => action === 'cancel' && (field.loading = false),
               inputValidator: value => {
                 let userData = null
-                loginByEmail2(username, value).then(res => {
-                  this.$message.success('登录成功')
+                const fn = this.isEmail ? loginByEmail2 : loginByPhone2
+                fn(username, value).then(res => {
+                  this.$message({ showClose: true, message: '登录成功', type: 'success' })
                   const node = document.querySelector('div.el-message-box__wrapper')
                   const nodeModal = document.querySelector('div.v-modal')
                   node.parentNode.removeChild(node)
@@ -84,15 +88,18 @@ export default {
                   return activeShareAccount(userData.id)
                 }).then(res => {
                   this.loading = false
-                  this.$router.push('/user/property')
+                  const redirect = this.$route.query.redirect
+                  this.$router.push(redirect || '/user/property')
                 }).catch(() => false)
               }
             }).catch(() => false)
           }
           if (validEmail(username)) {
+            this.isEmail = true
             data.email = username
             loginByEmail(data).then(handleRes)
           } else if (validPhone(username)) {
+            this.isEmail = false
             data.phone = username
             data.region = 86
             loginByPhone(data).then(handleRes)
@@ -103,26 +110,43 @@ export default {
         }, style: { width: '100%' }, type: 'primary' },
         { render() {
           return <div flex='main:justify cross:center'>
-            <el-checkbox checked={true}>记住密码</el-checkbox>
+            <el-checkbox checked={this.checked} onChange={(value) => this.$emit('change', value)} >记住密码</el-checkbox>
             <div>
               <el-link type='info' onClick={() => this.$router.push('/user/register')} underline={false}>注册账号</el-link>
               <el-divider direction='vertical' />
               <el-link type='info' onClick={() => this.$router.push('/user/forget')} underline={false}>忘记密码</el-link>
             </div>
           </div>
-        }, formItemStyle: { marginTop: '-20px' }}
+        }, formItemStyle: { marginTop: '-20px' }, props: {
+          checked: {
+            type: Boolean,
+            default: true
+          }
+        },
+        model: {
+          prop: 'checked',
+          event: 'change'
+        }, vModel: 'checked', default: true }
       ]
     }
   },
   created() {
-    window.getEmailCode = this.getEmailCode
+    window.getCode = this.getCode
+    const userAccountObj = localStorage.getItem('userAccountObj')
+    if (userAccountObj) {
+      const { username, password, checked } = JSON.parse(userAccountObj)
+      this.schema[0].default = username
+      this.schema[1].default = password
+      this.schema[3].default = checked
+    }
   },
   destroyed() {
-    window.getEmailCode = undefined
+    window.getCode = undefined
   },
   methods: {
-    getEmailCode(username) {
-      return getEmailCode(username).then(res => Promise.resolve(this.$message.success('成功发送验证码')))
+    getCode(username) {
+      const fn = this.isEmail ? getEmailCode : getPhoneCode
+      return fn(username).then(res => Promise.resolve(this.$message.success('成功发送验证码')))
     }
   }
 }

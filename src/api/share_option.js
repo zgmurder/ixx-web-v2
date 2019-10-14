@@ -10,10 +10,10 @@ export const createOrder = (data = { user_id: '', symbol: '', currency: '', trad
   method: 'post',
   data
 })
-export const getShareAccountList = user_id => request({
+export const getShareAccountList = (user_id, currencys) => request({
   url: '/opt/account/balance',
   method: 'post',
-  data: { user_id }
+  data: { user_id, currencys }
 })
 export const activeShareAccount = user_id => request({
   url: '/opt/account/activate',
@@ -26,7 +26,7 @@ export const activeShareAccount = user_id => request({
 // end_time 结算时间
 // page
 // size
-export const getHistory = user_id => request({
+export const getHistory = ({ user_id }) => request({
   url: '/opt/account/order/list',
   method: 'post',
   data: { user_id }
