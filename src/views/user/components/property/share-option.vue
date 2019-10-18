@@ -4,19 +4,20 @@
       <slot />
       <el-divider />
     </div>
-    <custom-table v-loading="false" :last-column-config="lastColumnConfig" :table-list="tableList" :table-columns="mapShareColumns">
-      <div slot="handlerDom" slot-scope="data" style="width:200px">
+    <custom-table v-loading="!tableList.length" stripe :last-column-config="lastColumnConfig" :table-list="tableList" :table-columns="mapShareColumns" @change="handlePageChange">
+      <!-- <div slot="handlerDom" slot-scope="data" style="width:200px">
         <el-link type="primary">划转</el-link>
         <el-link type="primary">充币</el-link>
         <el-link type="primary">提币</el-link>
         <el-link type="primary">交易</el-link>
-      </div>
+      </div> -->
     </custom-table>
   </div>
 </template>
 <script>
 import customTable from '@/components/customTable'
 import { getHistory } from '@/api/share_option'
+import { mapTabTimes } from '@/const'
 export default {
   name: 'ShareOption',
   components: {
@@ -25,6 +26,7 @@ export default {
   data() {
     return {
       tableList: [],
+      total: 0,
       loading: false,
       lastColumnConfig: {
         headerLabel: '操作',
@@ -38,7 +40,25 @@ export default {
       return Object.keys(this.chineseLangData.mapShareColumns).map(key => ({
         hearderLabel: this.$tR(`mapShareColumns.${key}`),
         prop: key,
-        handleValue: obj => obj['CNY']
+        hearderWidth: key => ['period', 'trade_type', 'amount'].includes(key) && '50px',
+        handleValue: (value, key) => {
+          switch (key) {
+            case 'period':
+              return mapTabTimes[value]
+            case 'trade_type':
+              return !value ? '涨' : '跌'
+            case 'spot':
+              return this.bigRound(value, 4)
+            case 'state':
+              return !value ? '未结算' : '已结算'
+            case 'create_time':
+              return this.parseTime(value)
+            case 'sett_time':
+              return this.parseTime(value)
+            default:
+              return value
+          }
+        }
       }))
     },
     mapTableInfo() {
@@ -49,7 +69,16 @@ export default {
     }
   },
   created() {
-    getHistory({ user_id: this.id }).then(res => (this.tableList = res.data))
+
+  },
+  methods: {
+    handlePageChange(obj) {
+      const { pageSize, currentPage } = obj
+      getHistory({ user_id: this.id, page: currentPage, size: pageSize }).then(res => {
+        this.tableList = res.data.data
+        obj.total = res.data.total
+      })
+    }
   }
 }
 </script>

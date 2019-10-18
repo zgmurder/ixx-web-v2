@@ -16,7 +16,9 @@ export default {
     },
     $tR(keyPath, locale) {
       return this.$t(`${capitalizeLower(this.thisName)}.${keyPath}`, locale)
-    }
+    },
+    bigRound,
+    parseTime
   },
   filters: {
     parseTime,

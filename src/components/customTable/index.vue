@@ -11,12 +11,15 @@
         :show-overflow-tooltip="true"
         v-bind="item"
         :label="item.hearderLabel"
+        :width="item.hearderWidth && item.hearderWidth(item.prop)||''"
       >
         <template slot="header" slot-scope="{ column }">
-          <p class="text-nowrap">{{ column.label }}</p>
+          <el-tooltip :disabled="false" :content="column.label" placement="top" effect="light">
+            <p class="text-nowrap">{{ column.label }}</p>
+          </el-tooltip>
         </template>
         <template slot-scope="scope">
-          <span>{{ scope.row[item.prop] | filterColumnValue(item.handleValue) }}</span>
+          <span>{{ scope.row[item.prop] | filterColumnValue(item.prop,item,item.handleValue) }}</span>
           <!-- <component :is="column.component" v-if="column.component" :data="[scope.row,column,$attrs.data]" />
           <span
             v-else-if="column.handleValue"
@@ -120,8 +123,8 @@
 // import units from '@/config/tools'
 export default {
   filters: {
-    filterColumnValue(value, callback) {
-      return callback && callback(value) || value
+    filterColumnValue(value, key, row, callback) {
+      return callback && callback(value, key, row) || value
     }
   },
   // filters: {
@@ -151,8 +154,8 @@ export default {
   data(vm) {
     const defaultValue = {
       currentPage: 1,
-      pageSizes: [3, 50, 100],
-      pageSize: 3
+      pageSizes: [10, 50, 100],
+      pageSize: 10
     }
     const pageConfig = {
       ...defaultValue,

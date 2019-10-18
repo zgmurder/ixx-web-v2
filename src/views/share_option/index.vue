@@ -2,7 +2,7 @@
   <div class="share-option" flex="main:justify cross:strech">
     <div class="share-option-bg" />
 
-    <div class="left-side-bar">
+    <div v-loading="!marketData" class="left-side-bar" element-loading-background="rgba(0, 0, 0, 0.3)" element-loading-spinner="el-icon-loading">
       <div v-for="(value,key) in mapComponentNames" :key="key" :class="{active:drawerIsOpen && activeName === key}" @click="handleClickleftTab(key)">
         <svg-icon :icon-class="mapIcons[key]" style="font-size:24px" />
         <p>{{ value }}</p>
@@ -11,20 +11,29 @@
     <transition name="fade" @after-leave="afterLeaveOrEnter" @enter="afterLeaveOrEnter">
       <div v-if="drawerIsOpen" class="left-drawer">
         <div slot="title" flex="cross:center main:justify" style="height:40px">
-          <p>最新价格<span class="share-text-info" style="font-size:12px;">(USDT/USD)</span></p>
+          <p>{{ temComponet.name=== 'ShareHistory'?'历史记录':'最新价格' }}<span v-if="temComponet.name=== 'SpotIndex'" class="share-text-info" style="font-size:12px;">(USDT/USD)</span> <el-link type="primary" style="font-size:12px" @click="$router.push({path:'/user/property',query:{key:'share-option'}})"> 完整历史记录</el-link></p>
         </div>
-        <component :is="temComponet" :data="temComponet.name=== 'ShareHistory'?historyData:marketData" />
+        <component :is="temComponet" :data="temComponet.name=== 'ShareHistory'?historyData:marketData" @loadData="loadHistoryData" />
         <i class="el-icon-close" @click="drawerIsOpen = false" />
       </div>
     </transition>
     <div class="content" flex="dir:bottom">
-      <charts-dynamic-update ref="dynamic-charts" style="width:100%" :income-obj="incomeObj" class="dynamic-update" @loadingData="showLoadBox" @handleTimeTabClick="handleTimeTabClick" @settleOrder="settleOrder" @pushData="data=>(marketData = data)" />
-      <ul v-if="activeCurrencyProduct" class="time-tab" flex="main:justify cross:center box:mean">
-        <li v-for="(item,index) in activeCurrencyProduct.periodList" :key="index" :class="{active:+activePeriod === +item.period}" @click="handleTimeTabClick(item.period)">{{ mapTabTimes[item.period] }}</li>
+      <charts-dynamic-update ref="dynamic-charts" style="width:100%" class="dynamic-update" @loadingData="showLoadBox" @handleTimeTabClick="handleTimeTabClick" @settleOrder="settleOrder" @pushData="data=>(marketData = data)" />
+      <ul class="time-tab" flex="main:justify cross:center box:mean">
+        <li v-for="(item,index) in mapTabTimes" :key="index" :class="{active:+activePeriod === +index}" @click="handleTimeTabClick(index)">{{ item }}</li>
       </ul>
-      <div style="position:absolute;top:20px;left:30px;z-index:14">
-        <customSelect v-model="activeCurrencyProduct" size="small" label="symbol" :map-data="mapProduct" />
-        <!-- <customSelect v-if="activeCurrencyProduct" v-model="activePeriodProduct" size="small" label="period" :map-data="activeCurrencyProduct.periodList" /> -->
+      <div style="position:absolute;top:20px;left:50px;z-index:14">
+        <el-cascader
+          v-model="activeProduct"
+          :options="mapProduct"
+          popper-class="popper-class"
+          :props="{ expandTrigger: 'hover',children:'periodList' }"
+        ><template slot-scope="{ node, data }">
+          <span v-if="data.symbol">{{ data.symbol }}</span>
+          <span v-if="data.period">{{ mapTabTimes[data.period] }}</span>
+          <!-- <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span> -->
+        </template>
+        </el-cascader>
       </div>
       <div v-if="!!loadingBoxWidth" v-loading="!!loadingBoxWidth" element-loading-background="rgba(0, 0, 0, 0.1)" style="position:absolute;top:10px;bottom:76px;left:30px;z-index:14" :style="{width:loadingBoxWidth+'px'}" />
     </div>
@@ -40,10 +49,13 @@
       </div>
       <div class="content-center hover-scale" flex="dir:top main:justify cross:center box:mean">
         <div flex="main:center cross:center" class="center-info">
-          <div v-if="activeShareAccount" class="share-text-info">
-            <!-- <span>{{ activeProductRate.up_rate|bigRound(2) }}%</span> -->
-            <span>{{ activeShareAccount.up_rate|bigRound(2) }}%</span>
-            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*(+activeShareAccount.up_rate)|bigRound(8) }}</p>
+          <el-tooltip placement="bottom" effect="dark">
+            <div slot="content" style="width:200px;line-height:2">看涨期权预期收益率。即，如果您购买看涨期权，且期权到期时标的价格高于初始行权价格，则您的净收益=看涨收益率*投资金额。</div>
+            <i class="el-icon-bell" style="position:absolute;top:10px;right:10px;color:#fff" />
+          </el-tooltip>
+          <div v-if="mapCurrencyList[0]" class="share-text-info">
+            <span>{{ mapCurrencyList[0].up_rate|bigRound(2) }}%</span>
+            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*(+mapCurrencyList[0].up_rate)|bigRound(8) }}</p>
           </div>
         </div>
         <el-button class="center-btn success" :disabled="!$store.state.userData" type="success" @click="addLabels('green')" @mouseover.native="dynamicChart.activeHover('success')" @mouseout.native="dynamicChart.disableHover('success')">
@@ -55,9 +67,13 @@
           <svg-icon icon-class="share-down" style="font-size:40px" /> <h2 style="margin-top:5px">看跌</h2>
         </el-button>
         <div flex="main:center cross:center" class="center-info">
-          <div v-if="activeShareAccount" class="share-text-info">
-            <span>{{ activeShareAccount.down_rate|bigRound(2) }}%</span>
-            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*(+activeShareAccount.down_rate)|bigRound(8) }}</p>
+          <el-tooltip placement="bottom" effect="dark">
+            <div slot="content" style="width:200px;line-height:2">看跌期权预期收益率。即，如果您购买看跌期权，且期权到期时标的价格低于初始行权价格，则您的净收益=看跌收益率*投资金额。</div>
+            <i class="el-icon-bell" style="position:absolute;bottom:10px;right:10px;color:#fff" />
+          </el-tooltip>
+          <div v-if="mapCurrencyList[0]" class="share-text-info">
+            <span>{{ mapCurrencyList[0].down_rate|bigRound(2) }}%</span>
+            <p><svg-icon icon-class="dollar" style="font-size:16px" /> {{ orderCount/100*(+mapCurrencyList[0].down_rate)|bigRound(8) }}</p>
           </div>
         </div>
       </div>
@@ -80,7 +96,9 @@ import customSelect from '@/components/customSelect'
 import websoketMixin from '@/mixins/soket'
 import { createOrder, getHistory, getProduct } from '@/api/share_option'
 import { deepCopy } from '@/utils'
-import { bigMinus } from '@/utils/handleNum'
+import { bigMinus, bigPlus } from '@/utils/handleNum'
+import { mapTabTimes } from '@/const'
+import { clearTimeout } from 'highcharts'
 export default {
   name: 'ShareOption',
   components: {
@@ -93,18 +111,19 @@ export default {
       drawerIsOpen: false,
       activeName: '',
       temComponet: null,
-      historyData: null,
+      historyData: [],
       mapProduct: [],
+      mapTabTimes,
 
       marketData: null,
       activePeriod: '',
-      activeCurrencyProduct: null,
-      activePeriodProduct: null,
-      incomeObj: {},
 
       loadingBoxWidth: '',
 
-      orderCount: 1
+      orderCount: 1,
+
+      activeProduct: [],
+      cacheOrderObj: {}
     }
   },
   computed: {
@@ -125,38 +144,60 @@ export default {
     dynamicChart() {
       return this.$refs['dynamic-charts']
     },
-    mapTabTimes() {
-      return ['1M', '5M', '10M', '1H', '3H', '1D', '7D']
-    },
     userData() {
       return this.$store.state.userData
     },
     activeShareAccount() {
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      // this.orderCount = +(this.$store.state.activeShareAccount || {}).min_amount
       return this.$store.state.activeShareAccount
     },
     mapShareAccount() {
       return this.$store.state.mapShareAccount
+    },
+    mapCurrencyList() {
+      const found = this.mapProduct.find(item => item.value === this.activeProduct[0])
+      return found && found.periodList[this.activeProduct[1]].currencyList || []
     }
   },
   watch: {
-    activeCurrencyProduct: {
+    activeProduct: {
       handler(product) {
-        this.activePeriodProduct = product.periodList[0]
-        this.activePeriod = this.activePeriodProduct.period
-        if (this.dynamicChart) {
-          this.dynamicChart.switchProduct(product.symbol)
+        if (this.dynamicChart && this.dynamicChart.websockets[0]) {
+          if (this.dynamicChart.websockets[0].readyState) {
+            this.activePeriod = +product[1]
+            this.dynamicChart.switchProduct([+product[1] + 1 + '', product[0]])
+          }
         }
-        this.$store.dispatch('getShareAccountList', { accountArr: this.activePeriodProduct.currencyList })
+        this.$store.dispatch('getShareAccountList', { accountArr: this.mapCurrencyList })
+      }
+    },
+    activeShareAccount: {
+      handler(newValue) {
+        if (!newValue) return
+        this.orderCount = +newValue.min_amount
       }
     }
   },
-  created() {
+  mounted() {
     getProduct().then(res => {
-      this.mapProduct = res.data
-      this.activeCurrencyProduct = this.mapProduct[0]
+      this.mapProduct = this.handleProductData(res.data)
+      this.activeProduct = ['BTCUSD', '0']
     })
   },
   methods: {
+    loadHistoryData() {
+      // this.getHistory()
+    },
+    handleProductData(productArr) {
+      productArr.forEach(item => {
+        Object.assign(item, { value: item.symbol, label: item.symbol })
+        item.periodList.forEach(subItem => {
+          Object.assign(subItem, { value: subItem.period, label: this.mapTabTimes[subItem.period] })
+        })
+      })
+      return productArr
+    },
     handleClickleftTab(name) {
       if (this.activeName === name && this.drawerIsOpen) return
       this.drawerIsOpen = true
@@ -168,41 +209,52 @@ export default {
     },
     getHistory() {
       if (!this.userData) return
-      const params = { user_id: this.userData.id, currency: this.activeShareAccount.currency }
+      // const params = { user_id: this.userData.id, currency: this.activeShareAccount.currency }
+      const params = { user_id: this.userData.id, page: 1, size: 10 }
       return getHistory(params).then(res => {
         this.historyData = res.data.data
         return Promise.resolve(res.data.data)
       })
     },
     afterLeaveOrEnter(el) {
+      if (!this.$refs['square-container']) return
       this.$refs['square-container'].style.left = el.clientWidth + 75 + 'px'
       this.dynamicChart.chart.reflow()
     },
     addLabels(color) {
       const tradeType = color === 'green' ? 0 : 1
-      createOrder({ user_id: this.userData.id, symbol: this.activeCurrencyProduct.symbol, amount: this.orderCount, currency: this.activeShareAccount.currency, 'trade_type': tradeType, period: this.activePeriod }).then(res => {
-        return this.$store.dispatch('getShareAccountList', { accountArr: this.activePeriodProduct.currencyList, isAssignment: true })
+      createOrder({ user_id: this.userData.id, symbol: this.activeProduct[0], amount: this.orderCount, currency: this.activeShareAccount.currency, 'trade_type': tradeType, period: this.activeProduct[1] }).then(res => {
+        return this.$store.dispatch('getShareAccountList', { accountArr: this.mapCurrencyList, isAssignment: true })
       }).then(res => {
-        this.dynamicChart.addLabels(color, this.orderCount, this.activeShareAccount.currency)
+        if (this.marketData.time > this.marketData.orderTime) {
+          this.cacheOrderObj[this.activeShareAccount.currency] = +this.orderCount + (this.cacheOrderObj[this.activeShareAccount.currency] || 0)
+        }
+        this.dynamicChart.addLabels(color, this.orderCount)
         this.getHistory()
       })
     },
-    handleTimeTabClick(period) {
-      this.activePeriod = period
-      this.dynamicChart.initChartsByReqType(+period)
+    handleTimeTabClick(periodIndex) {
+      this.activePeriod = periodIndex
+      this.dynamicChart.initChartsByReqType(periodIndex)
     },
     settleOrder(callback) {
-      setTimeout(() => {
+      if (!this.userData) return
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
         const mapShareAccount = deepCopy(this.mapShareAccount)
-        this.$store.dispatch('getShareAccountList', { accountArr: this.activePeriodProduct.currencyList, isAssignment: true }).then(dataArr => {
-          this.getHistory()
-          const incomeObj = dataArr.reduce((prev, curr, index) => {
-            prev[curr.currency] = bigMinus([curr.available, mapShareAccount[index].available], 4)
-            return prev
-          }, {})
-          this.userData && callback && callback(incomeObj)
+        this.$store.dispatch('getShareAccountList', { accountArr: this.mapCurrencyList, isAssignment: true }).then(dataArr => {
+          this.getHistory().then(res => {
+            // console.log(this.marketData.time > this.marketData.orderTime);
+            const incomeObj = dataArr.reduce((prev, curr, index) => {
+              const value = bigMinus([curr.available, mapShareAccount[index].available, mapShareAccount[index].ordering], 4)
+              prev[curr.currency] = bigPlus([value, this.cacheOrderObj[curr.currency] || 0])
+              return prev
+            }, {})
+            this.cacheOrderObj = {}
+            this.userData && callback && callback(incomeObj)
+          })
         })
-      }, 300)
+      }, 1000)
     },
     showLoadBox(width) {
       this.loadingBoxWidth = width
@@ -210,6 +262,16 @@ export default {
   }
 }
 </script>
+<style>
+.popper-class{
+  background: rgba(0, 0, 0, 0.3);
+  color: #ccc
+}
+.el-cascader input.el-input__inner{
+    background: rgba(0, 0,0, 0.3);
+    color: #ccc
+  }
+</style>
 <style lang="scss" scoped="this api replaced by slot-scope in 2.5.0+">
 .share-option{
   height: calc(100vh - 60px);
@@ -259,6 +321,7 @@ export default {
     padding: 0 15px;
     border-right:1px solid $--share-border-color;
     position: relative;
+    overflow: hidden;
     &>.el-icon-close{
       font-size: 26px;
       position: absolute;
@@ -362,6 +425,7 @@ export default {
       .center-info{
         width: 100%;
         text-align: center;
+        position: relative;
         &>.share-text-info{
           span{
             font-size: 20px;

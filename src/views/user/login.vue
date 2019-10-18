@@ -62,7 +62,7 @@ export default {
           const handleRes = async res => {
             localStorage.setItem('userAccountObj', checked ? JSON.stringify(userAccountObj) : '')
             setSession(res.data.session_id)
-            await this.getCode(username).catch(res => (this.loading = false))
+            await this.getCode(username).catch(res => (field.loading = false))
             this.$prompt(`系统已为账号 <span style="color:#13ce66">${username}</span> 发送验证码，请注意查收<br/>没有收到验证码？点击 <a href="javascript:;" style="color:#ff4949" onclick="getCode('${username}')" rel="noopener noreferrer">重新获取验证码</a>`, '邮箱验证', {
               showConfirmButton: false,
               showCancelButton: false,
@@ -90,19 +90,19 @@ export default {
                   this.loading = false
                   const redirect = this.$route.query.redirect
                   this.$router.push(redirect || '/user/property')
-                }).catch(() => false)
+                })
               }
             }).catch(() => false)
           }
           if (validEmail(username)) {
             this.isEmail = true
             data.email = username
-            loginByEmail(data).then(handleRes)
+            loginByEmail(data).then(handleRes).catch(res => (field.loading = false))
           } else if (validPhone(username)) {
             this.isEmail = false
             data.phone = username
             data.region = 86
-            loginByPhone(data).then(handleRes)
+            loginByPhone(data).then(handleRes).catch(res => (field.loading = false))
           } else {
             this.$message.warning('输入的账号名格式有误')
           }

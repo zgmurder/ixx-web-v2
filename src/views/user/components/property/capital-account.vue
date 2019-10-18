@@ -5,7 +5,8 @@
       <el-divider />
     </div>
     <custom-table v-loading="false" :last-column-config="lastColumnConfig" :table-list="tableList" :table-columns="mapAccoutColumns">
-      <div slot="handlerDom" slot-scope="data" style="width:200px">
+      <!-- slot-scope="data" -->
+      <div slot="handlerDom" style="width:200px">
         <el-link type="primary">划转</el-link>
         <el-link type="primary">充币</el-link>
         <el-link type="primary">提币</el-link>

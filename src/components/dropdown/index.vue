@@ -2,8 +2,8 @@
   <span class="drop-down-wrap">
     <slot />
     <ul class="menu-box" :style="{'min-width':menuMinWidth+'px'}">
-      <li v-for="(item,index) in menuOptions" :key="index" flex="main:justify cross:center" class="item" :class="{active:index === activeIndex}" @click="handle(item,index)">
-        <el-tooltip :disabled="typeof item.describe !== 'object'" :content="item.label" placement="left" effect="light">
+      <li v-for="(item,index) in menuOptions" :key="index" flex="main:justify cross:center" class="item" :class="{active:item.currency === active.currency}" @click="handle(item,index)">
+        <el-tooltip :disabled="!$attrs.tooltip" :content="handleLabel(item)" placement="left" effect="dark">
           <span class="text-nowrap"> <slot name="item-prefix" :data="item" /> {{ handleLabel(item) }}</span>
         </el-tooltip>
         <slot name="item-suffix" :data="item" />
@@ -29,18 +29,12 @@ export default {
     },
     active: {
       type: Object,
-      default: () => {}
-    }
-  },
-  data() {
-    return {
-      activeIndex: 0
+      default: () => ({})
     }
   },
   methods: {
     handle(item, index) {
       item.click && item.click(item) || this.$router.push({ path: item.path })
-      this.activeIndex = index
       this.$emit('change', item)
     },
     handleLabel(item) {

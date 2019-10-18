@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { getShareAccountList } from '@/api/share_option'
-import { removeUser } from '@/utils/auth'
 import { loginout } from '@/api/user'
 Vue.use(Vuex)
 
@@ -33,11 +32,14 @@ export default new Vuex.Store({
       const res = await getShareAccountList(state.userData.id, currenyArr)
       const dataArr = res.data.map(item => {
         const found = accountArr.find(subItem => subItem.currency === item.currency)
-        return { ...item, ...found }
-      })
+        return { ...found, ...item }
+      }).sort((a, b) => a.currency === 'DEMO' && -1 || 1)
       commit('SET_MAPSHAREACCOUNT', dataArr)
-      if (!isAssignment)commit('SET_ACTIVESHAREACCOUNT', dataArr[0])
-      else {
+      if (!isAssignment) {
+        const currency = localStorage.getItem('ACTIVESHAREACCOUNT')
+        const found = dataArr.find(item => currency === item.currency)
+        commit('SET_ACTIVESHAREACCOUNT', found || dataArr[0])
+      } else {
         const found = dataArr.find(item => state.activeShareAccount.currency === item.currency)
         commit('SET_ACTIVESHAREACCOUNT', found)
       }
@@ -46,7 +48,9 @@ export default new Vuex.Store({
     async loginout() {
       await loginout()
       location.reload()
-      removeUser()
+      const userAccountObj = localStorage.getItem('userAccountObj')
+      localStorage.clear()
+      localStorage.setItem('userAccountObj', userAccountObj)
       this.$store.commit('SET_USERDATA', null)
     }
   }

@@ -26,7 +26,7 @@ export default {
       tableList: [],
       loading: false,
       componentId: null,
-      activeKey: 'property-manage'
+      activeKey: ''
     }
   },
   computed: {
@@ -43,10 +43,19 @@ export default {
       }))
     }
   },
+  watch: {
+    '$route.query': {
+      handler({ key }) {
+        if (!key) return
+        this.componentId = () => import(`./components/property/${key}`)
+        this.activeKey = key
+      },
+      immediate: true
+    }
+  },
   methods: {
     handleClick(key) {
-      this.componentId = () => import(`./components/property/${key}`)
-      this.activeKey = key
+      this.$router.push({ path: this.$route.path, query: { key: key || 'property-manage' }})
     }
   }
 }

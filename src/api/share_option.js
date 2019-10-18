@@ -26,12 +26,16 @@ export const activeShareAccount = user_id => request({
 // end_time 结算时间
 // page
 // size
-export const getHistory = ({ user_id }) => request({
+export const getHistory = data => request({
   url: '/opt/account/order/list',
   method: 'post',
-  data: { user_id }
+  data
 })
 export const getProduct = () => request({
   url: '/opt/account/product',
+  method: 'post'
+})
+export const resetBalance = () => request({
+  url: '/opt/account/reset',
   method: 'post'
 })

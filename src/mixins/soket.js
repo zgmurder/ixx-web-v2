@@ -26,11 +26,8 @@ export default {
       return new Promise((resolve, reject) => {
         const websocket = new WebSocket(wsurl)
         websocket.onopen = () => {
-          // websocket.send(`{"reqType":13,"param":{"assetCode":1,"time":1}}`)
-          // websocket.send(`{"reqType":3,"param":{"assetCode":1,"period":1}}`)
-          websocket.send(`{"reqType": 2, "args":["BTCUSD"]}`)
+          websocket.send(`{"reqType": 2, "args":["${this.websocketArgs[1]}"]}`)
           websocket.send(`{"reqType": 1, "args":${JSON.stringify(this.websocketArgs)}}`)
-          // websocket.send(`{"reqType":3,"param":{"assetCode":1,"period":1}}`)
           console.log(`${wsurl}连接成功`)
         }
         websocket.onerror = () => console.log(`${wsurl}连接发生错误`)
@@ -41,7 +38,6 @@ export default {
           res = res.code === 0 ? res.data : res
           resolve(websocket)
           callBack(res)
-          // res.code === 0 && (resolve(websocket), callBack(res.data)) || reject(res)
         }
       })
     },
