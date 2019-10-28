@@ -32,25 +32,7 @@ export default {
       isEmail: false,
       loading: false,
       schema: [
-        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', errorMassage: '请输入正确邮箱或手机号码', validate: (obj) => {
-          return validEmail(obj.username) || validPhone(obj.username)
-        }, vModel: 'username', default: '', required: true },
-        // { fieldType: 'input', append: { text: `获取验证码`, disabled: false, click(e, append) {
-        //   checkEmail('294069733@qq.com').then(res => {
-        //     console.log(res)
-        //   })
-        //   append.disabled = true
-        //   const initValue = append.text
-        //   append.text = 45
-        //   const timer = setInterval(() => {
-        //     if (!append.text) {
-        //       append.disabled = false
-        //       append.text = initValue
-        //       return clearInterval(timer)
-        //     }
-        //     append.text--
-        //   }, 1000)
-        // } }, prefixIcon: 'el-icon-search', placeholder: '验证码', vModel: 'username', required: true },
+        { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', errorMassage: '请输入正确邮箱或手机号码', validate: obj => validEmail(obj.username) || validPhone(obj.username), vModel: 'username', default: '', required: true },
         { fieldType: 'input', prefixIcon: 'el-icon-search', type: 'password', placeholder: '密码', vModel: 'password', default: '', required: true },
         { fieldType: 'button', slotDefault: '登录', loading: false, on: { click: ({ field, context }) => {
           const userAccountObj = context.verifyAll()

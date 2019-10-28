@@ -1,6 +1,8 @@
 <template>
   <div class="app-footer">
-    aaadfsdf
+    <div class="container">
+      <el-link type="primary" @click="$router.push('/other/proposer')">上币申请</el-link>
+    </div>
   </div>
 </template>
 <script>

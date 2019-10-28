@@ -6,7 +6,7 @@ export default {
       'legalTender': '法币交易',
       'bidTitle': '币盈盈',
       'fund_assets_node_buy': '节点认购',
-      'share_option': '期权交易'
+      'share_option': '急速合约'
     },
     'signup': '创建帐号',
     'signin': '登录',
@@ -137,7 +137,7 @@ export default {
       'property-manage': '资产管理',
       'capital-account': '资金账户',
       'deal-account': '交易账户',
-      'share-option': '期权账户',
+      'share-option': '急速合约',
       'address-manage': '地址管理'
     }
   },
@@ -153,6 +153,18 @@ export default {
   },
 
   shareOption: {
+    up_rate: '看涨',
+    down_rate: '看跌',
+    newPrice: '最新价格',
+    fullHistory: '完整历史记录',
+    describe: '期权预期收益率。即，如果您购买看涨期权，且期权到期时标的价格高于初始行权价格，则您的净收益=看涨收益率*投资金额。',
+    'mapLeftNav': {
+      'spot-index': '现货指数',
+      'history': '历史记录'
+    },
+    'rightSideBar': {
+      'inputTitle': '投资'
+    },
     mapShareColumns: {
       currency: ' 支付货币',
       symbol: ' 产品类型',
@@ -168,6 +180,13 @@ export default {
       create_time: '下单时间',
       sett_time: '结算时间',
       state: '是否结算'
+    }
+  },
+  spotIndex: {
+    'USD': '现货指数',
+    mapList: {
+      price: 'USDT指数',
+      usdtRate: '汇率(USDT/USD)'
     }
   }
   // 'signup': '创建帐号',

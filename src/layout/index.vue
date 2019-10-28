@@ -4,19 +4,19 @@
     <keep-alive :include="['contract']">
       <router-view />
     </keep-alive>
-    <!-- <app-footer /> -->
+    <app-footer v-if="showFooter" />
   </div>
 </template>
 
 <script>
 import appNav from './appNav/index'
-// import appFooter from './appFooter/index'
+import appFooter from './appFooter/index'
 import { getValueByPath } from '@/utils/index'
 export default {
   name: 'Layout',
   components: {
-    appNav
-    // appFooter
+    appNav,
+    appFooter
   },
   data(vm) {
     const routes = [...vm.$router.options.routes]
@@ -34,6 +34,11 @@ export default {
     })
     return {
       navDataArr
+    }
+  },
+  computed: {
+    showFooter() {
+      return ['/home'].includes(this.$route.path)
     }
   }
 }

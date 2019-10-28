@@ -13,6 +13,7 @@ import fund_assets_node_buyRouter from './modules/fund_assets_node_buy'
 import contractRouter from './modules/contract'
 import bidTitleRouter from './modules/bidTitle'
 import share_optionRouter from './modules/share_option'
+import otherRouter from './modules/other'
 import userRouter from './modules/user'
 
 /**
@@ -78,6 +79,7 @@ export const constantRoutes = [
   bidTitleRouter,
   share_optionRouter,
   userRouter,
+  otherRouter,
   { path: '*', redirect: '/404', hidden: true },
   {
     path: '/404',

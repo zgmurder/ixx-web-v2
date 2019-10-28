@@ -2104,4 +2104,5 @@ export default {
 
   'link_name': '链名称',
   'fund_history_airdrop': '空投奖励'
+
 }

@@ -11,16 +11,16 @@
       </li>
       <div class="line" />
       <li v-for="(value,key) in mapExponent" :key="key" flex="main:justify cross:center">
-        <p class="text">{{ mapChineseData[key] }}</p>
+        <p class="text">{{ $tR(`mapList.${key}`) }}</p>
         <span class="num">{{ value }}</span>
       </li>
       <div class="line" />
       <li flex="main:justify cross:center">
-        <p class="text">现货指数<span class="graysmall">(USD)</span></p>
+        <p class="text">{{ $tR(`mapList.USD`) }}<span class="graysmall">(USD)</span></p>
         <span class="num">{{ USD }}</span>
       </li>
     </ul>
-    <el-button type="info" style="margin-top:30px;width:100%">点击了解更多信息</el-button>
+    <!-- <el-button type="info" style="margin-top:30px;width:100%">点击了解更多信息</el-button> -->
   </div>
 </template>
 <script>
@@ -34,11 +34,8 @@ export default {
     }
   },
   computed: {
-    mapChineseData() {
-      return {
-        price: 'USDT指数',
-        usdtRate: '汇率(USDT/USD)'
-      }
+    mapList() {
+      return this.chineseLangData.mapList
     },
     mapCurrency() {
       const { Huobi, Okex, Binance } = this.data

@@ -9,14 +9,14 @@
 </template>
 <script>
 export default {
-  name: 'App',
-  created() {
-    const that = this
-    window.TradingView.onready(function(configurationData) {
-      that.$eventBus.$on('TradingViewOnready', callBack => {
-        typeof callBack === 'function' && callBack()
-      })
-    })
-  }
+  name: 'App'
+  // created() {
+  //   const that = this
+  //   window.TradingView.onready(function(configurationData) {
+  //     that.$eventBus.$on('TradingViewOnready', callBack => {
+  //       typeof callBack === 'function' && callBack()
+  //     })
+  //   })
+  // }
 }
 </script>

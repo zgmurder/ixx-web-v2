@@ -8,10 +8,10 @@
         @change="handleChange($event,field,index)"
         @select="handleChange($event,field,index)" -->
       <component :is="field.fieldType?'el-'+field.fieldType:field" v-model="field[field.vModel]" :default-first-option="true" v-bind="filterComponentAttrsfield(field)" clearable v-on="resetEvent(field)">
-        <span v-if="field.slotDefault">{{ field.slotDefault }}</span>
+        <span v-if="field.slotDefault" v-html="field.slotDefault" />
         <!-- <component :is="field.append" /> -->
         <component :is="field.slot" v-if="field.slot" />
-        <!-- <template v-if="field.fieldType === 'select'">
+        <template v-if="field.fieldType === 'select'">
           <el-option
             v-for="(item,i) in field.options||[]"
             :key="i"
@@ -27,7 +27,7 @@
             :disabled="item.disabled"
             :label="handleValue(item,field,i)"
           >{{ handleLabel(item,field,i) }}</el-radio>
-        </template> -->
+        </template>
       </component>
       <el-button v-if="field.append" :type="field.append.type || 'pramiry'" :disabled="field.append.disabled" :style="field.append.style" class="custom-input-append" @click="e=>field.append.click && field.append.click(e,field.append)">{{ field.append.text }}</el-button>
     </el-form-item>
@@ -120,11 +120,11 @@ export default {
       const { optValue, valueKey } = field
       if (optValue === 'index') return index
       else if (valueKey) return item
-      else { return typeof item === 'object' ? (optValue ? item[optValue] : item.name) : item }
+      else { return typeof item === 'object' ? (optValue ? item[optValue] : item.value) : item }
     },
     handleLabel(item, field, index) {
       const { optLabel } = field
-      return typeof item === 'object' ? (optLabel ? item[optLabel] : item.name) : item
+      return typeof item === 'object' ? (optLabel ? item[optLabel] : item.label) : item
     },
     handleControl(controlBy) {
       if (!controlBy || isEmpty(controlBy)) return true

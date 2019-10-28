@@ -135,6 +135,7 @@
       <tr>
         <td colspan="3" rowspan="8">
           <candlestick />
+          <!-- <kLineCharts style="height:100%" /> -->
         </td>
       </tr><tr /><tr /><tr /><tr />
       <tr>
@@ -150,6 +151,7 @@
 
 <script>
 import candlestick from '@/components/candlestick'
+import kLineCharts from '@/components/kLine-charts'
 import selectBase from '@/components/selectBase'
 import soket from './soket'
 import { bigRound, logogramNum, bigDiv, bigTimes, bigPlus } from '@/utils/handleNum'
@@ -159,7 +161,8 @@ export default {
   name: 'Contract',
   components: {
     candlestick,
-    selectBase
+    selectBase,
+    kLineCharts
   },
   filters: {
     bigRound
@@ -256,6 +259,7 @@ export default {
         this.closeWebSocket(`/deal/FUTURE_${this.activeTabkey}USD`)
       }
       this.openWebSocket(`/orderbook/FUTURE_${key}USD/0/1/20`, data => (this.delegateData = data)).then(() => this.$nextTick(() => this.dataLoaded()))
+
       getFutureListByKey(key, { size: 16 }).then(res => (this.newBargainListData = res.data)).then(res => {
         this.openWebSocket(`/deal/FUTURE_${key}USD`, data => {
           const last = data[data.length - 1]

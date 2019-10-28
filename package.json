@@ -20,6 +20,7 @@
     "highcharts": "^7.1.3",
     "hover.css": "^2.3.2",
     "js-cookie": "^2.2.1",
+    "jsonp": "^0.2.1",
     "node-sass": "^4.12.0",
     "normalize.css": "^8.0.1",
     "nprogress": "^0.2.0",

@@ -599,7 +599,7 @@ export default {
       if (!element) return
       element.style.display = 'none'
     },
-    addLabels(color, value = 1, index = 0, data) {
+    addLabels(color, value = 1, index = 0, data = {}) {
       const obj = {
         green: {
           borderColor: 'rgba(42, 172, 62, 0.8)',
@@ -612,7 +612,7 @@ export default {
       }
       const labelOption = {
         point: this.lastPoint,
-        text: value + ' ' + this.$store.state.activeShareAccount.currency,
+        text: value + ' ' + data.currency || this.$store.state.activeShareAccount.currency,
         borderRadius: 6,
         shape: 'rect',
         y: -6,
