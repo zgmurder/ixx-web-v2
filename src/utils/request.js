@@ -15,9 +15,10 @@ service.interceptors.request.use(
   config => {
     // do something before request is sent
     // if (!config.url.startsWith('http'))config.url = process.env.VUE_APP_BASE_API_I + config.url
-    const arr = config.url.split('/Q')
-    if (arr.length > 1)config.url = arr[arr.length - 1]
-    config.baseURL = arr.length > 1 ? process.env.VUE_APP_BASE_API_Q : process.env.VUE_APP_BASE_API
+    // const arr = config.url.split('/Q')
+    // if (arr.length > 1)config.url = arr[arr.length - 1]
+    const proxy_q = process.env.VUE_APP_PROXY_Q
+    !config.url.includes(proxy_q) && (config.baseURL = process.env.VUE_APP_BASE_API)
     const userDataStr = getUser()
     if (userDataStr) {
       const userData = JSON.parse(userDataStr)

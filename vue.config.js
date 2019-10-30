@@ -19,11 +19,11 @@ module.exports = {
     proxy: {
       // change xxx-api/login => mock/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy
-      ['^' + process.env.VUE_APP_BASE_API_Q]: {
-        target: `https://q.ixex.pro`,
+      ['^' + process.env.VUE_APP_PROXY_Q]: {
+        target: process.env.VUE_APP_BASE_API_Q,
         changeOrigin: true,
         pathRewrite: {
-          ['^' + process.env.VUE_APP_BASE_API_Q]: ''
+          ['^' + process.env.VUE_APP_PROXY_Q]: ''
         }
       }
     }

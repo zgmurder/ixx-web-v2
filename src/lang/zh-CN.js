@@ -78,10 +78,10 @@ export default {
     buy: '卖入',
     sell: '卖出',
     mapTabs: {
-      BTC: `BTC永续`,
-      ETH: `ETH永续`,
-      EOS: `EOS永续`,
-      BHD: `BHD永续`
+      FUTURE_BTCUSD: `BTC永续`,
+      FUTURE_ETHUSD: `ETH永续`,
+      FUTURE_EOSUSD: `EOS永续`,
+      FUTURE_BHDUSD: `BHD永续`
     },
     mapDishInfo: {
       current: '最新价',

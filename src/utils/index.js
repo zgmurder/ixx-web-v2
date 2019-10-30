@@ -205,6 +205,25 @@ export function param(json) {
   ).join('&')
 }
 
+export const openWebSocket = ({ wsurl, onopen, onerror, onclose, onmessage }) => {
+  const websocket = new WebSocket(process.env.VUE_APP_WS_API + wsurl)
+  websocket.onopen = () => {
+    console.log(`${wsurl}连接成功`)
+    onopen && onopen(websocket)
+  }
+  websocket.onerror = () => {
+    console.log(`${wsurl}连接错误`)
+    onerror && onerror(websocket)
+  }
+  websocket.onclose = () => {
+    console.log(`${wsurl}连接关闭`)
+    onclose && onclose(websocket)
+  }
+  websocket.onmessage = e => {
+    const res = JSON.parse(e.data)
+    res.code === 0 && onmessage && onmessage(res.data, websocket)
+  }
+}
 // /**
 //  * @param {string} url
 //  * @returns {Object}

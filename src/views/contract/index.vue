@@ -3,31 +3,19 @@
     <tbody>
       <tr>
         <td colspan="3">
-          <div
-            v-loading="!tickersData" element-loading-text="拼命加载中"
-            element-loading-spinner="el-icon-loading"
-            element-loading-background="rgba(0, 0, 0, 0.3)" style="height:100%"
-          >
+          <div v-loading="!tickersData" element-loading-background="rgba(0, 0, 0, 0.3)" style="height:100%">
             <div v-if="tickersData" flex="main:left cross:strech" class="tabs-group">
-              <div v-for="(value,key) in mapTabs" :key="key" :class="{active:activeTabkey === key}" flex="dir:top main:center" @click="handleTabClick(key)">
-                <p>{{ $tR(`mapTabs.${key}`) }}</p>
-                <span
-                  :class="[(key === 'BTC'?isBuy:matchItemByKey(key).increment_24h > 0)?'is-success':'is-danger']"
-                >{{ matchItemByKey(key).current | bigRound(matchItemByKey(key).dictionary.price_scale) }}
-                  <svg-icon :icon-class="(key === 'BTC'?isBuy:matchItemByKey(key).increment_24h > 0)?'up':'down'" /></span>
+              <div v-for="(product,index) in products" :key="index" :class="{active:activeTabkey === product.name}" flex="dir:top main:center" @click="handleTabClick(product.name)">
+                <p>{{ $tR(`mapTabs.${product.name}`) }}</p>
+                <span :class="[matchItemByKey(product.name).increment_24h > 0?'is-success':'is-danger']">{{ calcIncreaseRate(matchItemByKey(product.name)) }}
+                  <svg-icon :icon-class="matchItemByKey(product.name).increment_24h > 0?'lv':'hong'" />
+                </span>
               </div>
             </div>
           </div>
         </td>
         <td rowspan="7">
-          <div
-            v-loading="!delegateData"
-            class="delegate-list"
-            element-loading-text="拼命加载中"
-            element-loading-spinner="el-icon-loading"
-            element-loading-background="rgba(0, 0, 0, 0.3)"
-            style="height:100%"
-          >
+          <!-- <div v-loading="!delegateData" class="delegate-list" element-loading-background="rgba(0, 0, 0, 0.3)" style="height:100%">
             <div class="header" flex="main:justify">
               <span> {{ $tR(`mapDelegateList.entrust-list`) }}</span>
               <selectBase v-model="dataDeep" :handle-label="value=>`${$tR(`mapDelegateList.depth`)}${value}`" :map-data="['1','0.1']" />
@@ -46,10 +34,10 @@
                   </li>
                 </ul>
                 <div class="content-center">
-                  <p :class="[(activeTabkey === 'BTC'?isBuy:activeTabItem.increment_24h > 0)?'is-success':'is-danger',triggerBtn && 'justify'||'']">
+                  <p :class="[(activeTabkey === 'FUTURE_BTCUSD'?isBuy:activeTabItem.increment_24h > 0)?'is-success':'is-danger',triggerBtn && 'justify'||'']">
                     <span>
                       {{ activeTabItem.current | bigRound(activeTabItem.dictionary.price_scale) }}
-                      <svg-icon :icon-class="(activeTabkey === 'BTC'?isBuy:activeTabItem.increment_24h > 0)?'up':'down'" />
+                      <svg-icon :icon-class="(activeTabkey === 'FUTURE_BTCUSD'?isBuy:activeTabItem.increment_24h > 0)?'up':'down'" />
                     </span>
                     <el-link v-if="triggerBtn" :underline="false" type="info" @click="dataLoaded(true)">{{ $tR(`mapDelegateList.return-dish`) }}</el-link>
                   </p>
@@ -65,16 +53,10 @@
                 </ul>
               </div>
             </div>
-          </div>
+          </div> -->
         </td>
         <td rowspan="7">
-          <div
-            v-loading="!newBargainListData.length"
-            class="delegate-list"
-            element-loading-text="拼命加载中"
-            element-loading-spinner="el-icon-loading"
-            element-loading-background="rgba(0, 0, 0, 0.3)"
-          >
+          <!-- <div v-loading="!newBargainListData.length" class="delegate-list" element-loading-background="rgba(0, 0, 0, 0.3)">
             <div class="header" flex="main:justify">
               <span> {{ $tR(`mapDelegateList.new-bargain`) }}</span>
             </div>
@@ -93,26 +75,21 @@
                 </ul>
               </div>
             </div>
-          </div>
+          </div> -->
         </td>
         <td rowspan="10">111122222</td>
       </tr>
       <tr>
         <td colspan="3" rowspan="1">
-          <div
-            v-loading="!tickersData"
-            class="dish-info" element-loading-text="拼命加载中"
-            element-loading-spinner="el-icon-loading"
-            element-loading-background="rgba(0, 0, 0, 0.3)"
-          >
+          <div v-loading="!tickersData" class="dish-info" element-loading-background="rgba(0, 0, 0, 0.3)">
             <template v-if="tickersData">
               <div class="info-left">
                 <div class="title">
-                  <svg-icon icon-class="round" class="round" />
+                  <svg-icon icon-class="star" class="round" />
                   {{ $tR(`mapTabs.${activeTabkey}`) }}
                   <svg-icon
-                    :class="[isMatchBuy?'is-success':'is-danger']"
-                    :icon-class="isMatchBuy?'up':'down'"
+                    :class="[activeTabItem.increment_24h > 0?'is-success':'is-danger']"
+                    :icon-class="activeTabItem.increment_24h > 0?'lv':'hong'"
                   />
                 </div>
                 <span>资金费率： </span>
@@ -123,8 +100,11 @@
                 </span>
               </div>
               <div class="info-list-box">
-                <div v-for="(value,key) in mapDishInfo" :key="key">{{ $tR(`mapDishInfo.${key}`) }}： <span :class="[matchClassByKey(key)]">{{ handleDishInfoItem(key) }}{{ key === 'change_24h' && '%' ||'' }}</span></div>
-                <div>≈ {{ activeTotalToBTC }} BTC</div>
+                <div v-for="(value,key) in mapDishInfo" :key="key">
+                  {{ $tR(`mapDishInfo.${key}`) }}：
+                  <span :class="[matchClassByKey(key)]">{{ handleDishInfoItem(key) }}{{ key === 'change_24h' && '%' ||'' }}</span>
+                </div>
+                <!-- <div>≈ {{ activeTotalToBTC }} BTC</div> -->
               </div>
             </template>
 
@@ -154,36 +134,39 @@ import candlestick from '@/components/candlestick'
 import kLineCharts from '@/components/kLine-charts'
 import selectBase from '@/components/selectBase'
 import soket from './soket'
-import { bigRound, logogramNum, bigDiv, bigTimes, bigPlus } from '@/utils/handleNum'
-import { getFutureListByKey } from '@/api/contract'
+import { bigRound, logogramNum, bigDiv, bigTimes, bigPlus, bigMinus } from '@/utils/handleNum'
+import { getFutureListByKey, getFutureDictionaryList } from '@/api/contract'
+import { openWebSocket } from '@/utils'
 // import PackWebSoket from './packWebSoket'
 export default {
   name: 'Contract',
   components: {
     candlestick,
-    selectBase,
-    kLineCharts
+    selectBase
+    // kLineCharts
   },
   filters: {
     bigRound
   },
-  mixins: [soket],
+  // mixins: [soket],
   data() {
     return {
-      activeTabkey: '',
+      activeTabkey: 'FUTURE_BTCUSD',
       isBuy: true,
       triggerBtn: false,
       dataDeep: '1',
 
       delegateData: null,
-      dataDictionary: [],
-      newBargainListData: []
+      newBargainListData: [],
+
+      tickersData: null,
+      products: []
     }
   },
   computed: {
-    mapTabs() {
-      return this.chineseLangData.mapTabs
-    },
+    // mapTabs() {
+    //   return this.chineseLangData.mapTabs
+    // },
     mapDishInfo() {
       return this.chineseLangData.mapDishInfo
     },
@@ -197,8 +180,7 @@ export default {
       return this.matchItemByKey(this.activeTabkey)
     },
     activeMarkItem() {
-      if (!this.tickersData) return {}
-      return this.tickersData.MARKET.find(item => item.pair.includes(this.activeTabkey))
+      return this.tickersData.MARKET.find(item => this.activeTabkey.includes(item.pair.split('_')[1]))
     },
     activeIndexItem() {
       if (!this.tickersData) return {}
@@ -206,10 +188,10 @@ export default {
     },
     activeTotalToBTC() {
       const arr = [this.activeTabItem.volume_24h, this.activeTabItem.current]
-      return this.activeTabkey === 'BTC' ? bigDiv(arr) : bigTimes([...arr, this.activeTabItem.dictionary.multiplier])
+      return this.activeTabkey === 'FUTURE_BTCUSD' ? bigDiv(arr) : bigTimes([...arr, this.activeTabItem.dictionary.multiplier])
     },
     isMatchBuy() {
-      return this.activeTabkey === 'BTC' ? this.isBuy : this.activeTabItem.increment_24h > 0
+      return this.activeTabkey === 'FUTURE_BTCUSD' ? this.isBuy : this.activeTabItem.increment_24h > 0
     },
     asks() {
       const arr = [...this.delegateData.asks]
@@ -231,22 +213,44 @@ export default {
     }
   },
   created() {
-    this.$eventBus.$emit('TradingViewOnready')
-    this.$once('baseDataLoaded', () => this.handleTabClick('BTC'))
+    // this.$eventBus.$emit('TradingViewOnready')
+    getFutureDictionaryList().then(res => {
+      this.products = res.data
+      this._dataDictionary = res.data
+      openWebSocket({ wsurl: `/market/tickers`, onmessage: this.handleMessage })
+      // this.handleTabClick('FUTURE_BTCUSD')
+    })
+    // this.$once('baseDataLoaded', () => this.handleTabClick('FUTURE_BTCUSD'))
   },
   methods: {
+    handleMessage(data, websoket) {
+      const matchArr = ['FUTURE', 'INDEX', 'MARKET']
+      const dictionary = [...this._dataDictionary]
+      const dataArr = data.filter(item => matchArr.includes(item.pair.split('_')[0]))
+      const objArr = dataArr.reduce((curr, prev) => {
+        const key = prev.pair.split('_')[0]
+        const index = dictionary.findIndex(item => item.name === prev.pair)
+        index !== -1 && (prev.dictionary = dictionary.splice(index, 1)[0])
+        curr[key] = [...(curr[key] || []), prev]
+        return curr
+      }, {})
+      this.tickersData = objArr
+    },
+    calcIncreaseRate(item) {
+      return bigDiv([bigTimes([item.increment_24h, 100]), bigMinus([item.current, item.increment_24h])], item.dictionary.price_scale)
+    },
     matchItemByKey(key) {
       if (!this.tickersData) return {}
-      return this.tickersData.FUTURE.find(item => item.pair.includes(key))
+      return this.tickersData.FUTURE.find(item => item.pair === key)
     },
     handleDishInfoItem(key) {
       const price_scale = this.activeTabItem.dictionary.price_scale
       if (key === 'markPrice') {
-        const fixed = this.activeTabkey === 'BTC' ? 2 : price_scale
+        const fixed = this.activeTabkey === 'FUTURE_BTCUSD' ? 2 : price_scale
         return bigRound(this.activeMarkItem.current, fixed)
       } else {
         const fixed = key === 'change_24h' ? 2 : price_scale
-        const unit = this.activeTabkey === 'BTC' ? 'USD' : this.$tR(`sheet`)
+        const unit = this.activeTabkey === 'FUTURE_BTCUSD' ? 'USD' : this.$tR(`sheet`)
         return key === 'volume_24h' ? logogramNum(this.activeTabItem[key]) + unit : bigRound(this.activeTabItem[key], fixed)
       }
     },
@@ -258,20 +262,22 @@ export default {
         this.closeWebSocket(`/orderbook/FUTURE_${this.activeTabkey}USD/0/1/20`)
         this.closeWebSocket(`/deal/FUTURE_${this.activeTabkey}USD`)
       }
-      this.openWebSocket(`/orderbook/FUTURE_${key}USD/0/1/20`, data => (this.delegateData = data)).then(() => this.$nextTick(() => this.dataLoaded()))
-
+      openWebSocket({ wsurl: `/orderbook/FUTURE_${key}USD/0/1/20`, onmessage: data => {
+        this.delegateData = data
+      } })
+      //  data => (this.delegateData = data)).then(() => this.$nextTick(() => this.dataLoaded())
       getFutureListByKey(key, { size: 16 }).then(res => (this.newBargainListData = res.data)).then(res => {
-        this.openWebSocket(`/deal/FUTURE_${key}USD`, data => {
+        openWebSocket({ wsurl: `/deal/FUTURE_${key}USD`, onmessage: data => {
           const last = data[data.length - 1]
           this.newBargainListData.length = this.newBargainListData.length - 1
           this.newBargainListData.unshift(last)
           this.isBuy = last.side === 'buy'
-        })
+        } })
       })
       this.activeTabkey = key
     },
     matchClassByKey(key) {
-      return ['current', 'change_24h', 'increment_24h'].includes(key) ? this.isMatchBuy ? 'is-success' : 'is-danger' : ''
+      return ['current', 'change_24h', 'increment_24h'].includes(key) ? this.isBuy ? 'is-success' : 'is-danger' : ''
     },
     dataLoaded(lessPosition) {
       const element = this.$refs['content-wrap']
