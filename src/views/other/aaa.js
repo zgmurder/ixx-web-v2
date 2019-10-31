@@ -1,0 +1,2 @@
+https://ix-bj-static.oss-cn-beijing.aliyuncs.com/currency-apply/currency_0dxgef74emg0rsw94j18q1euiea7s9wo
+https://ix-bj-static.oss-cn-beijing.aliyuncs.com/currency-apply/currency_0dxgef74emg0rsw94j18q1euiea7s9wo

@@ -8,12 +8,13 @@ import 'hover.css'
 
 import ElementUI from 'element-ui'
 import '@/styles/index.scss' // global css
-// import locale from 'element-ui/lib/locale/lang/en'
-// import 'element-ui/lib/theme-chalk/index.css'
-Vue.use(ElementUI)
+import enLocale from 'element-ui/lib/locale/lang/en'
+import zhLocale from 'element-ui/lib/locale/lang/zh-CN'
+import twLocale from 'element-ui/lib/locale/lang/zh-TW'
+import koLocale from 'element-ui/lib/locale/lang/ko'
 
 import './icons' // icon
-import router from './router/index'
+import router from './router'
 
 import './permission'
 
@@ -36,12 +37,15 @@ const i18n = new VueI18n({
   locale: localStorage.getItem('locale') || 'zh-CN', // 语言标识
   silentFallbackWarn: true,
   messages: {
-    en, ko,
-    'zh-CN': zhCN,
-    'zh-HK': zhHK
+    'en': { ...en, ...enLocale },
+    'ko': { ...ko, ...koLocale },
+    'zh-CN': { ...zhCN, ...zhLocale },
+    'zh-HK': { ...zhHK, ...twLocale }
   }
 })
-
+Vue.use(ElementUI, {
+  i18n: (key, value) => i18n.t(key, value)
+})
 Vue.prototype.$eventBus = new Vue({})
 
 new Vue({

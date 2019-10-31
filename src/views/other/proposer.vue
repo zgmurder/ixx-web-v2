@@ -36,7 +36,9 @@ export default {
         { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '项目全称', label: '项目全称', vModel: 'project_name', default: '项目全称', required: true },
         { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '以http开头', label: '官方网站', errorMassage: '请输入正确的网站', vModel: 'url', validate: obj => validURL(obj.url), default: '', required: true },
         { fieldType: 'upload', onSuccess: (res, files) => {
-          this.schemaWhite[this.schemaWhite.vModel] = this.schemaWhite.data.key + files.name
+          const data = this.schemaWhite.data
+          this.schemaWhite[this.schemaWhite.vModel] = `${data.host}/${this.schemaWhite.action}/${this.fileName}`
+          console.log(`${data.host}/${this.schemaWhite.action}/${data.dir}${this.fileName}`)
         }, data: {}, slotDefault: `<i class="el-icon-plus avatar-uploader-icon"></i><span style="color:#999">点击上传<span>`, errorMassage: '此项必传', action: whiteBookActionUrl, label: '项目白皮书', vModel: 'white', required: true },
         { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '最新版白皮书链接', label: '最新版白皮书链接', validate: obj => validURL(obj.white_url), vModel: 'white_url', default: '', required: true },
         { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '项目简介', label: '项目简介', vModel: 'synopsis', default: '', required: true },
@@ -67,13 +69,14 @@ export default {
   created() {
     getPolicy().then(res => {
       const data = JSON.parse(res.data)
+      this.fileName = 'currency_' + this.generateToken(32)
       const obj = {
-        'key': data.dir, // data.dir,
-        'policy': data.policy,
-        'OSSAccessKeyId': data.accessid,
-        'success_action_status': '200', // 让服务端返回200,不然，默认会返回204
-        'signature': data.signature,
-        'dir': data.dir
+        key: data.dir + this.fileName, // data.dir,
+        policy: data.policy,
+        OSSAccessKeyId: data.accessid,
+        success_action_status: '200', // 让服务端返回200,不然，默认会返回204
+        signature: data.signature,
+        dir: data.dir
       }
       this.schemaWhite.action = data.host
       this.schemaWhite.data = obj
@@ -88,6 +91,14 @@ export default {
           this.$message.success('申请成功')
         })
       }
+    },
+    generateToken(len = 16) {
+      const source = '1234567890qwertyuiopasdfghjklzxcvbnm'
+      let token = ''
+      for (let i = 0; i < len; i += 1) {
+        token += source[Math.floor(Math.random() * 36)]
+      }
+      return token
     }
   }
 }

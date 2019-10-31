@@ -7,7 +7,7 @@
             <div v-if="tickersData" flex="main:left cross:strech" class="tabs-group">
               <div v-for="(product,index) in products" :key="index" :class="{active:activeTabkey === product.name}" flex="dir:top main:center" @click="handleTabClick(product.name)">
                 <p>{{ $tR(`mapTabs.${product.name}`) }}</p>
-                <span :class="[matchItemByKey(product.name).increment_24h > 0?'is-success':'is-danger']">{{ calcIncreaseRate(matchItemByKey(product.name)) }}
+                <span :class="[matchItemByKey(product.name).increment_24h > 0?'text-success':'text-danger']">{{ calcIncreaseRate(matchItemByKey(product.name)) }}
                   <svg-icon :icon-class="matchItemByKey(product.name).increment_24h > 0?'lv':'hong'" />
                 </span>
               </div>
@@ -15,7 +15,7 @@
           </div>
         </td>
         <td rowspan="7">
-          <!-- <div v-loading="!delegateData" class="delegate-list" element-loading-background="rgba(0, 0, 0, 0.3)" style="height:100%">
+          <div v-loading="!delegateData" class="delegate-list" element-loading-background="rgba(0, 0, 0, 0.3)" style="height:100%">
             <div class="header" flex="main:justify">
               <span> {{ $tR(`mapDelegateList.entrust-list`) }}</span>
               <selectBase v-model="dataDeep" :handle-label="value=>`${$tR(`mapDelegateList.depth`)}${value}`" :map-data="['1','0.1']" />
@@ -27,14 +27,14 @@
               <div v-if="delegateData" class="content-container">
                 <ul>
                   <li v-for="(item,index) in asks.arr" :key="index" flex="main:justify cross:center">
-                    <span class="is-danger">{{ item.values[0] | bigRound(activeTabItem.dictionary.price_scale) }}</span>
+                    <span class="text-danger">{{ item.values[0] | bigRound(activeTabItem.dictionary.price_scale) }}</span>
                     <span style="flex:1">{{ item.values[1] | bigRound(0) }}</span>
                     <span>{{ item.values[2] }}</span>
                     <div class="mark-bg is-buy" :style="{width:handleWidthBg(item.values[1],asks.max)}" />
                   </li>
                 </ul>
                 <div class="content-center">
-                  <p :class="[(activeTabkey === 'FUTURE_BTCUSD'?isBuy:activeTabItem.increment_24h > 0)?'is-success':'is-danger',triggerBtn && 'justify'||'']">
+                  <p :class="[(activeTabkey === 'FUTURE_BTCUSD'?isBuy:activeTabItem.increment_24h > 0)?'text-success':'text-danger',triggerBtn && 'justify'||'']">
                     <span>
                       {{ activeTabItem.current | bigRound(activeTabItem.dictionary.price_scale) }}
                       <svg-icon :icon-class="(activeTabkey === 'FUTURE_BTCUSD'?isBuy:activeTabItem.increment_24h > 0)?'up':'down'" />
@@ -45,7 +45,7 @@
                 </div>
                 <ul>
                   <li v-for="(item,index) in bids.arr" :key="index" flex="main:justify cross:center">
-                    <span class="is-success">{{ item.values[0] | bigRound(activeTabItem.dictionary.price_scale) }}</span>
+                    <span class="text-success">{{ item.values[0] | bigRound(activeTabItem.dictionary.price_scale) }}</span>
                     <span style="flex:1">{{ item.values[1] | bigRound(0) }}</span>
                     <span>{{ item.values[2] }}</span>
                     <div class="mark-bg is-sell" :style="{width:handleWidthBg(item.values[1],bids.max)}" />
@@ -53,7 +53,7 @@
                 </ul>
               </div>
             </div>
-          </div> -->
+          </div>
         </td>
         <td rowspan="7">
           <!-- <div v-loading="!newBargainListData.length" class="delegate-list" element-loading-background="rgba(0, 0, 0, 0.3)">
@@ -67,8 +67,8 @@
               <div class="content-container">
                 <ul>
                   <li v-for="(item,index) in newBargainListData" :key="index" flex="main:justify cross:center box:mean">
-                    <span :class="[item.side === 'buy'?'is-success':'is-danger']">{{ $tR(item.side) }}</span>
-                    <span :class="[item.side === 'buy'?'is-success':'is-danger']">{{ item.values[0]|bigRound(activeTabItem.dictionary.price_scale) }}</span>
+                    <span :class="[item.side === 'buy'?'text-success':'text-danger']">{{ $tR(item.side) }}</span>
+                    <span :class="[item.side === 'buy'?'text-success':'text-danger']">{{ item.values[0]|bigRound(activeTabItem.dictionary.price_scale) }}</span>
                     <span>{{ item.values[1] }}</span>
                     <span>{{ item.time | parseTime('{h}:{i}:{s}') }}</span>
                   </li>
@@ -88,7 +88,7 @@
                   <svg-icon icon-class="star" class="round" />
                   {{ $tR(`mapTabs.${activeTabkey}`) }}
                   <svg-icon
-                    :class="[activeTabItem.increment_24h > 0?'is-success':'is-danger']"
+                    :class="[activeTabItem.increment_24h > 0?'text-success':'text-danger']"
                     :icon-class="activeTabItem.increment_24h > 0?'lv':'hong'"
                   />
                 </div>
@@ -131,7 +131,7 @@
 
 <script>
 import candlestick from '@/components/candlestick'
-import kLineCharts from '@/components/kLine-charts'
+// import kLineCharts from '@/components/kLine-charts'
 import selectBase from '@/components/selectBase'
 import soket from './soket'
 import { bigRound, logogramNum, bigDiv, bigTimes, bigPlus, bigMinus } from '@/utils/handleNum'
@@ -148,7 +148,7 @@ export default {
   filters: {
     bigRound
   },
-  // mixins: [soket],
+  mixins: [soket],
   data() {
     return {
       activeTabkey: 'FUTURE_BTCUSD',
@@ -160,7 +160,8 @@ export default {
       newBargainListData: [],
 
       tickersData: null,
-      products: []
+      products: [],
+      websokets: []
     }
   },
   computed: {
@@ -262,7 +263,7 @@ export default {
         this.closeWebSocket(`/orderbook/FUTURE_${this.activeTabkey}USD/0/1/20`)
         this.closeWebSocket(`/deal/FUTURE_${this.activeTabkey}USD`)
       }
-      openWebSocket({ wsurl: `/orderbook/FUTURE_${key}USD/0/1/20`, onmessage: data => {
+      openWebSocket({ wsurl: `/orderbook/FUTURE_${key}USD/0/1/20`, onopen: soket => this.websokets.push(soket), onmessage: data => {
         this.delegateData = data
       } })
       //  data => (this.delegateData = data)).then(() => this.$nextTick(() => this.dataLoaded())
@@ -277,7 +278,7 @@ export default {
       this.activeTabkey = key
     },
     matchClassByKey(key) {
-      return ['current', 'change_24h', 'increment_24h'].includes(key) ? this.isBuy ? 'is-success' : 'is-danger' : ''
+      return ['current', 'change_24h', 'increment_24h'].includes(key) ? this.isBuy ? 'text-success' : 'text-danger' : ''
     },
     dataLoaded(lessPosition) {
       const element = this.$refs['content-wrap']
@@ -300,12 +301,6 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.is-danger{
-  color: $--color-danger
-}
-.is-success{
-  color: $--color-success
-}
 .table-container{
   .tabs-group,.dish-info,.delegate-list{
     box-sizing: border-box;
