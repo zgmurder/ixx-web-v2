@@ -1,16 +1,16 @@
-import { getFutureDictionaryList } from '@/api/contract'
+// import { getFutureDictionaryList } from '@/api/contract'
 export default {
   data() {
     return {
-      websockets: [],
-      tickersData: null
+      websockets: []
+      // tickersData: null
     }
   },
   created() {
-    getFutureDictionaryList().then(res => {
-      this.dataDictionary = res.data
-      this.openWebSocket('/market/tickers', this.handleTickers).then(() => this.$emit('baseDataLoaded'))
-    })
+    // getFutureDictionaryList().then(res => {
+    //   this.dataDictionary = res.data
+    //   this.openWebSocket('/market/tickers', this.handleTickers).then(() => this.$emit('baseDataLoaded'))
+    // })
   },
   computed: {
     baseWSurl() {
@@ -21,20 +21,6 @@ export default {
     this.websockets.forEach(soket => soket.close())
   },
   methods: {
-    handleTickers(data) {
-      const matchArr = ['FUTURE', 'INDEX', 'MARKET']
-      const dictionary = [...this.dataDictionary]
-      const dataArr = data.filter(item => matchArr.includes(item.pair.split('_')[0]))
-      const objArr = dataArr.reduce((curr, prev) => {
-        const key = prev.pair.split('_')[0]
-        const index = dictionary.findIndex(item => item.name === prev.pair)
-        index !== -1 && (prev.dictionary = dictionary.splice(index, 1)[0])
-        curr[key] = [...(curr[key] || []), prev]
-        return curr
-      }, {})
-      this.tickersData = objArr
-    },
-
     openWebSocket(wsurl, callBack = () => {}) {
       return new Promise((resolve, reject) => {
         const websocket = new WebSocket(`${this.baseWSurl}${wsurl}`)

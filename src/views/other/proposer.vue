@@ -37,8 +37,8 @@ export default {
         { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '以http开头', label: '官方网站', errorMassage: '请输入正确的网站', vModel: 'url', validate: obj => validURL(obj.url), default: '', required: true },
         { fieldType: 'upload', onSuccess: (res, files) => {
           const data = this.schemaWhite.data
-          this.schemaWhite[this.schemaWhite.vModel] = `${data.host}/${this.schemaWhite.action}/${this.fileName}`
-          console.log(`${data.host}/${this.schemaWhite.action}/${data.dir}${this.fileName}`)
+          this.schemaWhite[this.schemaWhite.vModel] = `${this.schemaWhite.action}/${data.dir}${this.fileName}`
+          console.log(`${this.schemaWhite.action}/${data.dir}${this.fileName}`)
         }, data: {}, slotDefault: `<i class="el-icon-plus avatar-uploader-icon"></i><span style="color:#999">点击上传<span>`, errorMassage: '此项必传', action: whiteBookActionUrl, label: '项目白皮书', vModel: 'white', required: true },
         { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '最新版白皮书链接', label: '最新版白皮书链接', validate: obj => validURL(obj.white_url), vModel: 'white_url', default: '', required: true },
         { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '项目简介', label: '项目简介', vModel: 'synopsis', default: '', required: true },
@@ -87,6 +87,7 @@ export default {
       const isok = this.$refs['customForm'].verifyAll()
       const isok1 = this.$refs['customForm1'].verifyAll()
       if (isok && isok1) {
+        console.log(Object.assign(isok, isok1))
         insertCoinApply(Object.assign(isok, isok1)).then(res => {
           this.$message.success('申请成功')
         })

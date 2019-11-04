@@ -9,7 +9,7 @@ export const getFutureDictionaryList = query => request({
   params: query
 })
 export const getFutureListByKey = (key, query) => request({
-  url: `${proxy_q}/v1/deal/FUTURE_${key}USD`,
+  url: `${proxy_q}/v1/deal/${key}`,
   method: 'get',
   params: query
 })
@@ -20,10 +20,10 @@ export const getBars = (key, query) => request({
   params: query
 })
 
-export const getSymbolList = () => request({
-  url: `${proxy_q}/v1/market/pairs`,
-  method: 'get'
-})
+// export const getSymbolList = () => request({
+//   url: `${proxy_q}/v1/market/pairs`,
+//   method: 'get'
+// })
 export const getHistoryByPeriodOrPairs = (params = { period: '1m', pairs: 'ETH_BTC,EOS_BTC,UNKNOWN' }) => request({
   url: `${proxy_q}/v1/market/histories`,
   method: 'get',
@@ -62,3 +62,21 @@ export const getOrderDataBySymbol = (symbol, params = { offset: 0, accuracy: 1, 
 // getQuoteOrderbook({ pair, accuracy, offset, size }) {
 //   return quote(`orderbook/${pair}`, { offset, accuracy, size })
 // },
+// 获取交易对列表 POST /contract/symbol/list
+export const getSymbolList = user_id => request({
+  url: `/contract/symbol/list`,
+  method: 'post',
+  data: { user_id }
+})
+// 用户余额(持仓) POST /future/account/balance/list
+export const getBalanceList = nonce => request({
+  url: `/future/account/balance/list`,
+  method: 'post',
+  data: { nonce }
+})
+// 已平仓位 POST /contract/closedposition
+export const getClosedpositionList = user_id => request({
+  url: `/contract/closedposition`,
+  method: 'post',
+  data: { user_id }
+})

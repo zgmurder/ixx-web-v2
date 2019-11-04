@@ -83,6 +83,14 @@ export default {
       FUTURE_EOSUSD: `EOS永续`,
       FUTURE_BHDUSD: `BHD永续`
     },
+    mapTableTaps: {
+      shipping: '仓位',
+      shipped: '已平仓位',
+      curEntrust: '当前委托',
+      lossEntrust: '止损委托',
+      historyEntrust: '委托历史',
+      bargain: '成交'
+    },
     mapDishInfo: {
       current: '最新价',
       change_24h: '涨跌幅',
@@ -106,7 +114,59 @@ export default {
         'trading-volume': '成交量',
         'time': '时间'
       }
+    },
+    mapFormContent: {
+      mapBtns: {
+        'direction': '现价',
+        'transaction-price ': '市价',
+        'trading-volume': '市价止损'
+      }
+    },
+    mapInformation: {
+      priceBy: '价格来源',
+      priceIndex: '指数价格',
+      volume_24h: '24小时交易量',
+      value: '合约价值',
+      valueRate: '资金费率'
     }
+  },
+  shipping: {
+    mapTableText: {
+      holding: '目前仓位数量',
+      value: '价值',
+      leverage: '杠杆倍数',
+      position_margin: '仓位保证金',
+      markPrice: '标记价格',
+      unrealized: '未实现盈亏（回报率%）',
+      price: '开仓价格',
+      realized: '已实现盈亏',
+      liq_price: '强平价格'
+    },
+    mapClosedposition: {
+      symbol: '合约类型',
+      realized: '已实现盈亏'
+    },
+    winloss_record: '盈亏记录',
+    contract_name: '合约',
+    future: '永续',
+    query: '查询',
+    close_side: '平仓方向',
+    into_price: '入场价格',
+    out_price: '出场价格',
+    close_realized: '平仓盈亏',
+    close_type: '出场类型',
+    close_datetime: '平仓成交时间',
+    close_side_1: '买入平空',
+    close_side_2: '卖出平多',
+    close_type_1: '交易',
+    close_type_2: '强制平仓',
+    total_realized: '累计盈亏计算',
+    current_day_realized: '当日已结算盈亏',
+    unrealized_mark_price: '未结算盈亏（标记价格）',
+    unrealized_last_price: '未结算盈亏(盘口价格)',
+    day: '日',
+    start: '开始日期',
+    end: '结束日期'
   },
   userCenter: {
     mapMenuList: {

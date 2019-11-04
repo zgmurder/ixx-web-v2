@@ -1,5 +1,5 @@
 // import { getBars } from '@/api/contract'
-import { getSymbolList } from '@/api/contract'
+// import { getSymbolList } from '@/api/contract'
 
 const udf_datafeed = {
   onReady: cb => {
@@ -14,9 +14,9 @@ const udf_datafeed = {
   searchSymbols: (userInput, exchange, symbolType, onResultReadyCallback) => {},
 
   resolveSymbol: (symbolName, onSymbolResolvedCallback, onResolveErrorCallback) => {
-    getSymbolList().then(res => {
-      console.log(res)
-    })
+    // getSymbolList().then(res => {
+    //   console.log(res)
+    // })
     var split_data = symbolName.split(/[:/]/)
     var symbol_stub = {
       name: symbolName,

@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading" element-loading-background="rgba(0, 0, 0, 0.8)" class="login-container" flex="main:center cross:center">
+  <div class="login-container" flex="main:center cross:center">
     <background />
     <customForm ref="customForm" class="login-custom-form" :schema="schema" :submit-btn="false" label-width="0">
       <div slot="title" class="title-container" flex="main:justify cross:bottom">
@@ -18,7 +18,6 @@
 import background from './components/background'
 import customForm from '@/components/customForm'
 import { loginByEmail, loginByPhone, getEmailCode, getPhoneCode, loginByPhone2, loginByEmail2 } from '@/api/user'
-import { activeShareAccount } from '@/api/share_option'
 import { validEmail, validPhone } from '@/utils/validate'
 import { setUser, setSession } from '@/utils/auth'
 export default {
@@ -30,7 +29,6 @@ export default {
   data() {
     return {
       isEmail: false,
-      loading: false,
       schema: [
         { fieldType: 'input', prefixIcon: 'el-icon-search', placeholder: '邮箱或手机号', errorMassage: '请输入正确邮箱或手机号码', validate: obj => validEmail(obj.username) || validPhone(obj.username), vModel: 'username', default: '', required: true },
         { fieldType: 'input', prefixIcon: 'el-icon-search', type: 'password', placeholder: '密码', vModel: 'password', default: '', required: true },
@@ -66,10 +64,6 @@ export default {
                   userData = res.data
                   setUser(JSON.stringify(userData))
                   this.$store.commit('SET_USERDATA', userData)
-                  this.loading = true
-                  return activeShareAccount(userData.id)
-                }).then(res => {
-                  this.loading = false
                   const redirect = this.$route.query.redirect
                   this.$router.push(redirect || '/user/property')
                 })
