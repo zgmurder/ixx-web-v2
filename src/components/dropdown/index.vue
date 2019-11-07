@@ -2,7 +2,7 @@
   <span class="drop-down-wrap">
     <slot />
     <ul class="menu-box" :style="{'min-width':menuMinWidth+'px'}">
-      <li v-for="(item,index) in menuOptions" :key="index" flex="main:justify cross:center" class="item" :class="{active:item.currency === active.currency}" @click="handle(item,index)">
+      <li v-for="(item,index) in menuOptions" :key="index" flex="main:justify cross:center" class="item" :class="{active:isActive(item)}" @click="handle(item,index)">
         <el-tooltip :disabled="!$attrs.tooltip" :content="handleLabel(item)" placement="left" effect="dark">
           <span class="text-nowrap"> <slot name="item-prefix" :data="item" /> {{ handleLabel(item) }}</span>
         </el-tooltip>
@@ -28,9 +28,12 @@ export default {
       default: 'initial'
     },
     active: {
-      type: Object,
+      type: [Object, String],
       default: () => ({})
     }
+  },
+  mounted() {
+    console.log()
   },
   methods: {
     handle(item, index) {
@@ -41,6 +44,9 @@ export default {
       if (this.$attrs['handle-label']) return this.$attrs['handle-label'](item)
       else if (this.$attrs.label) return item[this.$attrs.label]
       else return item
+    },
+    isActive(item) {
+      return JSON.stringify(this.active) === JSON.stringify(item)
     }
   }
 }
@@ -55,7 +61,7 @@ export default {
     transition: all .5s ease-in;
   }
   &:hover{
-    color: #01CED1;
+    color: $--color-primary;
     cursor: pointer;
     .menu-box{
       display: block;
@@ -94,7 +100,7 @@ export default {
         border-bottom: 1px solid rgba(69,97,137,.2)
       }
       &:hover,&.active{
-        color: #fff
+        color: $--color-primary
       }
       &>.text-nowrap{
         max-width: 160px;

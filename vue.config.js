@@ -9,6 +9,11 @@ module.exports = {
   css: {
     loaderOptions: { sass: { data: `@import "@/styles/variables.scss";` }}
   },
+  publicPath: './',
+  outputDir: 'dist',
+  assetsDir: 'static',
+
+  lintOnSave: process.env.NODE_ENV === 'development',
   devServer: {
     port: 8080,
     open: true,

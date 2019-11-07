@@ -63,20 +63,53 @@ export const getOrderDataBySymbol = (symbol, params = { offset: 0, accuracy: 1, 
 //   return quote(`orderbook/${pair}`, { offset, accuracy, size })
 // },
 // 获取交易对列表 POST /contract/symbol/list
-export const getSymbolList = user_id => request({
+export const getSymbolList = data => request({
   url: `/contract/symbol/list`,
   method: 'post',
-  data: { user_id }
+  data
 })
 // 用户余额(持仓) POST /future/account/balance/list
-export const getBalanceList = nonce => request({
+export const getBalanceList = data => request({
   url: `/future/account/balance/list`,
   method: 'post',
-  data: { nonce }
+  data
 })
 // 已平仓位 POST /contract/closedposition
-export const getClosedpositionList = user_id => request({
+export const getClosedpositionList = data => request({
   url: `/contract/closedposition`,
   method: 'post',
-  data: { user_id }
+  data
+})
+// 当前委托 POST /contract/activeorders 参数user_id page size
+export const getActiveorders = data => request({
+  url: `/contract/activeorders`,
+  method: 'post',
+  data
+})
+// 止损委托 POST /contract/activetriggers 参数user_id page size
+export const getActivetriggers = data => request({
+  url: `/contract/activetriggers`,
+  method: 'post',
+  data
+})
+// 委托历史 POST /contract/orderhistory 参数user_id currency （非必传）默认全部 其他：BTCUSD/BHDUSD page size
+export const getActiveOrderhistory = data => request({
+  url: `/contract/orderhistory`,
+  method: 'post',
+  data
+})
+// 已成交 POST /future/account/orderfills
+export const getActiveOrderfills = data => request({
+  url: `/future/account/orderfills`,
+  method: 'post',
+  data
+})
+// 已成交 soket
+export const WSURL = 'wss://wss.ixex.pro/v1'
+
+// 已成交 POST /account/currency/rates
+export const getRates = data => request({
+  url: `/account/currency/rates`,
+  method: 'post',
+  data
 })

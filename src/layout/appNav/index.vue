@@ -9,7 +9,11 @@
     <div class="nav-right-container" flex="cross:center">
       <template v-if="$store.state.userData">
         <!-- <dropdown style="margin-left:20px" :menu-options="mapBalanceMenu"><div :class="{active:$route.path.includes('property')}" @click="$router.push('/user/property')">资产管理 <i class="el-icon-caret-bottom" /></div></dropdown> -->
-        <dropdown style="margin-left:20px" :menu-options="mapUserCenter" label="label"><div :class="{active:$route.path.includes('/user/')}" @click="$router.push('/user/index')">{{ $store.state.userData.email||$store.state.userData.phone }} <i class="el-icon-caret-bottom" /></div></dropdown>
+        <dropdown style="margin-left:20px" :menu-options="mapUserCenter" label="label">
+          <div :class="{active:$route.path.includes('/user/')}" @click="$router.push('/user/index')">
+            {{ $store.state.userData.email||$store.state.userData.phone }} <i class="el-icon-caret-bottom" />
+          </div>
+        </dropdown>
         <dropdown v-if="$route.path === '/share_option/index' && mapBalanceMenu.length" v-model="activeShareAccount" :tooltip="true" label="currency" :handle-label="item=>`${item.currency} 账户 / ${bigRound(item.available,4)}`" style="margin-left:20px" :menu-min-width="250" :menu-options="mapBalanceMenu">
           <svg-icon slot="item-prefix" slot-scope="{data}" :icon-class="data.currency.toLowerCase()" />
           <el-link slot="item-suffix" slot-scope="{data}" :disabled="data.currency === 'DEMO'?+data.currency.ordering>0:false" :type="data.currency === 'DEMO'?'danger':'primary'" :underline="false" @click.stop="resetBalance(data.currency)">{{ data.currency === 'DEMO'?'重置体验金':'充值' }}</el-link>

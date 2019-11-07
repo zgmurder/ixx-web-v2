@@ -71,49 +71,6 @@ export default {
 
         const markElement = this.orderTimeElement.querySelector('.mask')
 
-        // if (resTime >= new Date(resTime).setSeconds(period * 60 - settleTime)) {
-        //   if (orderBoxElement.innerText !== '下一轮') {
-        //     const yetTime = (new Date(resTime).setSeconds(period * 60) - resTime) / 1000
-        //     const finishCountUp = new CountUp(finishBoxElement, yetTime, 0, 0, yetTime, { useEasing: false, prefix: '00 ：' })
-        //     finishCountUp.start()
-        //     orderBoxElement.innerText = '下一轮'
-        //   }
-        //   orderBoxElement.innerText = '下一轮'
-        // } else {
-        //   // orderBoxElement.innerText = orderBoxElement.innerText || '下一轮'
-        //   finishBoxElement.innerText = ''
-
-        //   if (!orderBoxElement.innerText) this.initOrderLineByCountUp(resTime)
-        //   if (orderBoxElement.innerText === '下一轮') {
-        //     // this.orderBoxCountUp.reset()
-        //     this.orderBoxCountUp = new CountUp(orderBoxElement, period * 60 - settleTime, 0, 0, period * 60 - settleTime, { useEasing: false, prefix: '00 ：' })
-        //     this.orderBoxCountUp.start()
-        //     const userOptions = { ...this.chart.annotations[0].userOptions }
-        //     const labels = this.chart.annotations[0].labels.filter(item => item.options.point.x <= resTime - 20000)
-        //     const shapes = this.chart.annotations[0].shapes.filter(item => item.options.points[0].x <= resTime - 20000)
-        //     labels.forEach((item, index) => {
-        //       this.chart.annotations[0].destroyItem(shapes[index])
-        //       this.chart.annotations[0].destroyItem(item)
-        //     })
-        //     // const labels = this.chart.annotations[0].labels.filter(item=>item.options.point.x <= new Date(resTime).setSeconds(40))
-        //     // this.chart.annotations[0].destoryItem(this.chart.annotations[0])
-        //     this.chart.addAnnotation(userOptions)
-
-        //     const points = this.chart.series[0].points
-        //     this.$emit('settleOrder', incomeObj => {
-        //       this.chart.tooltip.iscustom = true
-        //       this.chart.tooltip.incomeObj = incomeObj
-        //       this.chart.tooltip.refresh(points[points.length - 1])
-        //       setTimeout(() => {
-        //         this.chart.tooltip.hide()
-        //         this.chart.tooltip.iscustom = false
-        //         this.chart.tooltip.incomeObj = {}
-        //       }, 2000)
-        //     })
-        //   } else {
-        //     finishBoxElement.innerText = ''
-        //   }
-        // }
         const xData = this.chart.series[0].xData
         this.isLoading = xData[xData.length - 5] === resTime
         this.lastPoint = {
@@ -182,35 +139,6 @@ export default {
     addUserAnnotations(data) {
       data = JSON.parse(data)
       this.addLabels(!data.tradeType ? 'green' : 'red', data.amount, 1, data)
-      // const obj = {
-      //   green: {
-      //     borderColor: 'rgba(42, 172, 62, 0.8)',
-      //     backgroundColor: 'rgba(42, 172, 62, 0.6)'
-      //   },
-      //   red: {
-      //     borderColor: 'rgba(232, 79, 67, 0.8)',
-      //     backgroundColor: 'rgba(232, 79, 67, 0.6)'
-      //   }
-      // }
-      // const labelOption = {
-      //   point: { x: data.createTime, y: data.strike, xAxis: 0, yAxis: 0 },
-      //   text: data.amount + ' ' + data.currency,
-      //   borderRadius: 6,
-      //   shape: 'rect',
-      //   y: -6,
-      //   allowOverlap: true,
-      //   ...obj[!data.tradeType ? 'green' : 'red']
-      // }
-      // console.log(data)
-
-      // const annotation2 = localStorage.getItem('annotations2')
-      // const { labels = [] } = annotation2 ? JSON.parse(annotation2) : {}
-      // labels.push(labelOption)
-      // localStorage.setItem('annotations2', JSON.stringify({ labels2: labels }))
-
-      // if (this.$store.state.userData && data.userId !== +this.$store.state.userData.id) {
-      //   this.chart.annotations[1].initLabel(labelOption)
-      // }
     },
     cleanAnnotations(orderTime) {
       // const labels = this.chart.annotations[0].labels.filter(item => item.options.point.x <= orderTime)

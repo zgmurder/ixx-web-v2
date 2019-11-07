@@ -83,13 +83,90 @@ export default {
       FUTURE_EOSUSD: `EOS永续`,
       FUTURE_BHDUSD: `BHD永续`
     },
-    mapTableTaps: {
-      shipping: '仓位',
-      shipped: '已平仓位',
-      curEntrust: '当前委托',
-      lossEntrust: '止损委托',
-      historyEntrust: '委托历史',
-      bargain: '成交'
+    mapTableTapContents: {
+      shipping: {
+        text: '仓位',
+        mapTableColumns: {
+          holding: '目前仓位数量',
+          leverage: '杠杆倍数',
+          markPrice: '标记价格',
+          price: '开仓价格',
+          liq_price: '强平价格',
+          value: '价值',
+          margin_position: '仓位保证金',
+          unrealized: '未实现盈亏（回报率%）',
+          realized: '已实现盈亏'
+        }
+      },
+      shipped: {
+        text: '已平仓位',
+        mapTableColumns: {
+          symbol: '合约类型',
+          realized: '已实现盈亏'
+        }
+      },
+      curEntrust: {
+        text: '当前委托',
+        mapTableColumns: {
+          symbol: '合约类型',
+          amount: '数量',
+          price: '委托价格',
+          total: '已成交额',
+          executed: '已成交量',
+          state: '状态',
+          create_time: '下单时间',
+          update_time: '更新时间',
+          tp_type: '止盈触发类型',
+          tp_price: '止盈价格',
+          sl_type: '止损触发类型',
+          sl_price: '止损价格'
+        }
+      },
+      lossEntrust: {
+        text: '止损委托',
+        mapTableColumns: {
+          symbol: '合约类型',
+          amount: '数量',
+          price: '委托价格',
+          total: '已成交额',
+          executed: '已成交量',
+          state: '状态',
+          create_time: '下单时间',
+          update_time: '更新时间',
+          tp_type: '止盈触发类型',
+          tp_price: '止盈价格',
+          sl_type: '止损触发类型',
+          sl_price: '止损价格'
+        }
+      },
+      historyEntrust: {
+        text: '委托历史',
+        mapTableColumns: {
+          symbol: '合约类型',
+          realized: '已实现盈亏'
+        }
+      },
+      bargain: {
+        text: '已成交',
+        mapTableColumns: {
+          id: '成交单ID',
+          origin: '1成交单',
+          order_id: '订单ID',
+          uid: '用户ID',
+          symbol: '交易对',
+          product: '商品简称',
+          currency: '货币简称',
+          side: '1买',
+          type: '1限价',
+          price: '成交价',
+          amount: '成交量',
+          amount_total: '委托数量',
+          amount_last: '成交量',
+          total: '成交额',
+          fee: '手续费',
+          create_time: '成交时间'
+        }
+      }
     },
     mapDishInfo: {
       current: '最新价',
@@ -117,9 +194,31 @@ export default {
     },
     mapFormContent: {
       mapBtns: {
-        'direction': '现价',
-        'transaction-price ': '市价',
-        'trading-volume': '市价止损'
+        direction: { text: '现价', describe: '限价委托用于在指定的（或更好的）价格买入或卖出。这是最常用的委托类型。' },
+        transactionPrice: { text: '市价', describe: '市价委托是一种最快的成交方式。它以目前委托列表的最佳价格执行。请注意，网络延迟可能导致委托的执行价格与你的期望有所不同。' },
+        tradingVolume: {
+          text: '市价止损'
+        }
+      },
+      mapMenuOptions: {
+        priceDamage: '市价止损',
+        priceProfit: '市价止盈',
+        limitedPriceDamage: '限价止损',
+        limitedPriceProfit: '限价止盈'
+      },
+      mapInput: {
+        shippingSpace: '仓位',
+        value: '价格'
+      },
+      mapHandleBtn: {
+        buy: '买入/做多',
+        sell: '卖出/做空'
+      },
+      cost: '成本',
+      submitEntrust: '提交委托',
+      mapDescribe: {
+        entrustValue: '委托价值',
+        available: '可用余额'
       }
     },
     mapInformation: {
@@ -131,42 +230,10 @@ export default {
     }
   },
   shipping: {
-    mapTableText: {
-      holding: '目前仓位数量',
-      value: '价值',
-      leverage: '杠杆倍数',
-      position_margin: '仓位保证金',
-      markPrice: '标记价格',
-      unrealized: '未实现盈亏（回报率%）',
-      price: '开仓价格',
-      realized: '已实现盈亏',
-      liq_price: '强平价格'
-    },
-    mapClosedposition: {
-      symbol: '合约类型',
-      realized: '已实现盈亏'
-    },
-    winloss_record: '盈亏记录',
-    contract_name: '合约',
-    future: '永续',
-    query: '查询',
-    close_side: '平仓方向',
-    into_price: '入场价格',
-    out_price: '出场价格',
-    close_realized: '平仓盈亏',
-    close_type: '出场类型',
-    close_datetime: '平仓成交时间',
-    close_side_1: '买入平空',
-    close_side_2: '卖出平多',
-    close_type_1: '交易',
-    close_type_2: '强制平仓',
-    total_realized: '累计盈亏计算',
-    current_day_realized: '当日已结算盈亏',
-    unrealized_mark_price: '未结算盈亏（标记价格）',
-    unrealized_last_price: '未结算盈亏(盘口价格)',
-    day: '日',
-    start: '开始日期',
-    end: '结束日期'
+    lossLimit: '止损',
+    winLimit: '止盈',
+    price: '市价',
+    closeOut: '平仓'
   },
   userCenter: {
     mapMenuList: {

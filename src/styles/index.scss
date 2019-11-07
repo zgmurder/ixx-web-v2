@@ -20,6 +20,20 @@ textarea,select,input{-webkit-appearance: none; -moz-appearance: none; -o-appear
 .background-active{ background-color: $--color-primary;}
 
 
+tr.contract-order-list-row-class{
+  background:$--contract-table-bg;
+  &:hover{
+    background: none;
+  }
+  th.is-leaf{
+    background: $--contract-table-bg;
+    border-color: rgb(27, 28, 29);
+  }
+  td{
+    border-color: rgb(27, 28, 29);
+  }
+}
+
 .share-text-info{
   color: $--share-text-info
 }

@@ -21,3 +21,19 @@ export const bigPlus = (dataArr, fixed) => handler(dataArr, fixed, 'plus')
 
 export const bigMinus = (dataArr, fixed) => handler(dataArr, fixed, 'minus')
 
+/*
+  { 开平仓费率：后台返回take_rate ，IM百分比：当前档位，合约乘数：后台返回multiplier BTC为1，合约数量：合约乘数 * 合约数量}
+
+  成本 = 起始保证 + 开平仓手续费
+  起始保证金 = 委托价值 / 当前杠杆倍数 *（1 + IM百分比）
+  委托价值 = 合约数量 / 成交价格
+  开平仓手续费 = 委托价值 * 开平仓费率
+
+  成本 = 委托价值 / 当前杠杆倍数 *（1 + IM百分比） + 开平仓手续费
+*/
+export const getCost = ({ count = 0, price = 1, leverages = 1, IM = 0, take_rate = 0.0007, fixed = 8 }) => {
+  const entrustValue = Big(count).div(price)
+  const serviceCharge = entrustValue.times(take_rate).times(2)
+  if (!count) return Big(0).toFixed(fixed)
+  return entrustValue.div(leverages).times(+IM + 1).plus(serviceCharge).toFixed(fixed)
+}
