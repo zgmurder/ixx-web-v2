@@ -24,7 +24,7 @@ export default {
   methods: {
     openWebSocket(wsurl, callBack = () => {}) {
       return new Promise((resolve, reject) => {
-        const websocket = new WebSocket(wsurl)
+        const websocket = new WebSocket(`${this.baseWSurl}${wsurl}`)
         websocket.onopen = () => {
           websocket.send(`{"reqType": 2, "args":["${this.websocketArgs[1]}"]}`)
           websocket.send(`{"reqType": 1, "args":${JSON.stringify(this.websocketArgs)}}`)

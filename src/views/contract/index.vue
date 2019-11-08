@@ -282,14 +282,11 @@ export default {
       isBuy: true,
       triggerBtn: false,
       dataDeep: '1',
-
       delegateData: null,
       newBargainListData: [],
-
       tickersData: null,
       products: [],
       websokets: [],
-
       tableList: null
     }
   },
