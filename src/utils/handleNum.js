@@ -76,9 +76,65 @@ export const toThousand = (num = 0) => {
 
   成本 = 委托价值 / 当前杠杆倍数 *（1 + IM百分比） + 开平仓手续费
 */
-export const getCost = ({ count = 0, price = 1, leverages = 1, IM = 0, take_rate = 0.0007, fixed = 8 }) => {
-  const entrustValue = Big(count).div(price)
-  const serviceCharge = entrustValue.times(take_rate).times(2)
-  if (!count) return Big(0).toFixed(fixed)
-  return entrustValue.div(leverages).times(+IM + 1).plus(serviceCharge).toFixed(fixed)
+export const getCost = ({ count = 0, price = 1, leverages = 1, IM = 0, take_rate = 0.0007, fixed = 8, MM = 0, pairInfo = {}, totalValue = 0 }) => {
+  // const entrustValue = Big(count).div(price)
+  // const serviceCharge = entrustValue.times(take_rate).times(2)
+  // if (!count) return Big(0).toFixed(fixed)
+  // return entrustValue.div(leverages).times(+IM + 1).plus(serviceCharge).toFixed(fixed)
+  if (count === 0 || price === 0) return 0 // 价格或数量为0时成本为0
+
+  const base_risk = pairInfo.base_risk || 200 // 起始保证金
+  const gap_risk = pairInfo.gap_risk || 100 // 每100BTC加一档
+  const max_leverage = pairInfo.max_leverage || 100 // 最大杠杆倍数
+  const mul = Big(pairInfo.multiplier || 0) // 乘数
+  const current_leverage = Big(leverages).eq(0) ? max_leverage : leverages // 当前杠杆倍数
+
+  // btc_usd的价值等于数量除以价格,其它币对的价值等于 数量 * 价格 * 乘数
+  let value = (Big(count).div(price))
+  if (pairInfo.name !== 'FUTURE_BTCUSD') {
+    value = mul.times(price).times(count)
+  }
+
+  // 总价值=仓位价值+委托列表价值（对冲仓位）
+  // 委托列表价值 = 当前委托列表价值+即将要下单的价值
+  totalValue = (totalValue == null || totalValue.eq(0)) ? value : totalValue
+
+  // 累加次数 向上取整
+  const num = (Big(totalValue).minus(base_risk)).div(gap_risk).round(0, 3)
+  IM = Big(IM).plus(num.times(MM))
+  // 起始保证金
+  const margin = Big(value).div(current_leverage).times(Big(1).plus(IM))
+  // 平仓手续费
+  const fee = value.times(take_rate).times(2)
+  // 成本
+  const cost = margin.plus(fee)
+  return cost
+}
+
+/**
+   * 获取总价值
+   * futures 当前委托列表 （委托列表 + 输入窗口的值）
+   * holding 持仓
+   * price 持仓价格
+   * pair 合约类型
+   */
+export const getTotalValue = ({ futures, holding, pairInfo, mul, fixed = 8 }) => {
+  const down = 0
+  const price = holding.price == '--' ? 0 : holding.price
+
+  let totalValue = Big(price || 0).eq(0) ? Big(0) : Big(holding.amount).div(price)
+  if (pairInfo.name !== 'FUTURE_BTCUSD') {
+    totalValue = Big(holding.amount || 0).times(price || 0).times(mul)
+  }
+  for (const future of futures) {
+    // 数量 = 委托总数量 - 已成交数量
+    const fprice = future.price == '--' ? 0 : future.price
+    const amount = Big(future.amount).minus(future.executed)
+    let value = (Big(future.amount || 0).eq(0) || Big(fprice || 0).eq(0)) ? Big(0) : amount.div(fprice).round(fixed, down)
+    if (pairInfo.name !== 'FUTURE_BTCUSD') {
+      value = Big(future.amount || 0).times(fprice || 0).times(mul)
+    }
+    totalValue = future.side == 1 ? totalValue.plus(value) : totalValue.minus(value)
+  }
+  return totalValue.abs()
 }
