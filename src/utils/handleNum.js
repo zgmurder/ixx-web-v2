@@ -66,34 +66,6 @@ export const toThousand = (num = 0) => {
   })
 }
 
-export const toDiv = (numA, numB) => {
-  if (isNaN(Number(numA)) || isNaN(Number(numB))) {
-    return 0
-  }
-  return Big(numA).div(numB).toString()
-}
-
-export const toTimes = (numA, numB) => {
-  if (isNaN(Number(numA)) || isNaN(Number(numB))) {
-    return 0
-  }
-  return Big(numA).times(numB).toString()
-}
-
-export const toPlus = (numA, numB) => {
-  if (isNaN(Number(numA)) || isNaN(Number(numB))) {
-    return 0
-  }
-  return Big(numA).plus(numB).toString()
-}
-
-export const toMinus = (numA, numB) => {
-  if (isNaN(Number(numA)) || isNaN(Number(numB))) {
-    return 0
-  }
-  return Big(numA).minus(numB).toString()
-}
-
 /*
   { 开平仓费率：后台返回take_rate ，IM百分比：当前档位，合约乘数：后台返回multiplier BTC为1，合约数量：合约乘数 * 合约数量}
 

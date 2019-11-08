@@ -1,23 +1,23 @@
 <template>
   <div>
-    <table class="table-container"  border="1" cellspacing="0" cellpadding="0">
+    <table class="table-container" border="1" cellspacing="0" cellpadding="0">
       <tr class="tr-1">
         <td class="grid-pair-title">
-          <label>{{currentProduct.product_name + "/" + currentProduct.currency_name}}</label>
+          <label>{{ currentProduct.product_name + "/" + currentProduct.currency_name }}</label>
           <span>
-            {{currentProduct.price}} ,
+            {{ currentProduct.price }} ,
           </span>
           <span>
-            涨跌幅  {{currentProduct.delta | fixed(2) }} %,
+            涨跌幅  {{ currentProduct.delta | fixed(2) }} %,
           </span>
           <span>
-            高  {{pairTick.highest_24h | fixed(2) }},
+            高  {{ pairTick.highest_24h | fixed(2) }},
           </span>
           <span>
-            低 {{pairTick.lowest_24h | fixed(2) }},
+            低 {{ pairTick.lowest_24h | fixed(2) }},
           </span>
           <span>
-            24H 量  {{pairTick.volume_24h | fixed(2) }} {{currentProduct.product_name}}
+            24H 量  {{ pairTick.volume_24h | fixed(2) }} {{ currentProduct.product_name }}
           </span>
         </td>
         <td class="grid-order-book" rowspan="2">
@@ -50,27 +50,27 @@
 </template>
 <script>
 import { getRates, getPairList, getBalanceList } from '@/api/trading'
-import { toPlus, toDiv, toTimes, toMinus, toFixed} from '@/utils/handleNum'
+import { toBig, bigTimes, bigMinus, bigDiv } from '@/utils/handleNum'
 import orderbook from './components/Orderbook'
 import soket from '../../mixins/soket'
- 
+
 export default {
-  name: 'trading', 
+  name: 'Trading',
+  components: { orderbook },
+  mixins: [soket],
   data() {
     return {
-      pair: "",
+      pair: '',
       products: [],
       currentProduct: {},
       tickersData: null,
       pairTick: {}
     }
   },
-  components: {orderbook},
-  mixins: [soket],
   async created() {
-     console.log(1111)
-    let res = await getPairList()
-    if (res.code == 200 && res.data) {
+    console.log(1111)
+    const res = await getPairList()
+    if (res.code === 200 && res.data) {
       res.data = res.data.map(item => {
         item.amount_scale = parseInt(item.amount_scale, 10)
         item.currency_scale = parseInt(item.price_scale, 10)
@@ -89,25 +89,25 @@ export default {
     }
 
     await this.openWebSocket('/market/tickers', this.handleTickers)
-
   },
   methods: {
     load() {
-      //console.log(1111)
-    }, 
-    handleTickers(data) { 
+      // console.log(1111)
+    },
+    handleTickers(data) {
       const dictionary = [...this.products]
       const dataArr = data
       dataArr.forEach(item => {
         this.patch(item)
-      });
+      })
     },
     patch(item) {
-      console.log('testtesttesttesttesttest')
+      console.log('')
       const find = this.products.find(pair => pair.name === item.pair)
       if (find) {
         find.price = item.current
-        find.delta = toDiv(toTimes(item.increment_24h, 100), toMinus(item.current, item.increment_24h))
+        find.delta = bigDiv([bigTimes([item.increment_24h, 100], 10), bigMinus([item.current, item.increment_24h], 10)], 10)
+
         find.vol = item.volume_24h
         find.tick = item
       }
@@ -120,33 +120,33 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.table-container { 
+.table-container {
   .grid-pair-title {
     min-width: 760px;
     height: 30px;
   }
   .grid-order-book {
     height: 320px;
-    width: 288px; 
+    width: 288px;
   }
   .grid-deal {
     width: 292px;
   }
   .grid-trading-view {
     width: 292px;
-    height: 574px; 
+    height: 574px;
   }
   .grid-operate {
     height: 288px;
     width: 604px;
-  } 
+  }
   .grid-order {
     height: 290px;
-  } 
+  }
   .grid-intro {
     height: 290px;
   }
-} 
+}
 table.table-container{
   width: 100%;
   table-layout: fixed;

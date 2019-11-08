@@ -1,8 +1,7 @@
 import Vue from 'vue'
 
-import {toBig, toRound, toFixed, toThousand} from './utils/handleNum'
+import { toBig, toRound, toFixed, toThousand } from './utils/handleNum'
 import { parseTime } from './utils/index'
-
 
 Vue.filter('big', toBig)
 Vue.filter('round', toRound)
