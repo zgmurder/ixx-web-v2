@@ -120,7 +120,7 @@ export const getCost = ({ count = 0, price = 1, leverages = 1, IM = 0, take_rate
    */
 export const getTotalValue = ({ futures, holding, pairInfo, mul, fixed = 8 }) => {
   const down = 0
-  const price = holding.price == '--' ? 0 : holding.price
+  const price = holding.price === '--' ? 0 : holding.price
 
   let totalValue = Big(price || 0).eq(0) ? Big(0) : Big(holding.amount).div(price)
   if (pairInfo.name !== 'FUTURE_BTCUSD') {
@@ -128,13 +128,13 @@ export const getTotalValue = ({ futures, holding, pairInfo, mul, fixed = 8 }) =>
   }
   for (const future of futures) {
     // 数量 = 委托总数量 - 已成交数量
-    const fprice = future.price == '--' ? 0 : future.price
+    const fprice = future.price === '--' ? 0 : future.price
     const amount = Big(future.amount).minus(future.executed)
-    let value = (Big(future.amount || 0).eq(0) || Big(fprice || 0).eq(0)) ? Big(0) : amount.div(fprice).round(fixed, down)
+    let value = Big(fprice || 0).eq(0) ? Big(0) : amount.div(fprice)
     if (pairInfo.name !== 'FUTURE_BTCUSD') {
       value = Big(future.amount || 0).times(fprice || 0).times(mul)
     }
-    totalValue = future.side == 1 ? totalValue.plus(value) : totalValue.minus(value)
+    totalValue = future.side === 1 ? totalValue.plus(value) : totalValue.minus(value)
   }
-  return totalValue.abs()
+  return totalValue.round(fixed, down).abs()
 }
