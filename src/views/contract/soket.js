@@ -3,14 +3,7 @@ export default {
   data() {
     return {
       websockets: []
-      // tickersData: null
     }
-  },
-  created() {
-    // getFutureDictionaryList().then(res => {
-    //   this.dataDictionary = res.data
-    //   this.openWebSocket('/market/tickers', this.handleTickers).then(() => this.$emit('baseDataLoaded'))
-    // })
   },
   computed: {
     baseWSurl() {
@@ -23,7 +16,8 @@ export default {
   methods: {
     openWebSocket(wsurl, callBack = () => {}) {
       return new Promise((resolve, reject) => {
-        const websocket = new WebSocket(`${this.baseWSurl}${wsurl}`)
+        wsurl = wsurl.startsWith('wss:') ? wsurl : `${this.baseWSurl}${wsurl}`
+        const websocket = new WebSocket(wsurl)
         websocket.onopen = () => console.log(`${wsurl}连接成功`)
         websocket.onerror = () => console.log(`${wsurl}连接发生错误`)
         websocket.onclose = () => console.log(`${wsurl}链接关闭`)

@@ -13,7 +13,7 @@ export default {
   watch: {
     data: {
       handler(newValue) {
-        if (!this.chart) return
+        if (!this.chart || !newValue) return
         Object.keys(newValue).map((key, index) => {
           const arrData = newValue[key].map(item => [+item.values[0], +item.values[2]]).sort((a, b) => a[0] - b[0])
           this.chart.series[index].setData(arrData, false, false, true)

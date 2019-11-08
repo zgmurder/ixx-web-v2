@@ -1,47 +1,62 @@
 <template>
-  <div v-loading="!data" class="shipping" element-loading-background="rgba(0, 0, 0, 0.3)">
+  <div class="shipping">
     <div v-for="item in data" :key="item.currency" class="shipping-item" flex>
       <div>
-        <h2 class="text-active">BTC永续</h2>
-        <h3 class="text-success">做多</h3>
-        <p class="interval">止盈/止损</p>
+        <h2 class="text-active">{{ $t(`contract.mapTabs.FUTURE_${item.currency}`) }}</h2>
+        <h3 v-if="item.holding > 0" class="text-success">{{ $t(`contract.mapFormContent.mapHandleBtn.buy`) }}</h3>
+        <h3 v-else class="text-danger">{{ $t(`contract.mapFormContent.mapHandleBtn.sell`) }}</h3>
+        <p class="interval">{{ $tR('lossLimit') }} / {{ $tR('winLimit') }}</p>
         <p>-- / -- </p>
       </div>
       <div flex>
-        <div v-for="(value,key,i) in mapTableText" :key="key">
-          <p class="text-info" :class="{interval:i>4}">{{ $tR(`mapTableText.${key}`) }}</p>
-          <p class="text-success">{{ item[key] }}</p>
+        <div v-for="(value,key,i) in tableColumns" :key="key">
+          <p class="text-info" :class="{interval:i>4}">{{ $t(`contract.mapTableTapContents.shipping.mapTableColumns.${key}`) }}</p>
+          <p class="text-success">{{ key === 'markPrice'?markData[item.currency]:item[key] }}</p>
           <!-- <p class="interval">止盈/止损</p>
           <p>-- / -- </p> -->
         </div>
       </div>
       <div>
         <p class="text-active">平仓价格</p>
-        <p class="text-success">做多</p>
+        <p v-if="item.holding > 0" class="text-success">{{ $t(`contract.mapFormContent.mapHandleBtn.buy`) }}</p>
+        <p v-else class="text-danger">{{ $t(`contract.mapFormContent.mapHandleBtn.sell`) }}</p>
         <div class="interval">
-          <el-button size="mini" type="danger" round>市价</el-button>
-          <el-button size="mini" type="success" round>平仓</el-button>
+          <el-button size="mini" type="danger" round>{{ $tR(`price`) }}</el-button>
+          <el-button size="mini" type="success" round>{{ $tR(`closeOut`) }}</el-button>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
+import { bigDiv } from '@/utils/handleNum'
 export default {
   name: 'Shipping',
   props: {
     data: {
       type: Array,
       default: null
+    },
+    tableColumns: {
+      type: Object,
+      default: null
+    },
+    markData: {
+      type: Object,
+      default: () => {}
     }
   },
-  computed: {
-    mapTableText() {
-      return this.chineseLangData.mapTableText
+  methods: {
+    handleValueByKey(key, item) {
+      switch (key) {
+        case 'markPrice':
+          return this.markData[item.currency]
+        case 'value':
+          return bigDiv([item.holding, item.price])
+        default:
+          return item[key]
+      }
     }
-  },
-  created() {
-    console.log(this.data)
   }
 }
 </script>

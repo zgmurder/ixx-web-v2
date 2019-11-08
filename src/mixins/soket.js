@@ -26,7 +26,8 @@ export default {
       return new Promise((resolve, reject) => {
         const websocket = new WebSocket(`${this.baseWSurl}${wsurl}`)
         websocket.onopen = () => {
-          websocket.send(`{"reqType": 2, "args":["${this.websocketArgs[1]}"]}`)
+          // websocket.send(`{"reqType": 2, "args":["${this.websocketArgs[1]}"]}`)
+          websocket.send(`{"reqType": 2, "args":["BTCUSD"]}`)
           websocket.send(`{"reqType": 1, "args":${JSON.stringify(this.websocketArgs)}}`)
           console.log(`${wsurl}连接成功`)
         }
