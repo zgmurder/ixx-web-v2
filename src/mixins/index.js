@@ -1,6 +1,5 @@
 import { capitalizeLower, parseTime } from '@/utils'
-import { bigRound } from '@/utils/handleNum'
-
+import { bigRound, toBig, toRound, toFixed, toThousand } from '@/utils/handleNum'
 export default {
   computed: {
     thisName() {
@@ -22,6 +21,10 @@ export default {
   },
   filters: {
     parseTime,
-    bigRound
+    bigRound,
+    toBig,
+    toRound,
+    toFixed,
+    toThousand
   }
 }

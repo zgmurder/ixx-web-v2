@@ -8,16 +8,16 @@
             {{ currentProduct.price }} ,
           </span>
           <span>
-            涨跌幅  {{ currentProduct.delta | fixed(2) }} %,
+            涨跌幅  {{ currentProduct.delta | toFixed(2) }} %,
           </span>
           <span>
-            高  {{ pairTick.highest_24h | fixed(2) }},
+            高  {{ pairTick.highest_24h | toFixed(2) }},
           </span>
           <span>
-            低 {{ pairTick.lowest_24h | fixed(2) }},
+            低 {{ pairTick.lowest_24h | toFixed(2) }},
           </span>
           <span>
-            24H 量  {{ pairTick.volume_24h | fixed(2) }} {{ currentProduct.product_name }}
+            24H 量  {{ pairTick.volume_24h | toFixed(2) }} {{ currentProduct.product_name }}
           </span>
         </td>
         <td class="grid-order-book" rowspan="2">
