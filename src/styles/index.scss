@@ -22,8 +22,8 @@ textarea,select,input{-webkit-appearance: none; -moz-appearance: none; -o-appear
 
 tr.contract-order-list-row-class{
   background:$--contract-table-bg;
-  &:hover{
-    background: none;
+  &:hover>td{
+    background: $--contract-table-active!important;
   }
   th.is-leaf{
     background: $--contract-table-bg;

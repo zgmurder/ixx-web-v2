@@ -11,9 +11,9 @@
       <div flex>
         <div v-for="(value,key,i) in tableColumns" :key="key">
           <p class="text-info" :class="{interval:i>4}">{{ $t(`contract.mapTableTapContents.shipping.mapTableColumns.${key}`) }}</p>
-          <p class="text-success">{{ key === 'markPrice'?markData[item.currency]:item[key] }}</p>
-          <!-- <p class="interval">止盈/止损</p>
-          <p>-- / -- </p> -->
+          <p v-if="i<5" class="text-success">{{ key === 'markPrice'?markData[item.currency]:item[key] }}</p>
+          <p v-else class="text-success">{{ item[key]|bigRound(8) }}</p>
+          <p v-if="i>4">-- / -- </p>
         </div>
       </div>
       <div>

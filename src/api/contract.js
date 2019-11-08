@@ -113,3 +113,31 @@ export const getRates = data => request({
   method: 'post',
   data
 })
+/* 下单 POST /contract/order
+user_id
+amount
+price
+type 下单类型 1 限价 2市价 3限价止损 4市价止损 5限价止盈 6市价止盈
+side 方向 2卖 1买
+symbol 交易对
+leverage 杠杆倍数 -1代表全仓 10 20 100
+passive 是否被动委托 0否 1是
+trigger_price 触发价格
+trigger_type 触发类型 0默认 1盘口价格 2标记价格 3指数价格
+trigger_close 触发后平仓 0未勾选 1勾选
+tp_type 止盈触发类型 0默认 1盘口价格 2标记价格 3指数价格 如果是-1的话代表从仓位里下的触发单
+tp_price 止盈价格
+sl_type 止损触发类型 0默认 1盘口价格 2标记价格 3指数价格 如果是-1的话代表从仓位里下的触发单
+sl_price 止损价格 */
+export const submitOrder = data => request({
+  url: `/contract/order`,
+  method: 'post',
+  data
+})
+
+// 当前仓位,委托,止损委托,委托历史,已成交数量 POST /future/account/holding/amount
+export const getAllAmount = data => request({
+  url: `/future/account/holding/amount`,
+  method: 'post',
+  data
+})

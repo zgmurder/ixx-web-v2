@@ -77,6 +77,10 @@ export default {
     sheet: '张',
     buy: '卖入',
     sell: '卖出',
+    state: {
+      1: '委托中未成交',
+      2: '委托中部分成交'
+    },
     mapTabs: {
       FUTURE_BTCUSD: `BTC永续`,
       FUTURE_ETHUSD: `ETH永续`,
@@ -111,15 +115,17 @@ export default {
           symbol: '合约类型',
           amount: '数量',
           price: '委托价格',
-          total: '已成交额',
-          executed: '已成交量',
+          // total: '已成交额',
+          executed: '已成交量/剩余量',
+          entrustValue: '委托价值',
+          type: '类型',
           state: '状态',
-          create_time: '下单时间',
-          update_time: '更新时间',
-          tp_type: '止盈触发类型',
-          tp_price: '止盈价格',
-          sl_type: '止损触发类型',
-          sl_price: '止损价格'
+          tp_type: '止盈/止损',
+          create_time: '下单时间'
+          // update_time: '更新时间'
+          // tp_price: '止盈价格',
+          // sl_type: '止损触发类型',
+          // sl_price: '止损价格'
         }
       },
       lossEntrust: {
@@ -194,17 +200,15 @@ export default {
     },
     mapFormContent: {
       mapBtns: {
-        direction: { text: '现价', describe: '限价委托用于在指定的（或更好的）价格买入或卖出。这是最常用的委托类型。' },
-        transactionPrice: { text: '市价', describe: '市价委托是一种最快的成交方式。它以目前委托列表的最佳价格执行。请注意，网络延迟可能导致委托的执行价格与你的期望有所不同。' },
-        tradingVolume: {
-          text: '市价止损'
-        }
+        1: { text: '限价', describe: '限价委托用于在指定的（或更好的）价格买入或卖出。这是最常用的委托类型。' },
+        2: { text: '市价', describe: '市价委托是一种最快的成交方式。它以目前委托列表的最佳价格执行。请注意，网络延迟可能导致委托的执行价格与你的期望有所不同。' },
+        3: { text: '市价止损' }
       },
       mapMenuOptions: {
-        priceDamage: '市价止损',
-        priceProfit: '市价止盈',
-        limitedPriceDamage: '限价止损',
-        limitedPriceProfit: '限价止盈'
+        4: '市价止损',
+        5: '市价止盈',
+        6: '限价止损',
+        7: '限价止盈'
       },
       mapInput: {
         shippingSpace: '仓位',

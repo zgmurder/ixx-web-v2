@@ -15,7 +15,7 @@
           </el-tooltip>
         </template>
         <template slot-scope="scope">
-          <span>{{ scope.row[item.prop] | filterColumnValue(item.prop,item,item.handleValue) }}</span>
+          <span>{{ scope.row[item.prop] | filterColumnValue(item.prop,scope.row,item.handleValue) }}</span>
         </template>
       </el-table-column>
       <el-table-column v-if="lastColumnConfig" v-bind="$attrs">

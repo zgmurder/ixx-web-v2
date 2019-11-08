@@ -85,7 +85,7 @@
             <div v-loading="!activeTabItem.dictionary" element-loading-background="rgba(0, 0, 0, 0.3)" class="content-container-submit">
               <div flex="main:justify">
                 <div v-for="(value,key) in mapFormContent.mapBtns" :key="key" :class="{active:activeBtnsKey === key}">
-                  <dropdown v-if="key === 'tradingVolume'" v-model="activePriceType" :menu-options="menuOptions" label="label">
+                  <dropdown v-if="key === '3'" v-model="activePriceType" :menu-options="menuOptions" label="label">
                     <el-button class="custom-btn" :class="{active:activeBtnsKey === key}" size="small" plain @click="handleSwitch(key)">
                       {{ activePriceType.label }} <i class="el-icon-caret-bottom" />
                     </el-button>
@@ -99,7 +99,7 @@
               </div>
               <div v-for="(value,key,i) in mapFormContent.mapInput" :key="key" flex="main:justify">
                 <label for="">{{ $tR(`mapFormContent.mapInput.${key}`) }}</label>
-                <div v-if="i===1 && activeBtnsKey === 'transactionPrice'" class="transactionPrice" flex="main:justify box:mean">
+                <div v-if="i===1 && activeBtnsKey === '2'" class="transactionPrice" flex="main:justify box:mean">
                   <div>买：9540</div>
                   <div style="border-left: 1px solid #333;">卖：9540</div>
                 </div>
@@ -110,8 +110,8 @@
               </div>
               <div>
                 <div v-for="(value,key) in mapFormContent.mapHandleBtn" :key="key">
-                  <el-button :type="key === 'buy'?'success':'danger'" :disabled="!activeAcountAndPriceArr[0]" style="width:100%" @click="submitOrder(key === 'buy'?1:2)">
-                    <div flex="main:justify cross:center">
+                  <el-button :type="key === 'buy'?'success':'danger'" :loading="buyBtnLoading" :disabled="!activeAcountAndPriceArr[0]" style="width:100%" @click="submitOrder(key === 'buy'?1:2)">
+                    <div v-show="!buyBtnLoading" flex="main:justify cross:center">
                       <span>{{ $tR(`mapFormContent.mapHandleBtn.${key}`) }}</span>
                       <span style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ activeAcountAndPriceArr[1]||activeTabItem.current }} USD</span>
                     </div>
@@ -222,14 +222,19 @@
         <td rowspan="3" colspan="5">
           <div v-loading="!tableList" class="order-list" element-loading-background="rgba(0, 0, 0, 0.3)">
             <div class="header" flex>
-              <div v-for="(value,key) in mapTableTapContents" :key="key" :class="{active:activeTableTabKey === key}" @click="handleTableTabClick(key)">
-                <!-- <el-badge is-dot style="line-height:normal"> </el-badge> -->
-                {{ $tR(`mapTableTapContents.${key}.text`) }}
+              <div v-for="(value,key) in mapTableTapContents" :key="key" :class="{active:activeTableTabKey === key}" @click="handleTableTabClick(key,amountObj[key][1]=false)">
+                <el-badge v-if="amountObj" is-dot :hidden="activeTableTabKey === key ||!amountObj[key][1]">
+                  <p style="min-width:120px">{{ $tR(`mapTableTapContents.${key}.text`) }}【{{ amountObj[key][0] }}】</p>
+                </el-badge>
               </div>
             </div>
             <div class="order-list-content">
               <shipping v-if="activeTableTabKey && activeTableTabKey === 'shipping' && tickersData" :mark-data="markData" :data="tableList" :table-columns="tableColumns" />
-              <customTable v-if="activeTableTabKey && activeTableTabKey !== 'shipping' && tableList" header-row-class-name="contract-order-list-row-class" row-class-name="contract-order-list-row-class" size="mini" :table-list="tableList" :table-columns="tableColumns" />
+              <customTable v-if="activeTableTabKey && activeTableTabKey !== 'shipping' && tableList" header-row-class-name="contract-order-list-row-class" row-class-name="contract-order-list-row-class" size="mini" :table-list="tableList" :last-column-config="lastColumnConfig" :table-columns="tableColumns">
+                <div slot="handlerDom"><!--  slot-scope="data" -->
+                  <el-button size="mini" type="danger">撤销</el-button>
+                </div>
+              </customTable>
             </div>
           </div></td>
         <td rowspan="3">
@@ -274,9 +279,10 @@ import {
   getActivetriggers,
   getActiveOrderhistory,
   getActiveOrderfills,
-  // WSURL,
+  WSURL,
   getRates,
-  submitOrder
+  submitOrder,
+  getAllAmount
 } from '@/api/contract'
 import depthMap from './components/depth-map'
 import shipping from './components/shipping'
@@ -296,7 +302,7 @@ export default {
   data() {
     return {
       activeTabkey: '',
-      activeBtnsKey: 'direction',
+      activeBtnsKey: '1',
       activePriceType: {},
       activeLever: '0',
       activeTableTabKey: 'shipping',
@@ -316,7 +322,10 @@ export default {
 
       tableList: null,
 
-      currencyRates: null
+      currencyRates: null,
+
+      buyBtnLoading: false,
+      amountObj: null
     }
   },
   computed: {
@@ -405,11 +414,37 @@ export default {
       let mapTableColumns = this.mapTableTapContents[this.activeTableTabKey].mapTableColumns
       if (this.activeTableTabKey !== 'shipping') {
         mapTableColumns = Object.keys(mapTableColumns).map(key => ({
-          hearderLabel: mapTableColumns[key],
-          prop: key
+          hearderLabel: this.$tR(`mapTableTapContents.${this.activeTableTabKey}.mapTableColumns.${key}`),
+          prop: key,
+          // hearderWidth: key => ['amount', 'trade_type', 'amount'].includes(key) && '50px',
+          handleValue: (value, key, row) => {
+            switch (key) {
+              case 'executed':
+                return `${value}/${row.amount - value}`
+              case 'type':
+                return +value < 4 ? this.$tR(`mapFormContent.mapBtns.${value}.text`) : this.$tR(`mapFormContent.mapMenuOptions.${value}`)
+              case 'state':
+                return this.$tR(`state.${value}`)
+              case 'tp_type':
+                return `${value}/${row.sl_price}`
+              case 'create_time':
+                return this.parseTime(value)
+              // case 'sett_time':
+              //   return this.parseTime(value)
+              default:
+                return value
+            }
+          }
         }))
       }
       return mapTableColumns
+    },
+    lastColumnConfig() {
+      return {
+        headerLabel: '操作',
+        headerAlign: 'left',
+        width: '50px'
+      }
     },
     menuOptions() {
       const options = this.mapFormContent.mapMenuOptions
@@ -418,8 +453,7 @@ export default {
         key,
         click: item => {
           // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-          this.activeBtnsKey = 'tradingVolume'
-          console.log(item)
+          this.activeBtnsKey = '3'
         }
       }))
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -446,16 +480,32 @@ export default {
   async created() {
     this.products = (await getSymbolList()).data
     await this.openWebSocket('/market/tickers', this.handleTickers)
-    // this.openWebSocket(WSURL, res => {
-    //   console.log(res)
-    // }).then(res => {
-
-    // })
+    this.openWebSocket(WSURL, res => {
+      if (res) this.handleAmountObj()
+    }, websocket => websocket.send('{"op":"login","args":["8be85859c7e2d88c87d6e31d650c6cef","8c7d5d714632ece63bc2eef4301acf94c121ea23065f2456f28e083485e558a1"]}')).then((websocket) => {
+      websocket.send('{"op":"subscribe","args":["orderfills"]}')
+      // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
+    })
+    this.handleAmountObj()
     this.handleTabClick('FUTURE_BTCUSD')
-    this.handleTableTabClick('shipping')
     this.currencyRates = (await getRates({ currency: 'BTC' })).data
   },
   methods: {
+    async handleAmountObj() {
+      const { holding_amount: shipped, active_amount: curEntrust, active_triggers_amount: lossEntrust, active_orders_amount: historyEntrust, orders_amount: bargain } = (await getAllAmount()).data
+      const data = this.amountObj && JSON.parse(JSON.stringify(this.amountObj))
+      const obj = {
+        shipping: [shipped, data && data.shipping[0] !== shipped],
+        shipped: [shipped, false],
+        curEntrust: [curEntrust, data && data.curEntrust[0] !== curEntrust],
+        lossEntrust: [lossEntrust, data && data.lossEntrust[0] !== lossEntrust],
+        historyEntrust: [historyEntrust, data && data.historyEntrust[0] !== historyEntrust],
+        bargain: [bargain, data && data.bargain[0] !== bargain]
+      }
+      obj[this.activeTableTabKey][1] = false
+      this.amountObj = obj
+      this.handleTableTabClick(this.activeTableTabKey)
+    },
     translateByRate(value) {
       if (!this.currencyRates) return
       return bigTimes([this.currencyRates['USD'], value])
@@ -515,12 +565,24 @@ export default {
     async handleTableTabClick(key) {
       this.tableList = null
       this.activeTableTabKey = key
-      const data = (await this.mapHandlers[key]()).data
-      this.tableList = Array.isArray(data) ? data.filter(item => !!+item.holding).map(item => {
-        item.price = this.bigRound(item.price, this.futurePriceScale[`FUTURE_${item.currency}`])
-        item.value = bigDiv([item.holding, item.price], 8)
+      let data = (await this.mapHandlers[key]()).data
+      if (Array.isArray(data)) {
+        data = key === 'shipping' ? data.filter(item => !!+item.holding).map(item => {
+          item.price = this.bigRound(item.price, this.futurePriceScale[`FUTURE_${item.currency}`])
+          item.value = bigDiv([item.holding, item.price], 8)
+          return item
+        }) : data.map(item => {
+          item.realized = this.bigRound(item.realized, 8)
+          return item
+        })
+      } else data = data.data
+      this.tableList = data.map(item => {
+        key === 'shipped' && (item.symbol = this.$tR(`mapTabs.FUTURE_${item.symbol}`))
+        key === 'curEntrust' && (item.symbol = this.$tR(`mapTabs.${item.symbol}`))
         return item
-      }) : data.data
+      })
+
+      // key === 'shipping' && (this.amountObj.shipping[0] = this.tableList.length)
       const found = this.tableList.find(item => this.activeTabItem.pair.includes(item.currency))
       this.activeLever = found && found.leverage || this.activeLever
       this.holdingCount = found && found.holding || +this.holdingCount
@@ -550,17 +612,21 @@ export default {
       this.activeBtnsKey = btnKey
     },
     submitOrder(side) {
-      console.log(this.activePriceType, this.activeBtnsKey)
+      // const product = this.activeTabItem.dictionary
+      this.buyBtnLoading = true
+      console.log(this.activeAcountAndPriceArr[1] || this.activeTabItem.current)
 
       const data = {
         user_id: this.userData.id,
         amount: this.activeAcountAndPriceArr[0],
-        price: this.activeAcountAndPriceArr[0],
+        price: this.activeAcountAndPriceArr[1] || this.activeTabItem.current,
         type: this.activeBtnsKey, // 下单类型 1 限价 2市价 3限价止损 4市价止损 5限价止盈 6市价止盈
-        side
-        // symbol 交易对
-        // leverage 杠杆倍数 -1代表全仓 10 20 100
+        side,
+        symbol: this.activeTabItem.pair,
+        leverage: this.activeLever
+
         // passive 是否被动委托 0否 1是
+
         // trigger_price 触发价格
         // trigger_type 触发类型 0默认 1盘口价格 2标记价格 3指数价格
         // trigger_close 触发后平仓 0未勾选 1勾选
@@ -569,7 +635,13 @@ export default {
         // sl_type 止损触发类型 0默认 1盘口价格 2标记价格 3指数价格 如果是-1的话代表从仓位里下的触发单
         // sl_price 止损价格
       }
-      // submitOrder(data)
+      submitOrder(data).then(res => {
+        this.$message.success('操作成功')
+        this.handleAmountObj()
+        setTimeout(() => {
+          this.buyBtnLoading = false
+        }, 500)
+      })
     }
   }
 }
@@ -811,7 +883,6 @@ export default {
     &>.header{
       padding: 0;
       &>*{
-        padding: 0 30px;
         border-right:1px solid #000;
         transition: all .5s ease-in-out;
         &:hover,&.active{
@@ -862,6 +933,19 @@ table.table-container{
       border-width:4px;
       border: solid 4px $--contract-table-bd;
     }
+  }
+}
+tr.contract-order-list-row-class{
+  background:$--contract-table-bg;
+  &:hover>td{
+    background: $--contract-table-active!important;
+  }
+  th.is-leaf{
+    background: $--contract-table-bg;
+    border-color: rgb(27, 28, 29);
+  }
+  td{
+    border-color: rgb(27, 28, 29);
   }
 }
 </style>
