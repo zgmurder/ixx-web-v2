@@ -53,15 +53,13 @@
     </div>
     <div class="panel-thead">
       <div class="thead" flex>
-        <div flex-box="1" class="th"/>
+        <div flex-box="1" class="th" />
         <div flex-box="1" class="th">{{ $t('价格') }} </div>
         <div flex-box="1" class="th">{{ $t('数量') }} </div>
         <div flex-box="1" class="th">{{ $t('累计') }} </div>
       </div>
     </div>
-    <div class="panel-body" >
-
-    </div>
+    <div class="panel-body" />
     <div class="mask" />
   </div>
 </template>
@@ -88,8 +86,8 @@ export default {
     },
     currentDepth() {
       return Math.pow(10, -this.priceScale).toFixed(this.priceScale >= 0 ? this.priceScale : 0)
-    },
-    
+    }
+
   },
   methods: {
     setModel(mode) {
