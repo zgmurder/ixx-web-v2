@@ -34,10 +34,10 @@
                   </li>
                 </ul>
                 <div class="content-center">
-                  <p :class="[activeTabItem.increment_24h > 0?'text-success':'text-danger',triggerBtn && 'justify'||'']">
+                  <p :class="[isBuy?'text-success':'text-danger',triggerBtn && 'justify'||'']">
                     <span>
                       {{ activeTabItem.current | bigRound(activeTabItem.dictionary.price_scale) }}
-                      <svg-icon :icon-class="activeTabItem.increment_24h > 0?'up':'down'" />
+                      <svg-icon :icon-class="isBuy?'lv':'hong'" />
                     </span>
                     <el-link v-if="triggerBtn" :underline="false" type="info" @click="dataLoaded(true)">{{ $tR(`mapDelegateList.return-dish`) }}</el-link>
                   </p>
@@ -230,9 +230,9 @@
             </div>
             <div class="order-list-content">
               <shipping v-if="activeTableTabKey && activeTableTabKey === 'shipping' && tickersData" :mark-data="markData" :data="tableList" :table-columns="tableColumns" />
-              <customTable v-if="activeTableTabKey && activeTableTabKey !== 'shipping' && tableList" header-row-class-name="contract-order-list-row-class" row-class-name="contract-order-list-row-class" size="mini" :table-list="tableList" :last-column-config="lastColumnConfig" :table-columns="tableColumns">
-                <div slot="handlerDom"><!--  slot-scope="data" -->
-                  <el-button size="mini" type="danger">撤销</el-button>
+              <customTable v-if="activeTableTabKey && activeTableTabKey !== 'shipping' && tableList" header-row-class-name="contract-order-list-row-class" row-class-name="contract-order-list-row-class" size="mini" :table-list="activeTableTabKey === 'lossEntrust'?updateTableList:tableList" :last-column-config="lastColumnConfig" :table-columns="tableColumns">
+                <div slot="handlerDom" slot-scope="{data}">
+                  <el-button size="mini" type="danger" :loading="cancelBtnLoading" @click="cancelOrder(data)">{{ $tR('cancel') }}</el-button>
                 </div>
               </customTable>
             </div>
@@ -244,10 +244,10 @@
             </div>
             <div v-if="delegateData" class="information-content">
               <div class="content-center">
-                <p :class="[activeTabItem.increment_24h > 0?'text-success':'text-danger',triggerBtn && 'justify'||'']">
+                <p :class="[isBuy?'text-success':'text-danger',triggerBtn && 'justify'||'']">
                   <span>
                     {{ activeTabItem.current | bigRound(activeTabItem.dictionary.price_scale) }}
-                    <svg-icon :icon-class="activeTabItem.increment_24h > 0?'up':'down'" />
+                    <svg-icon :icon-class="isBuy?'lv':'hong'" />
                   </span>
                   <el-link v-if="triggerBtn" :underline="false" type="info" @click="dataLoaded(true)">{{ $tR(`mapDelegateList.return-dish`) }}</el-link>
                 </p>
@@ -282,6 +282,7 @@ import {
   WSURL,
   getRates,
   submitOrder,
+  cancelOrder,
   getAllAmount
 } from '@/api/contract'
 import depthMap from './components/depth-map'
@@ -310,6 +311,7 @@ export default {
       isBuy: true,
       triggerBtn: false,
       dataDeep: '1',
+
       delegateData: null,
       newBargainListData: [],
       holdingCount: 0,
@@ -324,7 +326,9 @@ export default {
       currencyRates: null,
 
       buyBtnLoading: false,
+      cancelBtnLoading: false,
       amountObj: null
+
     }
   },
   computed: {
@@ -415,9 +419,28 @@ export default {
         mapTableColumns = Object.keys(mapTableColumns).map(key => ({
           hearderLabel: this.$tR(`mapTableTapContents.${this.activeTableTabKey}.mapTableColumns.${key}`),
           prop: key,
+          class: (value, key, row) => {
+            switch (key) {
+              case 'amount':
+                return row.side === 1 ? 'text-success' : 'text-danger'
+              case 'side':
+                return row.side === 1 ? 'text-success' : 'text-danger'
+              case 'distancePrice':
+                return +value > 0 ? 'text-success' : 'text-danger'
+              default:
+                return ''
+            }
+            // if (['distancePrice','amount'].includes(key)) {
+            //   return +value > 0 ? 'text-success' : 'text-danger'
+            // }
+          },
           // hearderWidth: key => ['amount', 'trade_type', 'amount'].includes(key) && '50px',
           handleValue: (value, key, row) => {
             switch (key) {
+              case 'amount':
+                return `${row.side === 2 ? '-' : ''}${value}`
+              case 'side':
+                return `${row.side === 2 ? this.$tR('sell') : this.$tR('buy')}`
               case 'executed':
                 return `${value}/${row.amount - value}`
               case 'type':
@@ -428,8 +451,8 @@ export default {
                 return `${value}/${row.sl_price}`
               case 'create_time':
                 return this.parseTime(value)
-              // case 'sett_time':
-              //   return this.parseTime(value)
+              case 'distancePrice':
+                return `${value > 0 ? '+' : ''}${value}`
               default:
                 return value
             }
@@ -439,11 +462,11 @@ export default {
       return mapTableColumns
     },
     lastColumnConfig() {
-      return {
-        headerLabel: '操作',
+      return ['curEntrust', 'lossEntrust'].includes(this.activeTableTabKey) ? {
+        headerLabel: this.$tR('handle'),
         headerAlign: 'left',
         width: '50px'
-      }
+      } : null
     },
     menuOptions() {
       const options = this.mapFormContent.mapMenuOptions
@@ -474,13 +497,19 @@ export default {
     mapLever() {
       if (!this.activeTabItem.dictionary) return []
       return this.activeTabItem.dictionary.leverages.split(',')
+    },
+    updateTableList() {
+      return this.tableList && this.tableList.map(item => {
+        const distancePrice = item.trigger_price - this.activeTabItem.current
+        return { ...item, distancePrice }
+      }) || []
     }
   },
   async created() {
     this.products = (await getSymbolList()).data
     await this.openWebSocket('/market/tickers', this.handleTickers)
     this.openWebSocket(WSURL, res => {
-      if (res) this.handleAmountObj()
+      if (res && !this.cancelBtnLoading && !this.buyBtnLoading) this.handleAmountObj()
     }, websocket => websocket.send('{"op":"login","args":["8be85859c7e2d88c87d6e31d650c6cef","8c7d5d714632ece63bc2eef4301acf94c121ea23065f2456f28e083485e558a1"]}')).then((websocket) => {
       websocket.send('{"op":"subscribe","args":["orderfills"]}')
       // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
@@ -576,8 +605,13 @@ export default {
         })
       } else data = data.data
       this.tableList = data.map(item => {
-        key === 'shipped' && (item.symbol = this.$tR(`mapTabs.FUTURE_${item.symbol}`))
-        key === 'curEntrust' && (item.symbol = this.$tR(`mapTabs.${item.symbol}`))
+        if (key === 'shipped') {
+          item._symbol = item.symbol
+          item.symbol = this.$tR(`mapTabs.FUTURE_${item.symbol}`)
+        } else {
+          item._symbol = item.symbol
+          item.symbol && (item.symbol = this.$tR(`mapTabs.${item.symbol}`))
+        }
         return item
       })
 
@@ -613,7 +647,6 @@ export default {
     submitOrder(side) {
       // const product = this.activeTabItem.dictionary
       this.buyBtnLoading = true
-      console.log(this.activeAcountAndPriceArr[1] || this.activeTabItem.current)
 
       const data = {
         user_id: this.userData.id,
@@ -635,11 +668,24 @@ export default {
         // sl_price 止损价格
       }
       submitOrder(data).then(res => {
-        this.$message.success('操作成功')
-        this.handleAmountObj()
-        setTimeout(() => {
-          this.buyBtnLoading = false
-        }, 500)
+        this.handleAmountObj().then(res => {
+          setTimeout(() => {
+            this.buyBtnLoading = false
+            this.$message.success(this.$tR('handleSuccess'))
+          }, 500)
+        })
+      })
+    },
+    cancelOrder(data) {
+      const { user_id, id, _symbol } = data
+      this.cancelBtnLoading = true
+      cancelOrder({ user_id, order_id: id, symbol: _symbol }).then(res => {
+        this.handleAmountObj().then(res => {
+          setTimeout(() => {
+            this.cancelBtnLoading = false
+            this.$message.success(this.$tR('handleSuccess'))
+          }, 500)
+        })
       })
     }
   }
@@ -932,19 +978,6 @@ table.table-container{
       border-width:4px;
       border: solid 4px $--contract-table-bd;
     }
-  }
-}
-tr.contract-order-list-row-class{
-  background:$--contract-table-bg;
-  &:hover>td{
-    background: $--contract-table-active!important;
-  }
-  th.is-leaf{
-    background: $--contract-table-bg;
-    border-color: rgb(27, 28, 29);
-  }
-  td{
-    border-color: rgb(27, 28, 29);
   }
 }
 </style>

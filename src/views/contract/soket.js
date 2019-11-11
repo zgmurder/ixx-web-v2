@@ -20,10 +20,8 @@ export default {
         wsurl = wsurl.startsWith('wss:') ? wsurl : `${this.baseWSurl}${wsurl}`
         const websocket = new ReconnectingWebSocket(wsurl)
         websocket.onopen = () => {
-          console.log(`${wsurl}连接成功`)
           onopen && onopen(websocket)
         }
-        websocket.onerror = () => console.log(`${wsurl}连接发生错误`)
         websocket.onclose = () => console.log(`${wsurl}链接关闭`)
         this.websockets.push(websocket)
         websocket.onmessage = e => {

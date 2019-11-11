@@ -26,6 +26,7 @@
         </div>
       </div>
     </div>
+    <span v-if="!data || !data.length" class="el-table__empty-text">{{ $t('el.table.emptyText') }}</span>
   </div>
 </template>
 <script>

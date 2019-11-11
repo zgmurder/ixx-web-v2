@@ -61,7 +61,7 @@ export const toThousand = (num = 0) => {
     if (len % 3 === 0) {
       return n.replace(/(\d{3})/g, ',$1').slice(1)
     } else {
-      return n.slice(0, leng % 3) + n.slice(len % 3).replace(/(\d{3})/g, ',$1')
+      return n.slice(0, len % 3) + n.slice(len % 3).replace(/(\d{3})/g, ',$1')
     }
   })
 }

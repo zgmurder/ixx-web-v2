@@ -141,3 +141,13 @@ export const getAllAmount = data => request({
   method: 'post',
   data
 })
+// 撤单 POST /contract/remove
+/*
+user_id
+symbol 交易对
+order_id 订单id */
+export const cancelOrder = data => request({
+  url: `/contract/remove`,
+  method: 'post',
+  data
+})

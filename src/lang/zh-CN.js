@@ -75,11 +75,19 @@ export default {
   },
   contract: {
     sheet: '张',
-    buy: '卖入',
+    buy: '买入',
     sell: '卖出',
+    handle: '操作',
+    cancel: '撤销',
+    handleSuccess: '操作成功',
     state: {
       1: '委托中未成交',
-      2: '委托中部分成交'
+      2: '委托中限价部分成交',
+      3: '完全成交',
+      4: '撤单全部',
+      5: '撤单部分成交',
+      6: '市价部分成交',
+      7: '市价'
     },
     mapTabs: {
       FUTURE_BTCUSD: `BTC永续`,
@@ -113,6 +121,7 @@ export default {
         text: '当前委托',
         mapTableColumns: {
           symbol: '合约类型',
+          side: '方向',
           amount: '数量',
           price: '委托价格',
           // total: '已成交额',
@@ -133,44 +142,63 @@ export default {
         mapTableColumns: {
           symbol: '合约类型',
           amount: '数量',
-          price: '委托价格',
-          total: '已成交额',
-          executed: '已成交量',
+          trigger_price: '触发价格',
+          distancePrice: '距离触发',
+          // total: '已成交额',
+          // executed: '已成交量',
+          type: '类型',
           state: '状态',
-          create_time: '下单时间',
-          update_time: '更新时间',
-          tp_type: '止盈触发类型',
-          tp_price: '止盈价格',
-          sl_type: '止损触发类型',
-          sl_price: '止损价格'
+          create_time: '下单时间'
+          // update_time: '更新时间'
+          // tp_type: '止盈触发类型',
+          // tp_price: '止盈价格',
+          // sl_type: '止损触发类型',
+          // sl_price: '止损价格'
         }
       },
       historyEntrust: {
         text: '委托历史',
         mapTableColumns: {
           symbol: '合约类型',
-          realized: '已实现盈亏'
+          side: '方向',
+          amount: '数量',
+          // price: '委托价格',
+          executed_price: '成交价格',
+          executed: '已成交量/剩余量',
+          // entrustValue: '委托价值',
+          type: '类型',
+          state: '状态',
+          // tp_type: '止盈/止损',
+          create_time: '下单时间'
+          // update_time: '更新时间'
+          // tp_price: '止盈价格',
+          // sl_type: '止损触发类型',
+          // sl_price: '止损价格'
         }
       },
       bargain: {
         text: '已成交',
         mapTableColumns: {
-          id: '成交单ID',
-          origin: '1成交单',
-          order_id: '订单ID',
-          uid: '用户ID',
-          symbol: '交易对',
-          product: '商品简称',
-          currency: '货币简称',
-          side: '1买',
-          type: '1限价',
-          price: '成交价',
-          amount: '成交量',
+          symbol: '合约类型',
+          side: '方向',
           amount_total: '委托数量',
-          amount_last: '成交量',
-          total: '成交额',
+          amount: '成交量',
+          amount_last: '剩余量',
+          price: '成交价格',
+          entrustPrice: '委托价格',
+          total: '价值',
+          type: '委托类型',
+          order_id: '委托单ID',
           fee: '手续费',
           create_time: '成交时间'
+
+          // id: '成交单ID',
+          // origin: '1成交单',
+          // order_id: '订单ID',
+          // uid: '用户ID',
+          // product: '商品简称',
+          // currency: '货币简称',
+
         }
       }
     },

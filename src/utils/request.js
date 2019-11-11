@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { Message } from 'element-ui'
-import store from '@/store'
+// import store from '@/store'
 import { getUser } from '@/utils/auth'
 
 // create an axios instance
@@ -89,12 +89,13 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    console.log('err' + error, 1111) // for debug
     Message({
       message: error.message,
       type: 'error',
       duration: 5 * 1000
     })
+    window.location.href = '/#/404'
     return Promise.reject(error)
   }
 )
