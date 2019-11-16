@@ -158,7 +158,6 @@ export const getCost = (product, leverages, entrustList, currHolding) => {
   // if (pairInfo.name !== 'FUTURE_BTCUSD') {
   //   value = mul.times(price).times(amount)
   // }
-
   // 输入价值
   const currValue = calcValueByAmountAndPrice(amount, price, multiplier)
   if (!currValue) return 0
@@ -187,3 +186,64 @@ export const getCost = (product, leverages, entrustList, currHolding) => {
    * price 持仓价格
    * pair 合约类型
    */
+export const getTotalValue = ({ futures, holding, pairInfo, mul, fixed = 8 }) => {
+  const down = 0
+  const price = holding.price === '--' ? 0 : holding.price
+
+  let totalValue = Big(price || 0).eq(0) ? Big(0) : Big(holding.amount).div(price)
+  if (pairInfo.name !== 'FUTURE_BTCUSD') {
+    totalValue = Big(holding.amount || 0).times(price || 0).times(mul)
+  }
+  for (const future of futures) {
+    // 数量 = 委托总数量 - 已成交数量
+    const fprice = future.price === '--' ? 0 : future.price
+    const amount = Big(future.amount).minus(future.executed)
+    let value = Big(fprice || 0).eq(0) ? Big(0) : amount.div(fprice)
+    if (pairInfo.name !== 'FUTURE_BTCUSD') {
+      value = Big(future.amount || 0).times(fprice || 0).times(mul)
+    }
+    totalValue = future.side === 1 ? totalValue.plus(value) : totalValue.minus(value)
+  }
+  return totalValue.round(fixed, down).abs()
+}
+
+/** 盈亏计算
+ * direction 多空方向 less空 more多
+ * leverages 杠杆倍数
+ * amount 下单数量
+ * open_price 开仓价格
+ * close_price 平仓价格
+ * product 币对属性
+*/
+export const getProfitLoss = ({ direction, leverages, amount, open_price, close_price, product }) => {
+  if (direction === 'less') {
+    amount = -amount
+  }
+  if (leverages == 0) {
+    leverages = product.max_leverage
+  }
+  let open_value = Big(0)
+  let close_value = Big(0)
+
+  if (product.product_name === 'BTC') {
+    open_value = Big(amount).div(open_price || 1).abs()
+    close_value = Big(close_price).div(open_price || 1).mul(open_value).abs()
+  } else {
+    open_value = Big(amount || 0).times(open_price || 0).times(product.multiplier).abs()
+    close_value = Big(amount || 0).times(close_price || 0).times(product.multiplier).abs()
+  }
+
+  const margin = Big(open_value).mul(product.max_leverage).div(leverages || product.max_leverage).mul(product.im).abs()
+  const realized = close_value.minus(open_value).mul(amount < 0 ? -1 : 1)
+  const realized_roe = realized.div(open_value || 1).mul(100)
+  const roe = realized_roe.mul(leverages)
+
+  return {
+    open_value, // 开仓价值
+    close_value, // 平仓价值
+    margin, // 保证金
+    realized, // 以实现盈亏
+    realized_roe, // 盈亏比例
+    roe // 回报率
+  }
+}
