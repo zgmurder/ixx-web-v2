@@ -179,3 +179,150 @@ export const getProfitLoss = ({ direction, leverages, amount, open_price, close_
     roe // 回报率
   }
 }
+
+// 风险限额及最大杠杆倍数
+export const riskLimitDict = (maxLeverage) => {
+  if (maxLeverage == 100) {
+    return [
+      { r: 0, m: 100 },
+      { r: 200, m: 100 },
+      { r: 300, m: 66.66 },
+      { r: 400, m: 50 },
+      { r: 500, m: 40 },
+      { r: 600, m: 33.33 },
+      { r: 700, m: 28.5 },
+      { r: 800, m: 25 },
+      { r: 900, m: 22.22 },
+      { r: 1000, m: 20 },
+      { r: 1100, m: 18.1 }
+    ]
+  } else if (maxLeverage == 50) {
+    return [
+      { r: 0, m: 50 },
+      { r: 50, m: 50 },
+      { r: 100, m: 33.3 },
+      { r: 150, m: 25 },
+      { r: 200, m: 20 },
+      { r: 250, m: 16.6 },
+      { r: 300, m: 14.2 },
+      { r: 350, m: 12.5 },
+      { r: 400, m: 11.1 },
+      { r: 450, m: 10 },
+      { r: 500, m: 9 }
+    ]
+  } else if (maxLeverage == 20) {
+    return [
+      { r: 0, m: 20 },
+      { r: 50, m: 20 },
+      { r: 100, m: 10 },
+      { r: 150, m: 6.6 },
+      { r: 200, m: 5 },
+      { r: 250, m: 4 },
+      { r: 300, m: 3.3 },
+      { r: 350, m: 2.8 },
+      { r: 400, m: 2.5 },
+      { r: 450, m: 2.2 },
+      { r: 500, m: 2 }
+    ]
+  } else {
+    return []
+  }
+}
+
+// 强平价格
+/**
+ * direction 多空方向 less空 more多
+ * leverages 杠杆倍数
+ * amount 下单数量
+ * open_price 开仓价格
+ * price_scale 价格小数位
+ * isCross 是否是全仓
+ * multiplier 乘数
+ * take_rate 手续费率
+*/
+export const getLiqPriceI = ({ direction, leverages, amount, open_price, price_scale, isCross, multiplier, take_rate }, holding, symbol) => {
+  const current = holding.holding || 0 // 持仓量
+  let force_price = '0'
+  if (open_price == 0 || amount == 0) {
+    return {
+      current, // 当前持仓量
+      new_amount: amount, // 新的持仓量
+      force_price: '--' // 强平价格
+    }
+  }
+
+  if (leverages === 0) {
+    leverages = symbol.max_leverage
+  }
+
+  if (symbol.product_name === 'BTC') {
+    const value = Big(amount).div(open_price)
+    const im = Big(value).mul(symbol.max_leverage / leverages).mul(symbol.im)
+    const mm = Big(value).mul(symbol.mm)
+    const available = holding.available_balance
+
+    let result = Big(open_price).mul(amount)
+    let imDiff = Big(im - mm)
+    if (isCross) {
+      // 全仓--空仓Lp=open_price*amount/[amount-(可用余额+IM-MM)*open_price*（1-R）]
+      imDiff = imDiff.plus(available)
+    }
+    // 空仓
+    if (direction === 'less') {
+      result = result.div(Big(amount).minus(imDiff.mul(open_price).mul(1 - Number(take_rate || 0))))
+      // 如果result小于0， 强平价格无限大
+      if (result.lt(0)) {
+        force_price = '999999'
+      } else {
+        force_price = result.round(price_scale || 4).toString()
+      }
+    } else {
+      result = result.div(Big(amount).plus(imDiff.mul(open_price).mul(1 - Number(take_rate || 0))))
+      if (result.lt(0)) {
+        force_price = '--'
+      } else {
+        force_price = result.round(price_scale || 4).toString()
+      }
+    }
+    if (Big(force_price || 0).lt(0)) {
+      force_price = Big(0)
+    }
+  } else {
+    const value = Big(multiplier).times(amount).times(open_price)
+    const im = value.div(leverages).times(Big(1).plus(im))
+    const mm = Big(mm).times(value)
+    const mulvol = multiplier.times(amount)
+    const imDiff = im.minus(mm)
+    const fee = Big(take_rate).times(value)
+    // 全仓
+    if (isCross) {
+      const avia = Big(holding.available_balance).minus(fee).minus(im)
+      // 空单
+      if (direction === 'less') {
+        force_price = (value.plus(imDiff).plus(avia)).div(mulvol)
+      }
+      // 多单
+      else {
+        force_price = (value.minus(imDiff).minus(avia)).div(mulvol)
+      }
+    } else {
+      // 空单
+      if (direction === 'less') {
+        force_price = (value.plus(imDiff)).div(mulvol)
+      }
+      // 多单
+      else {
+        force_price = (value.minus(imDiff)).div(mulvol)
+      }
+    }
+    if (Big(force_price || 0).lt(0)) {
+      force_price = Big(0)
+    }
+  }
+  const new_amount = Number(current) + Number(amount * (direction === 'less' ? -1 : 1))
+  return {
+    current, // 当前持仓量
+    new_amount, // 新的持仓量
+    force_price // 强平价格
+  }
+}
