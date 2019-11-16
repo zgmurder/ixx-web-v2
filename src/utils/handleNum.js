@@ -97,7 +97,7 @@ export const getCost = ({ count = 0, price = 1, leverages = 1, IM = 0, take_rate
 
   // 总价值=仓位价值+委托列表价值（对冲仓位）
   // 委托列表价值 = 当前委托列表价值+即将要下单的价值
-  totalValue = (totalValue == null || totalValue.eq(0)) ? value : totalValue
+  totalValue = (totalValue == null || Big(totalValue).eq(0)) ? value : totalValue
 
   // 累加次数 向上取整
   const num = (Big(totalValue).minus(base_risk)).div(gap_risk).round(0, 3)
