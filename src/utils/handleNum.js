@@ -138,3 +138,44 @@ export const getTotalValue = ({ futures, holding, pairInfo, mul, fixed = 8 }) =>
   }
   return totalValue.round(fixed, down).abs()
 }
+
+/** 盈亏计算
+ * direction 多空方向 less空 more多
+ * leverages 杠杆倍数
+ * amount 下单数量
+ * open_price 开仓价格
+ * close_price 平仓价格
+ * symbol 币对属性
+*/
+export const getProfitLoss = ({ direction, leverages, amount, open_price, close_price, symbol }) => {
+  if (direction === 'less') {
+    amount = -amount
+  }
+  if (leverages == 0) {
+    leverages = symbol.max_leverage
+  }
+  let open_value = Big(0)
+  let close_value = Big(0)
+
+  if (symbol.product_name === 'BTC') {
+    open_value = Big(amount).div(open_price || 1).abs()
+    close_value = Big(close_price).div(open_price || 1).mul(open_value).abs()
+  } else {
+    open_value = Big(amount || 0).times(open_price || 0).times(symbol.multiplier).abs()
+    close_value = Big(amount || 0).times(close_price || 0).times(symbol.multiplier).abs()
+  }
+
+  const margin = Big(open_value).mul(symbol.max_leverage).div(leverages || symbol.max_leverage).mul(symbol.im).abs()
+  const realized = close_value.minus(open_value).mul(amount < 0 ? -1 : 1)
+  const realized_roe = realized.div(open_value || 1).mul(100)
+  const roe = realized_roe.mul(leverages)
+
+  return {
+    open_value, // 开仓价值
+    close_value, // 平仓价值
+    margin, // 保证金
+    realized, // 以实现盈亏
+    realized_roe, // 盈亏比例
+    roe // 回报率
+  }
+}
