@@ -1,5 +1,5 @@
 // import { getBars } from '@/api/contract'
-import { getSymbolList } from '@/api/contract'
+import { getSymbolList, getKlineHistoryList } from '@/api/contract'
 
 const udf_datafeed = {
   onReady: cb => {
@@ -17,6 +17,8 @@ const udf_datafeed = {
     // getSymbolList().then(res => {
     //   console.log(res)
     // })
+    console.log(symbolName)
+
     var split_data = symbolName.split(/[:/]/)
     var symbol_stub = {
       name: symbolName,
@@ -44,7 +46,15 @@ const udf_datafeed = {
   },
 
   getBars: (symbolInfo, resolution, from, to, onHistoryCallback, onErrorCallback, firstDataRequest) => {
-    console.log(symbolInfo, resolution, from)
+    const [period, begin, end] = ['1m', from * 1000, to * 1000]
+    // {
+    //   period: period,
+    //   pair: symbolInfo.ticker,
+    //   begin: from * 1000,
+    //   end: to * 1000
+    // }
+    // getKlineHistoryList()
+    console.log(symbolInfo)
   },
   subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscribeUID, onResetCacheNeededCallback) => {},
 

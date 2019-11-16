@@ -186,3 +186,19 @@ export const closeStorehouse = data => request({
   method: 'post',
   data
 })
+
+// "0.076973",         // 起始价
+//                 "0.076838",         // 结束价
+//                 "0.07606",          // 最低价
+//                 "0.077378",         // 最高价
+//                 "27.3411",          // 成交量
+//                 "2.1000977805",     // 成交额
+//                 "0.076973",         // 上一周期结束价
+//                 "121",              // 成交笔数
+//                 "0.205"             // 现量
+// /v1/history/millis/{pair}?period={period}&begin={begin}&end={end}
+export const getKlineHistoryList = (symbol, query) => request({
+  url: `${proxy_q}/v1/history/millis/${symbol}`,
+  method: 'get',
+  params: query
+})
