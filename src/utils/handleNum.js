@@ -240,7 +240,7 @@ export const riskLimitDict = (maxLeverage) => {
  * multiplier 乘数
  * take_rate 手续费率
 */
-export const getLiqPriceI = ({ direction, leverages, amount, open_price, price_scale, isCross, multiplier, take_rate }, holding, symbol) => {
+export const getLiqPrice = ({ direction, leverages, amount, open_price, price_scale, isCross, multiplier, take_rate }, holding, symbol) => {
   const current = holding.holding || 0 // 持仓量
   let force_price = '0'
   if (open_price == 0 || amount == 0) {
@@ -289,8 +289,8 @@ export const getLiqPriceI = ({ direction, leverages, amount, open_price, price_s
     }
   } else {
     const value = Big(multiplier).times(amount).times(open_price)
-    const im = value.div(leverages).times(Big(1).plus(im))
-    const mm = Big(mm).times(value)
+    const im = value.div(leverages).times(Big(1).plus(symbol.im))
+    const mm = Big(symbol.mm).times(value)
     const mulvol = multiplier.times(amount)
     const imDiff = im.minus(mm)
     const fee = Big(take_rate).times(value)
