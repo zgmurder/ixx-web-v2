@@ -1,4 +1,9 @@
 export default {
+  handleSuccess: '操作成功',
+  handleFailed: '操作失败',
+  confirm: '确定',
+  cancel: '取消',
+  noShow: '不在显示',
   appNav: {
     mapNavList: {
       'trading': '币币交易',
@@ -79,7 +84,12 @@ export default {
     sell: '卖出',
     handle: '操作',
     cancel: '撤销',
+    deal: '合约交易',
+    rateOReturn: '回报率',
+    quota: '风险限额',
     handleSuccess: '操作成功',
+    index: '指数',
+    currentPlace: '当前仓位',
     state: {
       1: '委托中未成交',
       2: '委托中限价部分成交',
@@ -230,17 +240,19 @@ export default {
       mapBtns: {
         1: { text: '限价', describe: '限价委托用于在指定的（或更好的）价格买入或卖出。这是最常用的委托类型。' },
         2: { text: '市价', describe: '市价委托是一种最快的成交方式。它以目前委托列表的最佳价格执行。请注意，网络延迟可能导致委托的执行价格与你的期望有所不同。' },
-        3: { text: '市价止损' }
+        3: { text: '限价止损' }
       },
       mapMenuOptions: {
+        3: '限价止损',
         4: '市价止损',
-        5: '市价止盈',
-        6: '限价止损',
-        7: '限价止盈'
+        5: '限价止盈',
+        6: '市价止盈'
       },
       mapInput: {
         shippingSpace: '仓位',
-        value: '价格'
+        value: '价格',
+        triggerPrice: '触发价格',
+        triggerType: '触发类型'
       },
       mapHandleBtn: {
         buy: '买入/做多',
@@ -251,7 +263,15 @@ export default {
       mapDescribe: {
         entrustValue: '委托价值',
         available: '可用余额'
-      }
+      },
+      mapTriggerType: {
+        1: '盘口价格',
+        2: '标记价格',
+        3: '指数价格'
+      },
+      notip: '直接下单',
+      trigger_close: '触发后平仓',
+      perfactPrice: '市场最优价格'
     },
     mapInformation: {
       priceBy: '价格来源',
@@ -266,6 +286,20 @@ export default {
     winLimit: '止盈',
     price: '市价',
     closeOut: '平仓'
+  },
+  orderPopover: {
+    mapTableColumns: {
+      1: '委托价值',
+      2: '成本@80x',
+      3: '可用余额',
+      4: '成交后的仓位大小',
+      5: '标记价格',
+      6: '预期强平价格',
+      7: '标记价格/预期强平价格 差异'
+    },
+    setLever: '设置杠杆倍数',
+    tip: '您的操作将会把已持仓杠杆倍数和委托订单杠杆倍数修改为25倍，仓位保证金调节为0.0041495，委托保证金为0',
+    allstorehouse: '全仓'
   },
   userCenter: {
     mapMenuList: {

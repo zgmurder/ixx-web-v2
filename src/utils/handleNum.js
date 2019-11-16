@@ -7,7 +7,7 @@ export const logogramNum = num => {
     return num
   }
 }
-const handler = (dataArr, fixed, type) => {
+const handler = (dataArr, fixed = 8, type) => {
   const res = dataArr.reduce((curr, prev) => Big(curr)[type](prev))
   return bigRound(res, fixed)
 }
@@ -20,9 +20,9 @@ const consts = {
   DEFAULT_THEME_NAME: 'default'
 }
 
-export const bigRound = (target, fixed = 1, rm = 0) => Big(target).round(fixed, rm).toFixed(fixed < 0 ? 0 : fixed)
+export const bigRound = (target, fixed, rm = 0) => Big(target || 0).round(fixed, rm).toFixed(fixed < 0 ? 0 : fixed)
 
-export const bigDiv = ([source, rate], fixed) => bigRound(Big(source).div(rate), fixed)
+export const bigDiv = (dataArr, fixed) => handler(dataArr, fixed, 'div')
 
 export const bigTimes = (dataArr, fixed) => handler(dataArr, fixed, 'times')
 
@@ -67,6 +67,53 @@ export const toThousand = (num = 0) => {
 }
 
 /*
+  总价值 = 仓位价值 + 委托列表价值（对冲仓位）
+*/
+/**
+ * getCost
+ * @param {Array} entrustList
+ * @param {Array [amount,price]} holding
+ */
+export const calcValueByAmountAndPrice = (amount, price, multiplier) => {
+  if (!amount || !+amount || !price || !+price) return 0
+  else return !+multiplier ? Big(amount).div(price) : Big(multiplier).times(price).times(amount)
+}
+
+export const calcTotalValue = ({ entrustList, holding = { amount: 0, price: 0, side: 1 }, mul }) => {
+  if (!holding[0] || !holding[1] || !+holding[1] || !+holding[0]) return 0
+  const holdingValue = calcValue(holding.amount, holding.price, mul)
+  let _holdingValue = Big(_holdingValue)
+  const entrustValue = entrustList.reduce((prev, curr) => {
+    const remainAmount = Big(curr.amount).minus(curr.executed)
+    const entrustValue = calcValue(remainAmount, curr.price, mul)
+    if (curr.side !== holding.side && _holdingValue.gte(0)) {
+      _holdingValue = _holdingValue.minus(entrustValue)
+      return _holdingValue.abs().plus(prev)
+    } else return holdingValue.plus(entrustValue).plus(prev)
+  }, 0)
+  return holdingValue.plus(entrustValue)
+  // const down = 0
+  // const price = holding.price === '--' ? 0 : holding.price
+
+  // let totalValue = Big(price || 0).eq(0) ? Big(0) : Big(holding.amount).div(price)
+  // if (pairInfo.name !== 'FUTURE_BTCUSD') {
+  //   totalValue = Big(holding.amount || 0).times(price || 0).times(mul)
+  // }
+  // for (const future of futures) {
+  //   // 数量 = 委托总数量 - 已成交数量
+  //   const fprice = future.price === '--' ? 0 : future.price
+  //   const amount = Big(future.amount).minus(future.executed)
+
+  //   let value = Big(fprice || 0).eq(0) ? Big(0) : amount.div(fprice)
+  //   if (pairInfo.name !== 'FUTURE_BTCUSD') {
+  //     value = Big(future.amount || 0).times(fprice || 0).times(mul)
+  //   }
+  //   totalValue = future.side === 1 ? totalValue.plus(value) : totalValue.minus(value)
+  // }
+  // return totalValue.round(fixed, down).abs()
+}
+
+/*
   { 开平仓费率：后台返回take_rate ，IM百分比：当前档位，合约乘数：后台返回multiplier BTC为1，合约数量：合约乘数 * 合约数量}
 
   成本 = 起始保证 + 开平仓手续费
@@ -75,40 +122,62 @@ export const toThousand = (num = 0) => {
   开平仓手续费 = 委托价值 * 开平仓费率
 
   成本 = 委托价值 / 当前杠杆倍数 *（1 + IM百分比） + 开平仓手续费
-*/
-export const getCost = ({ count = 0, price = 1, leverages = 1, IM = 0, take_rate = 0.0007, fixed = 8, MM = 0, pairInfo = {}, totalValue = 0 }) => {
-  // const entrustValue = Big(count).div(price)
-  // const serviceCharge = entrustValue.times(take_rate).times(2)
-  // if (!count) return Big(0).toFixed(fixed)
-  // return entrustValue.div(leverages).times(+IM + 1).plus(serviceCharge).toFixed(fixed)
-  if (count === 0 || price === 0) return 0 // 价格或数量为0时成本为0
 
-  const base_risk = pairInfo.base_risk || 200 // 起始保证金
-  const gap_risk = pairInfo.gap_risk || 100 // 每100BTC加一档
-  const max_leverage = pairInfo.max_leverage || 100 // 最大杠杆倍数
-  const mul = Big(pairInfo.multiplier || 0) // 乘数
-  const current_leverage = Big(leverages).eq(0) ? max_leverage : leverages // 当前杠杆倍数
+  价值 = 如果是BTC ? 合约数量 / 成交价格 : 乘数 * 价格 * 数量
+  总价值 = 仓位价值 + 委托列表价值（对冲仓位）
+*/
+/**
+ * getCost
+ * @param {(|string|number)} amount
+ * @param {(|string|number)} price
+ * @param {(|string|number)} leverages
+ * @param {(|string|number)} IM
+ * @param {(|string|number)} take_rate
+ * @param {(|string|number)} fixed
+ * @param {(|string|number)} MM
+ * @returns {string|number}
+ */
+export const getCost = (product, leverages, entrustList, currHolding) => {
+  // { amount = 0, price = 1, leverages = 1, IM = 0, take_rate = 0.0007, MM = 0, pairInfo = { mul: 0 }, totalValue = 0, fixed = 8 }
+  // const entrustValue = Big(amount).div(price)
+  // const serviceCharge = entrustValue.times(take_rate).times(2)
+  // if (!amount) return Big(0).toFixed(fixed)
+  // return entrustValue.div(leverages).times(+IM + 1).plus(serviceCharge).toFixed(fixed)
+
+  // if (amount === 0 || price === 0) return 0 // 价格或数量为0时成本为0
+  const { amount, price, base_risk, gap_risk, take_rate, mm, im, multiplier } = product
+
+  // const base_risk = pairInfo.base_risk || 200 // 起始风险限额
+  // const gap_risk = pairInfo.gap_risk || 100 // 每100BTC加一档
+  // const max_leverage = pairInfo.max_leverage || 100 // 最大杠杆倍数
+  // const mul = Big(pairInfo.multiplier || 0) // 乘数
+  // const current_leverage = !+leverages ? max_leverage : leverages // 当前杠杆倍数
 
   // btc_usd的价值等于数量除以价格,其它币对的价值等于 数量 * 价格 * 乘数
-  let value = (Big(count).div(price))
-  if (pairInfo.name !== 'FUTURE_BTCUSD') {
-    value = mul.times(price).times(count)
-  }
+  // let value = (Big(amount).div(price))
+  // if (pairInfo.name !== 'FUTURE_BTCUSD') {
+  //   value = mul.times(price).times(amount)
+  // }
 
+  // 输入价值
+  const currValue = calcValueByAmountAndPrice(amount, price, multiplier)
+  if (!currValue) return 0
   // 总价值=仓位价值+委托列表价值（对冲仓位）
   // 委托列表价值 = 当前委托列表价值+即将要下单的价值
-  totalValue = (totalValue == null || totalValue.eq(0)) ? value : totalValue
+  // totalValue = (totalValue == null || totalValue.eq(0)) ? value : totalValue
 
   // 累加次数 向上取整
-  const num = (Big(totalValue).minus(base_risk)).div(gap_risk).round(0, 3)
-  IM = Big(IM).plus(num.times(MM))
-  // 起始保证金
-  const margin = Big(value).div(current_leverage).times(Big(1).plus(IM))
+  // const totalValue = calcTotalValue(entrustList,currHolding,multiplier)
+  const num = (Big(currValue).minus(base_risk)).div(gap_risk).round(0, 3)
+
+  const endIM = Big(im).plus(num.times(mm))
+
   // 平仓手续费
-  const fee = value.times(take_rate).times(2)
+  const serviceCharge = currValue.times(take_rate).times(2)
+  // 起始保证金
+  const margin = Big(currValue).div(leverages).times(Big(1).plus(endIM)).plus(serviceCharge)
   // 成本
-  const cost = margin.plus(fee)
-  return cost
+  return margin.plus(serviceCharge).round(8)
 }
 
 /**
@@ -118,23 +187,3 @@ export const getCost = ({ count = 0, price = 1, leverages = 1, IM = 0, take_rate
    * price 持仓价格
    * pair 合约类型
    */
-export const getTotalValue = ({ futures, holding, pairInfo, mul, fixed = 8 }) => {
-  const down = 0
-  const price = holding.price === '--' ? 0 : holding.price
-
-  let totalValue = Big(price || 0).eq(0) ? Big(0) : Big(holding.amount).div(price)
-  if (pairInfo.name !== 'FUTURE_BTCUSD') {
-    totalValue = Big(holding.amount || 0).times(price || 0).times(mul)
-  }
-  for (const future of futures) {
-    // 数量 = 委托总数量 - 已成交数量
-    const fprice = future.price === '--' ? 0 : future.price
-    const amount = Big(future.amount).minus(future.executed)
-    let value = Big(fprice || 0).eq(0) ? Big(0) : amount.div(fprice)
-    if (pairInfo.name !== 'FUTURE_BTCUSD') {
-      value = Big(future.amount || 0).times(fprice || 0).times(mul)
-    }
-    totalValue = future.side === 1 ? totalValue.plus(value) : totalValue.minus(value)
-  }
-  return totalValue.round(fixed, down).abs()
-}

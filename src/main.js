@@ -52,5 +52,6 @@ new Vue({
   router,
   store,
   i18n,
+  data: { modelVisible: false },
   render: h => h(App)
 }).$mount('#app')

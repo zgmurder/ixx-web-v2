@@ -21,7 +21,7 @@
         </dropdown>
       </template>
       <template v-else>
-        <el-link :type="$route.path === '/user/login'? 'primary':'info'" @click="$router.push('/user/login')">{{ $tR('signin') }}</el-link>
+        <el-link :type="$route.path === '/user/login'? 'primary':'info'" @click="$router.push(`/user/login?redirect=${$route.path}`)">{{ $tR('signin') }}</el-link>
         <el-divider direction="vertical" />
         <el-link :type="$route.path === '/user/register'? 'primary':'info'" @click="$router.push('/user/register')">{{ $tR('signup') }}</el-link>
       </template>

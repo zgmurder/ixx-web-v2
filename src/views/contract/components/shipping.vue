@@ -13,24 +13,48 @@
           <p class="text-info" :class="{interval:i>4}">{{ $t(`contract.mapTableTapContents.shipping.mapTableColumns.${key}`) }}</p>
           <p v-if="i<5" class="text-success">{{ key === 'markPrice'?markData[item.currency]:item[key] }}</p>
           <p v-else class="text-success">{{ item[key]|bigRound(8) }}</p>
-          <p v-if="i>4">-- / -- </p>
+          <p v-if="i>4">≈ {{ translateByRate(item[key])|bigRound(2) }} USD </p>
         </div>
       </div>
-      <div>
-        <p class="text-active">平仓价格</p>
+      <div flex="dir:top cross:center main:justify">
+        <!-- <p class="text-active">平仓价格</p>
         <p v-if="item.holding > 0" class="text-success">{{ $t(`contract.mapFormContent.mapHandleBtn.buy`) }}</p>
         <p v-else class="text-danger">{{ $t(`contract.mapFormContent.mapHandleBtn.sell`) }}</p>
         <div class="interval">
           <el-button size="mini" type="danger" round>{{ $tR(`price`) }}</el-button>
           <el-button size="mini" type="success" round>{{ $tR(`closeOut`) }}</el-button>
-        </div>
+        </div> -->
+
+        <el-popover v-model="visible" placement="top" width="160">
+          <p>确定要以 <span class="text-danger">市价【{{ $t(`contract.mapFormContent.perfactPrice`) }}】</span>平掉所有持仓吗</p>
+          <hr>
+          <div flex="main:justify cross:center">
+            <!-- <el-button size="mini" type="text" @click="visible = false">取消</el-button> -->
+            <el-checkbox v-model="visibleChecked">不在提示</el-checkbox>
+            <el-button type="primary" size="mini" @click="closeStorehouse(item,true)">确定</el-button>
+          </div>
+          <el-button slot="reference" type="primary">市价平仓</el-button>
+        </el-popover>
+        <div />
+        <el-popover v-model="visible1" placement="top" width="160">
+          <el-input v-model="input" size="small" placeholder="请输入平仓价格" />
+          <p style="margin-top:5px">确定到<span class="text-danger">指定价格</span>后平掉所有持仓吗</p>
+          <hr>
+          <div flex="main:justify cross:center">
+            <!-- <el-button size="mini" type="text" @click="visible = false">取消</el-button> -->
+            <el-checkbox v-model="visibleChecked">不在提示</el-checkbox>
+            <el-button type="primary" size="mini" :disabled="!input" @click="closeStorehouse(item)">确定</el-button>
+          </div>
+          <el-button slot="reference" type="primary" plain>限价平仓</el-button>
+        </el-popover>
       </div>
     </div>
-    <span v-if="!data || !data.length" class="el-table__empty-text">{{ $t('el.table.emptyText') }}</span>
+    <span v-if="data && data.length === 0" class="el-table__empty-text">{{ $t('el.table.emptyText') }}</span>
   </div>
 </template>
 <script>
-import { bigDiv } from '@/utils/handleNum'
+import { bigDiv, bigTimes } from '@/utils/handleNum'
+import { getRates, closeStorehouse } from '@/api/contract'
 export default {
   name: 'Shipping',
   props: {
@@ -47,6 +71,18 @@ export default {
       default: () => {}
     }
   },
+  data() {
+    return {
+      currencyRates: null,
+      visible: false,
+      visible1: false,
+      visibleChecked: false,
+      input: ''
+    }
+  },
+  async created() {
+    this.currencyRates = (await getRates({ currency: 'BTC' })).data.BTC
+  },
   methods: {
     handleValueByKey(key, item) {
       switch (key) {
@@ -57,6 +93,18 @@ export default {
         default:
           return item[key]
       }
+    },
+    translateByRate(value) {
+      if (!this.currencyRates) return
+      return bigTimes([this.currencyRates['USD'], value])
+    },
+    closeStorehouse(item, isMarket) {
+      const params = { symbol: 'FUTURE_' + item.currency, price: isMarket ? '0' : this.input }
+      closeStorehouse(params).then(res => {
+        this.$message.success(this.$t('handleSuccess'))
+      })
+      this.visible = false
+      this.visible1 = false
     }
   }
 }

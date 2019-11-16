@@ -95,7 +95,7 @@ service.interceptors.response.use(
       type: 'error',
       duration: 5 * 1000
     })
-    window.location.href = '/#/404'
+    window.location.href = `/#/404?redirect=${window.location.hash}`
     return Promise.reject(error)
   }
 )

@@ -151,3 +151,38 @@ export const cancelOrder = data => request({
   method: 'post',
   data
 })
+// 财务记录 POST /future/account/fund/history
+/* user_id*/
+export const getFinanceRecord = data => request({
+  url: `/future/account/fund/history`,
+  method: 'post',
+  data
+})
+
+// 设置杠杆倍数 POST /future/account/leverage
+/* user_id
+currency 币种
+leverage */
+export const setLeverage = data => request({
+  url: `/future/account/leverage`,
+  method: 'post',
+  data
+})
+
+// 合约信息 POST /future/account/symbol/info
+/* symbol 交易对 */
+
+export const getSymbolInfo = data => request({
+  url: `/future/account/symbol/info`,
+  method: 'post',
+  data
+})
+// 合约信息 POST /future/account/symbol/info
+/* user_id
+symbol 交易对
+price 平仓价格 */
+export const closeStorehouse = data => request({
+  url: `/contract/close`,
+  method: 'post',
+  data
+})

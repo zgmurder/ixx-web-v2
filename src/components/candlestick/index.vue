@@ -1,5 +1,5 @@
 <template>
-  <div id="container" style="height:100%" />
+  <div id="container-view" style="height:100%" />
 </template>
 <script>
 // import TradingView from '@/assets/charting_library/charting_library.min.js'
@@ -11,8 +11,14 @@
 
 import { widgetOptions } from './config'
 export default {
+  props: {
+    product: {
+      type: [Object, String],
+      default: () => {}
+    }
+  },
   mounted() {
-    window.tvWidget = new TradingView.widget(Object.assign(widgetOptions, { container_id: 'container' }))
+    window.tvWidget = new TradingView.widget(Object.assign(widgetOptions, { container_id: 'container-view' }))
   }
 }
 </script>

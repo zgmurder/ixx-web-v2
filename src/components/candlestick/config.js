@@ -1,5 +1,5 @@
 // import { getBars } from '@/api/contract'
-// import { getSymbolList } from '@/api/contract'
+import { getSymbolList } from '@/api/contract'
 
 const udf_datafeed = {
   onReady: cb => {
@@ -44,7 +44,7 @@ const udf_datafeed = {
   },
 
   getBars: (symbolInfo, resolution, from, to, onHistoryCallback, onErrorCallback, firstDataRequest) => {
-    console.log(symbolInfo)
+    console.log(symbolInfo, resolution, from)
   },
   subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscribeUID, onResetCacheNeededCallback) => {},
 

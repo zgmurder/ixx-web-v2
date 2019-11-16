@@ -51,12 +51,9 @@ export default {
 
   // }
   .custom-select{
-    border-radius: 50%;
+    border-radius: 4px;
     width: 110px;
     margin-left: 15px;
-    & /deep/ .el-input__inner{
-      background: transparent;
-      color: #fff;
-    }
+    border:1px solid #ccc
   }
 </style>
