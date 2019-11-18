@@ -12,7 +12,10 @@ textarea,select,input{-webkit-appearance: none; -moz-appearance: none; -o-appear
 .container{ width: 1200px; margin: 0 auto; height: inherit;}
 hr{
   border-top: none;
-  border-color: #999;
+  border-color: #DCDFE6;
+}
+body::-webkit-scrollbar {
+  display: none;
 }
 .text-nowrap{ max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
 .text-active{ color: $--color-primary;}
@@ -24,46 +27,7 @@ hr{
 .background-active{ background-color: $--color-primary;}
 
 
-tr.contract-order-list-row-class{
-  background:$--contract-table-bg;
-  &:hover>td{
-    background: $--contract-table-active!important;
-  }
-  th.is-leaf{
-    background: $--contract-table-bg;
-    border-color: rgb(27, 28, 29);
-  }
-  td{
-    border-color: rgb(27, 28, 29);
-  }
-}
 
-.contrat-popper-success-class{
-  background: $--contract-table-bg;
-  border: 1px solid $--color-success;
-  &>.el-popover__title{
-    color: $--color-success;
-  }
-  &[x-placement^="left"] .popper__arrow{
-    border-left-color: $--color-success;
-    &::after{
-      border-left-color: $--color-success;
-    }
-  }
-}
-.contrat-popper-danger-class{
-  background: $--contract-table-bg;
-  border: 1px solid $--color-danger;
-  &>.el-popover__title{
-    color: $--color-danger;
-  }
-  &[x-placement^="left"] .popper__arrow{
-    border-left-color: $--color-danger;
-    &::after{
-      border-left-color: $--color-danger;
-    }
-  }
-}
 
 .share-text-info{
   color: $--share-text-info
@@ -77,18 +41,5 @@ tr.contract-order-list-row-class{
 .share-active-bg{
   color: $--color-success
 }
-.login-custom-form{
-  /deep/ .el-input__inner{
-      background: transparent;
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-}
-.custom-select{
-  & /deep/ .el-input__inner{
-    background: transparent;
-    color: #fff;
-    border:none
-  }
-}
+
 

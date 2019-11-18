@@ -1,12 +1,24 @@
 <template>
   <div class="property-manage-warp" flex="dir:top">
-    <div class="top">
-      <slot />
-      <el-divider />
-    </div>
-    <custom-table v-loading="false" :last-column-config="lastColumnConfig" :table-list="tableList" :table-columns="mapAccoutColumns">
+    <slot />
+    <el-tabs v-model="activeName" type="card" @tab-click="handleTabClick">
+      <el-tab-pane label="个人资产" name="1" />
+      <el-tab-pane label="划转记录" name="2" />
+      <el-tab-pane label="充币记录" name="3" />
+      <el-tab-pane label="提币记录" name="4" />
+      <el-tab-pane label="奖励分配" name="5" />
+      <el-tab-pane label="返佣记录" name="6" />
+    </el-tabs>
+    <custom-table
+      v-loading="loading" stripe
+      :show-summary="showSummary" border
+      size="small" :filter-change="filterHandler"
+      :max-height="calcWidth" :last-column-config="lastColumnConfig"
+      :table-list="tableList" :table-columns="mapAccoutColumns"
+      @change="handlePageChange"
+    >
       <!-- slot-scope="data" -->
-      <div slot="handlerDom" style="width:200px">
+      <div slot="handlerDom">
         <el-link type="primary">划转</el-link>
         <el-link type="primary">充币</el-link>
         <el-link type="primary">提币</el-link>
@@ -17,7 +29,7 @@
 </template>
 <script>
 import customTable from '@/components/customTable'
-import { getPropertyAccountList } from '@/api/property'
+import { getPropertyAccountList, getFinanceList, getDepositList, getWithdrawList } from '@/api/property'
 export default {
   name: 'PropertyManage',
   components: {
@@ -26,72 +38,94 @@ export default {
   data() {
     return {
       tableList: [],
-      loading: false,
+      filterObj: [],
+      loading: true,
+      noData: true,
+      showSummary: true,
+      pageConfig: {},
+      activeCurrency: 'CNY',
+
       lastColumnConfig: {
         headerLabel: '操作',
         headerAlign: 'right',
-        width: '400px'
-      }
+        width: '150px'
+      },
+      activeName: '1'
     }
   },
   computed: {
     mapAccoutColumns() {
-      return Object.keys(this.chineseLangData.mapAccoutColumns).map(key => ({
-        hearderLabel: this.$tR(`mapAccoutColumns.${key}`),
-        prop: key,
-        handleValue: obj => obj['CNY']
-      }))
+      return Object.keys(this.chineseLangData[this.activeName]).map(key => {
+        const obj = {
+          hearderLabel: this.$tR(`${this.activeName}.${key}`),
+          prop: key,
+          columnKey: key
+          // handleValue: obj => obj[this.activeCurrency]
+        }
+        // if (key === 'rates') {
+        //   obj.filters = this.filterObj
+        //   obj.hearderLabel = `${obj.hearderLabel} ${this.activeCurrency}`
+        //   obj['filter-multiple'] = false
+        //   obj['filter-method'] = this.filterHandler
+        //   obj['filtered-value'] = [this.activeCurrency]
+        //   // obj.handleValue = config => config[this.activeCurrency] + this.activeCurrency
+        // }
+        // if (key === 'totalValue') {
+        //   obj.handleValue = (obj, column, row) => {
+        //     const value = (+row.available + (+row.locking)) * (+row.rates[this.activeCurrency])
+        //     return value ? value + ' ' + this.activeCurrency : '--'
+        //   }
+        // }
+        return obj
+      })
     },
     mapTableInfo() {
       return this.chineseLangData.mapTableInfo
     },
     userData() {
       return this.$store.state.userData
+    },
+    calcWidth() {
+      return document.body.clientHeight - 200
+    },
+    api() {
+      return {
+        1: getPropertyAccountList,
+        2: getFinanceList,
+        3: getDepositList,
+        4: getWithdrawList
+      }
     }
   },
   created() {
-    getPropertyAccountList().then(res => (this.tableList = res.data))
+
+  },
+  methods: {
+    handleTabClick() {
+      this.handlePageChange(this.pageConfig)
+    },
+    filterHandler(value, row, column) {
+      this.activeCurrency = column.filteredValue[0]
+      return true
+    },
+    filterChange() {
+      console.log(1111)
+    },
+    handlePageChange(obj) {
+      const { pageSize, currentPage } = obj
+      this.pageConfig = obj
+      this.loading = true
+      this.api[this.activeName]({ user_id: this.id, page: currentPage, size: pageSize }).then(res => {
+        // this.filterObj = Object.keys(res.data[0].rates).map(key => ({ text: key, value: key }))
+        this.tableList = Array.isArray(res.data) ? res.data : res.data.data
+        this.loading = false
+      })
+    }
   }
 }
 </script>
 <style lang="scss" scoped>
 .property-manage-warp{
-  height: 100%;
-  text-align: center;
-  &>.center{
-    .numerical{
-      // line-height: 100px;
-      margin-top: 30px;
-      color: $--color-danger;
-      // border-width: 0 5px 5px 5px;
-      // border-style: solid;
-      // border-color: rgba($color: $--color-primary, $alpha: .3);
-      // padding-bottom: 20px;
-    }
-  }
-  &>.bottom{
-    &>fieldset{
-      margin: 0;
-      padding: 30px;
-      box-sizing: border-box;
-      width: 48%;
-      border: solid 1px #f0f0f0;
-      .title{
-        font-size: 20px;
-      }
-      .numerical{
-        margin-top:30px;
-        margin-bottom: 30px;
-        color: rgba($color: $--color-warning, $alpha: 3);
-        border-width: 0 5px 5px 5px;
-        border-style: solid;
-        border-color: #f6f6f6;
-        padding-bottom: 20px;
-      }
-      .list > p{
-        line-height: 40px;
-      }
-    }
-  }
+
 }
 </style>

@@ -106,6 +106,7 @@ export const getActiveOrderfills = data => request({
 })
 // 已成交 soket
 export const WSURL = 'wss://wss.ixex.pro/v1'
+// 周期频道 URI：/v1/history/{pair}/{period}
 
 // 已成交 POST /account/currency/rates
 export const getRates = data => request({

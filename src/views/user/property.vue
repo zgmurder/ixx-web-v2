@@ -6,7 +6,13 @@
       </div>
       <div class="container-right">
         <keep-alive>
-          <component :is="componentId"><h3 flex="main:justify cross:center">{{ $tR(`mapMenuList.${activeKey}`) }}<el-button size="mini" type="primary" @click="$router.push('/user/property')">个人中心<i class="el-icon-arrow-right" /></el-button></h3></component>
+          <component :is="componentId">
+            <div flex="main:justify cross:center" class="container-title">
+              {{ $tR(`mapMenuList.${activeKey}`) }}
+              <el-button size="mini" type="primary" @click="$router.push('/user/property')">个人中心<i class="el-icon-arrow-right" />
+              </el-button>
+            </div>
+          </component>
         </keep-alive>
       </div>
     </div>
@@ -78,6 +84,13 @@ export default {
       &>.container-right{
         background: #fff;
         padding: 20px;
+        .container-title{
+          line-height: 50px;
+          border-bottom: 1px solid #ddd;
+          margin-bottom: 12px;
+          font-size: 18px;
+          font-weight: bold
+        }
       }
     }
   }

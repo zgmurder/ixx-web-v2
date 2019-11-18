@@ -23,6 +23,7 @@ service.interceptors.request.use(
     if (userDataStr) {
       const userData = JSON.parse(userDataStr)
       config.headers['token'] = userData.token
+      // config.headers['SameSite'] = 'None'
       // config.headers['ix_session_id'] = store.state.userData.ix_session_id
     }
     // config.headers.Origin = 'https://staging.ixex.pro'

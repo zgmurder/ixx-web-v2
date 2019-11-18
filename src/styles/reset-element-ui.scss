@@ -24,3 +24,58 @@
       }
   }
 }
+tr.contract-order-list-row-class{
+  background:$--contract-table-bg;
+  &:hover>td{
+    background: $--contract-table-active!important;
+  }
+  th.is-leaf{
+    background: $--contract-table-bg;
+    border-color: rgb(27, 28, 29);
+  }
+  td{
+    border-color: rgb(27, 28, 29);
+  }
+}
+
+.contrat-popper-success-class{
+  background: $--contract-table-bg;
+  border: 1px solid $--color-success;
+  &>.el-popover__title{
+    color: $--color-success;
+  }
+  &[x-placement^="left"] .popper__arrow{
+    border-left-color: $--color-success;
+    &::after{
+      border-left-color: $--color-success;
+    }
+  }
+}
+.contrat-popper-danger-class{
+  background: $--contract-table-bg;
+  border: 1px solid $--color-danger;
+  &>.el-popover__title{
+    color: $--color-danger;
+  }
+  &[x-placement^="left"] .popper__arrow{
+    border-left-color: $--color-danger;
+    &::after{
+      border-left-color: $--color-danger;
+    }
+  }
+}
+
+.login-custom-form{
+  .el-input__inner{
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+.custom-select{
+  .el-input__inner{
+    background: transparent;
+    color: #fff;
+    border:none
+  }
+}

@@ -1,6 +1,19 @@
 // import { getBars } from '@/api/contract'
-import { getSymbolList, getKlineHistoryList } from '@/api/contract'
+// getSymbolList
+import { getKlineHistoryList } from '@/api/contract'
+import ReconnectingWebSocket from 'reconnecting-websocket'
+import { mapPeriod, upColor, downColor } from '@/const'
 
+const wsurl = process.env.VUE_APP_WS_API
+const mapItemFun = item => ({
+  time: item.time,
+  open: +item.values[0],
+  close: +item.values[1],
+  low: +item.values[2],
+  high: +item.values[3],
+  volume: +item.values[4]
+})
+// import { upColor, downColor } from '@/const'
 const udf_datafeed = {
   onReady: cb => {
     setTimeout(() => cb({
@@ -17,9 +30,7 @@ const udf_datafeed = {
     // getSymbolList().then(res => {
     //   console.log(res)
     // })
-    console.log(symbolName)
-
-    var split_data = symbolName.split(/[:/]/)
+    // var split_data = symbolName.split(/[:/]/)
     var symbol_stub = {
       name: symbolName,
       description: '',
@@ -28,7 +39,7 @@ const udf_datafeed = {
       timezone: 'America/New_York',
       ticker: symbolName,
       minmov: 1,
-      pricescale: 100000000,
+      pricescale: 100,
       has_intraday: true,
       intraday_multipliers: ['1', '60'],
       supported_resolution: ['1', '3', '5', '15', '30', '60', '120', '240', 'D'],
@@ -36,9 +47,9 @@ const udf_datafeed = {
       data_status: 'streaming'
     }
 
-    if (split_data[2].match(/USD|EUR|JPY|AUD|GBP|KRW|CNY/)) {
-      symbol_stub.pricescale = 100
-    }
+    // if (split_data[2].match(/USD|EUR|JPY|AUD|GBP|KRW|CNY/)) {
+    //   symbol_stub.pricescale = 100
+    // }
 
     setTimeout(function() {
       onSymbolResolvedCallback(symbol_stub)
@@ -46,17 +57,31 @@ const udf_datafeed = {
   },
 
   getBars: (symbolInfo, resolution, from, to, onHistoryCallback, onErrorCallback, firstDataRequest) => {
-    const [period, begin, end] = ['1m', from * 1000, to * 1000]
-    // {
-    //   period: period,
-    //   pair: symbolInfo.ticker,
-    //   begin: from * 1000,
-    //   end: to * 1000
-    // }
-    // getKlineHistoryList()
-    console.log(symbolInfo)
+    const [period, begin, end] = [mapPeriod[resolution], from * 1000, to * 1000]
+    getKlineHistoryList('FUTURE_BTCUSD', { period, begin, end }).then(res => {
+      const data = res.data.map(mapItemFun)
+      return onHistoryCallback(data, { noData: !data.length })
+    })
   },
-  subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscribeUID, onResetCacheNeededCallback) => {},
+  subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscribeUID, onResetCacheNeededCallback) => {
+    const websocket = new ReconnectingWebSocket(`${wsurl}/history/${symbolInfo.ticker}/${mapPeriod[resolution]}`)
+    websocket.onmessage = e => {
+      const obj = JSON.parse(e.data).data[0]
+      onRealtimeCallback(mapItemFun(obj))
+    }
+    // const period = getPeriod(resolution)
+    // utils.$tvSocket && utils.$tvSocket.$destroy()
+    // utils.$tvSocket = ws.create(`history/${symbolInfo.ticker}/${period}`)
+    // utils.$tvSocket.$on('message', (data) => {
+    //   // @fixme 改接口，不用数组
+    //   data = data[0]
+    //   if (!data.time || data.time < lastTime) {
+    //     return utils.log('Wrong realtime')
+    //   }
+    //   lastTime = data.time
+    //   onRealtimeCallback(toTick(data))
+    // })
+  },
 
   unsubscribeBars: subscriberUID => {},
 
@@ -72,7 +97,7 @@ const udf_datafeed = {
 }
 export const widgetOptions = {
   debug: false,
-  symbol: 'Coinbase:BTC/USD',
+  symbol: 'FUTURE_BTCUSD',
   datafeed: udf_datafeed, // our datafeed object
   interval: '15',
   container_id: 'tv_chart_container',
@@ -84,13 +109,76 @@ export const widgetOptions = {
   user_id: 'public_user_id',
   fullscreen: false,
   autosize: true,
+  toolbar_bg: '#1c273e',
   overrides: {
-    'paneProperties.background': '#131722',
-    'paneProperties.vertGridProperties.color': '#363c4e',
-    'paneProperties.horzGridProperties.color': '#363c4e',
-    'symbolWatermarkProperties.transparency': 90,
-    'scalesProperties.textColor': '#AAA',
-    'mainSeriesProperties.candleStyle.wickUpColor': '#336854',
-    'mainSeriesProperties.candleStyle.wickDownColor': '#7f323f'
+    'symbolWatermarkProperties.color': 'rgba(0, 0, 0, 0)',
+    'paneProperties.background': '#0c1222',
+    'paneProperties.vertGridProperties.color': 'rgba(210, 217, 229, 0.06)',
+    'paneProperties.horzGridProperties.color': 'rgba(210, 217, 229, 0.06)',
+    'paneProperties.crossHairProperties.color': 'rgb(210, 217, 229)',
+    'paneProperties.legendProperties.showStudyArguments': true,
+    'paneProperties.legendProperties.showStudyTitles': true,
+    'paneProperties.legendProperties.showStudyValues': true,
+    'paneProperties.legendProperties.showSeriesTitle': false,
+    'paneProperties.legendProperties.showSeriesOHLC': true,
+    // 'paneProperties.legendProperties.showLegend': false,
+    'paneProperties.topMargin': 8,
+    'paneProperties.bottomMargin': 18,
+    'scalesProperties.lineColor': 'rgba(210, 217, 229, 0.06)',
+    'scalesProperties.textColor': 'rgb(210, 217, 229)',
+    'mainSeriesProperties.barStyle.upColor': upColor,
+    'mainSeriesProperties.barStyle.downColor': downColor,
+    'mainSeriesProperties.candleStyle.upColor': upColor,
+    'mainSeriesProperties.candleStyle.downColor': downColor,
+    'mainSeriesProperties.candleStyle.drawBorder': false,
+    'mainSeriesProperties.candleStyle.borderUpColor': upColor,
+    'mainSeriesProperties.candleStyle.borderDownColor': downColor,
+    'mainSeriesProperties.candleStyle.wickUpColor': upColor,
+    'mainSeriesProperties.candleStyle.wickDownColor': downColor,
+    'mainSeriesProperties.hollowCandleStyle.upColor': upColor,
+    'mainSeriesProperties.hollowCandleStyle.downColor': downColor,
+    'mainSeriesProperties.hollowCandleStyle.borderUpColor': upColor,
+    'mainSeriesProperties.hollowCandleStyle.borderDownColor': downColor,
+    'mainSeriesProperties.hollowCandleStyle.wickUpColor': upColor,
+    'mainSeriesProperties.hollowCandleStyle.wickDownColor': downColor,
+    'mainSeriesProperties.lineStyle.color': 'rgb(42, 159, 248)',
+    'mainSeriesProperties.areaStyle.color1': 'rgba(42, 159, 248, 0.4)',
+    'mainSeriesProperties.areaStyle.color2': 'rgb(42, 159, 248)',
+    'mainSeriesProperties.areaStyle.linecolor': 'rgb(42, 159, 248)'
+  },
+  studies_overrides: {
+    'volume.volume.color.0': downColor,
+    'volume.volume.color.1': upColor,
+    'volume.volume.transparency': 80,
+    'volume.volume ma.transparency': 80,
+    'volume.volume ma.linewidth': 2,
+    'volume.volume ma.plottype': 'line',
+    'volume.show ma': true,
+    'macd.macd.color': '#ff9500',
+    'macd.signal.color': '#107efa',
+    'macd.histogram.color': upColor,
+    'bb.Upper.color': upColor,
+    'bb.Lower.color': downColor,
+    'bb.Median.color': '#cccccc',
+    'bb.Plots Background.color': '#ccc',
+    'Stoch RSI.%K.color': upColor,
+    'Stoch RSI.%D.color': downColor,
+    'Stoch RSI.Hlines Background.color': '#fff',
+    'Stoch RSI.Hlines Background.transparency': 90,
+    // 'volume.show macd': true,
+    'volume.options.showStudyArguments': true
   }
+  // overrides: {
+  //   'paneProperties.background': '#131722',
+  //   'paneProperties.vertGridProperties.color': '#363c4e',
+  //   'paneProperties.horzGridProperties.color': '#363c4e',
+  //   'symbolWatermarkProperties.transparency': 90,
+  //   'scalesProperties.textColor': '#AAA',
+  //   'mainSeriesProperties.candleStyle.wickUpColor': '#336854',
+  //   'mainSeriesProperties.candleStyle.wickDownColor': '#7f323f',
+  //   'mainSeriesProperties.lineStyle.color': 'rgb(42, 159, 248)',
+  //   'mainSeriesProperties.areaStyle.color1': 'rgba(42, 159, 248, 0.4)',
+  //   'mainSeriesProperties.areaStyle.color2': 'rgb(42, 159, 248)',
+  //   'mainSeriesProperties.areaStyle.linecolor': 'rgb(42, 159, 248)'
+  // }
 }

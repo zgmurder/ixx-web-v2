@@ -238,6 +238,7 @@
                 <el-badge v-if="amountObj" is-dot :hidden="activeTableTabKey === key ||!amountObj[key][1]">
                   <p style="min-width:120px">{{ $tR(`mapTableTapContents.${key}.text`) }}【{{ amountObj[key][0] }}】</p>
                 </el-badge>
+                <p v-else style="min-width:120px">{{ $tR(`mapTableTapContents.${key}.text`) }}</p>
               </div>
             </div>
             <div v-loading="!calcTableList" class="order-list-content" element-loading-background="rgba(0, 0, 0, 0.3)">
@@ -282,7 +283,7 @@
 <script>
 import candlestick from '@/components/candlestick'
 import selectBase from '@/components/selectBase'
-import soket from './soket'
+import soket from '@/mixins/soket'
 import { bigRound, logogramNum, calcValueByAmountAndPrice, bigDiv, bigTimes, bigPlus, bigMinus, getCost } from '@/utils/handleNum'
 import {
   getSymbolInfo,
@@ -563,8 +564,9 @@ export default {
     await this.openWebSocket('/market/tickers', this.handleTickers)
     this.handleProductsChange(this.products[0])
     this.openWebSocket(WSURL, res => {
-      if (res && !this.cancelBtnLoading && !this.buyBtnLoading) this.handleAmountObj()
-    }, websocket => websocket.send('{"op":"login","args":["8be85859c7e2d88c87d6e31d650c6cef","8c7d5d714632ece63bc2eef4301acf94c121ea23065f2456f28e083485e558a1"]}')).then((websocket) => {
+      if (res && res[0] && !this.cancelBtnLoading && !this.buyBtnLoading) this.handleAmountObj()
+    }, websocket => {
+      websocket.send('{"op":"login","args":["8be85859c7e2d88c87d6e31d650c6cef","8c7d5d714632ece63bc2eef4301acf94c121ea23065f2456f28e083485e558a1"]}')
       websocket.send('{"op":"subscribe","args":["orderfills"]}')
       // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
     })
@@ -737,21 +739,6 @@ export default {
       this.tableList = null
       let data = (await this.mapHandlers[key]()).data
       data = Array.isArray(data) ? data : data.data
-      // if (Array.isArray(data)) {
-      //   if (key === 'shipping') {
-      //     data = data.filter(item => !!+item.holding).map(item => {
-      //       item.value = bigDiv([item.holding, item.price], 8)
-      //       item.price = this.bigRound(item.price, this.activeProduct['price_scale'])
-      //       return item
-      //     })
-      //   } else {
-      //     data = data.map(item => {
-      //
-      //       return item
-      //     })
-      //   }
-      // } else data = data.data
-
       this.tableList = data.map(item => {
         item.realized && (item.realized = this.bigRound(item.realized, 8))
         item.cancelBtnLoading = false

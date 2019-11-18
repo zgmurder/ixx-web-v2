@@ -11,14 +11,14 @@
       >
         <template slot="header" slot-scope="{ column }">
           <el-tooltip :disabled="true" :content="column.label" placement="top" effect="light">
-            <p class="text-nowrap">{{ column.label }}</p>
+            <span class="text-nowrap">{{ column.label }}</span>
           </el-tooltip>
         </template>
         <template slot-scope="scope">
           <span :class="typeof item.class === 'function'?item.class(scope.row[item.prop],item.prop,scope.row):item.class">{{ scope.row[item.prop] | filterColumnValue(item.prop,scope.row,item.handleValue) }}</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="lastColumnConfig" v-bind="$attrs">
+      <el-table-column v-if="lastColumnConfig" v-bind="lastColumnConfig">
         <template slot="header">
           <p class="text-nowrap" :style="{textAlign:lastColumnConfig.headerAlign||'left'}">{{ lastColumnConfig.headerLabel }}</p>
         </template>

@@ -335,16 +335,76 @@ export default {
     }
   },
   propertyManage: {
-    mapAccoutColumns: {
+    1: {
       currency: '币名',
       available: '可用量',
       withdrawing: '提币锁定量',
       quota: '当前提币剩余额度',
       max_quota: '当前提币总额度',
-      rates: ' 汇率对象'
+      rates: '汇率',
+      totalValue: '总价值'
+    },
+    2: {
+      currency: '币种',
+      balance: '账户',
+      opetate: '操作', // 1-转入 2-传出 3-当日清算
+      amount: '操作数量',
+      available: '剩余量',
+      createdTime: '操作时间',
+      status: '状态' // 0-失败 1-成功
+    },
+    3: {
+      id: '流水号',
+      user_id: '用户ID',
+      chain: '链名',
+      currency: '币名',
+      to_address: '目标地址',
+      memo: '备忘',
+      amount: '充值量',
+      txid: '链上交易号',
+      confirm: '确认数',
+      state: '状态',
+      create_time: '开始时间',
+      update_time: '最近更新时间'
+    },
+    4: {
+      id: '流水号',
+      wallet_tx_id: '钱包流水号',
+      user_id: '用户ID',
+      chain: '链名',
+      currency: '币名',
+      from_address: '源地址',
+      to_address: '目标地址',
+      change_address: '找零地址',
+      memo: '备忘',
+      amount: '提币量',
+      fee: '提币手续费',
+      txid: '链上交易号',
+      confirm: '确认数',
+      state: '状态',
+      create_time: '开始时间',
+      update_time: '最近更新时间',
+      reviewer_id: '审核人ID',
+      reviewer_nonce: '审核人nonce',
+      reviewer_signature: '审核人签名',
+      review_time: '审核时间',
+      raw_tx: '原始tx',
+      sign_result: '签名结果'
     }
   },
-
+  dealAccount: {
+    mapTableColumns: {
+      1: {
+        currency: '币名',
+        available: '可用量',
+        withdrawing: '提币锁定量',
+        quota: '当前提币剩余额度',
+        max_quota: '当前提币总额度',
+        rates: '汇率',
+        totalValue: '总价值'
+      }
+    }
+  },
   shareOption: {
     up_rate: '看涨',
     down_rate: '看跌',

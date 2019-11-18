@@ -29,8 +29,12 @@ export default {
       return 'The webmaster said that you can not enter this page...'
     },
     path() {
-      return this.$route.query.redirect || '/home'
+      const path = this.$route.fullPath.split('=#')[1]
+      return path || '/home'
     }
+  },
+  created() {
+    console.log()
   }
 }
 </script>

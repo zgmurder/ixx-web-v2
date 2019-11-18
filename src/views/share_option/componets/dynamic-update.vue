@@ -30,7 +30,8 @@ export default {
     return {
       isLoading: false,
       isNoScroll: true,
-      yetHandle: false
+      yetHandle: false,
+      websocketArgs: ['1', 'BTCUSD']
     }
   },
   mounted() {
@@ -99,9 +100,9 @@ export default {
 
         if (dataCout > 400 && this.isNoScroll) this.initxAxis()
       }
-    }).then(websocket => {
-      // websocket.send(`{"reqType":9,"param":{"id":1,"period":1,"optionType":1}}`)
-      // websocket.send(`{"reqType":1,"param":{"assetCode":1,"optionType":1}}`)
+    }, websocket => {
+      websocket.send(`{"reqType": 2, "args":["BTCUSD"]}`)
+      websocket.send(`{"reqType": 1, "args":${JSON.stringify(this.websocketArgs)}}`)
     })
   },
   destroyed() {

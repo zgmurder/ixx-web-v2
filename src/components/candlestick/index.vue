@@ -17,6 +17,13 @@ export default {
       default: () => {}
     }
   },
+  watch: {
+    '$store.state.locale': {
+      handler(newValue) {
+        console.log(newValue)
+      }
+    }
+  },
   mounted() {
     window.tvWidget = new TradingView.widget(Object.assign(widgetOptions, { container_id: 'container-view' }))
   }
