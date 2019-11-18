@@ -79,13 +79,19 @@ export const calcValueByAmountAndPrice = (amount, price, multiplier) => {
   else return !+multiplier ? Big(amount).div(price) : Big(multiplier).times(price).times(amount)
 }
 
-export const calcTotalValue = ({ entrustList, holding = { amount: 0, price: 0, side: 1 }, mul }) => {
-  if (!holding[0] || !holding[1] || !+holding[1] || !+holding[0]) return 0
-  const holdingValue = calcValue(holding.amount, holding.price, mul)
+export const calcTotalValue = ({ entrustList, holding = { amount: 0, price: 0, side: 1 }, multiplier },) => {
+  let holdingValue = Big(0)
+  if (!holding[0] || !holding[1] || !+holding[1] || !+holding[0]) {
+    holdingValue = Big(0)
+  } else {
+    holdingValue = calcValue(holding.amount, holding.price, multiplier)
+  }
+  entrustList = !entrustList ? [] : entrustList
+
   let _holdingValue = Big(_holdingValue)
   const entrustValue = entrustList.reduce((prev, curr) => {
     const remainAmount = Big(curr.amount).minus(curr.executed)
-    const entrustValue = calcValue(remainAmount, curr.price, mul)
+    const entrustValue = calcValue(remainAmount, curr.price, multiplier)
     if (curr.side !== holding.side && _holdingValue.gte(0)) {
       _holdingValue = _holdingValue.minus(entrustValue)
       return _holdingValue.abs().plus(prev)
@@ -166,8 +172,10 @@ export const getCost = (product, leverages, entrustList, currHolding) => {
   // totalValue = (totalValue == null || totalValue.eq(0)) ? value : totalValue
 
   // 累加次数 向上取整
-  // const totalValue = calcTotalValue(entrustList,currHolding,multiplier)
-  const num = (Big(currValue).minus(base_risk)).div(gap_risk).round(0, 3)
+  let totalValue = calcTotalValue({ entrustList, currHolding, multiplier })
+  totalValue = (totalValue == null || totalValue.eq(0)) ? currValue : totalValue
+  console.log({ totalValue })
+  const num = (Big(totalValue).minus(base_risk)).div(gap_risk).round(0, 3)
 
   const endIM = Big(im).plus(num.times(mm))
 
