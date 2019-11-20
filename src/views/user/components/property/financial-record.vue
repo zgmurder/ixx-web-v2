@@ -27,13 +27,11 @@
 </template>
 <script>
 import customTable from '@/components/customTable'
-import lbTable from '@/components/lb-table'
 import { getPropertyAccountList, getFinanceList, getDepositList, getWithdrawList } from '@/api/property'
 export default {
   name: 'PropertyManage',
   components: {
-    customTable,
-    lbTable
+    customTable
   },
   data() {
     return {
