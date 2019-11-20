@@ -131,7 +131,7 @@ export default {
   },
   computed: {
     mapLeftNav() {
-      return this.chineseLangData.mapLeftNav
+      return this.langData.mapLeftNav
     },
     mapIcons() {
       return {

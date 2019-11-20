@@ -1,14 +1,11 @@
 <template>
   <div class="property-manage-warp" flex="dir:top">
     <slot />
-    <el-tabs v-model="activeName" type="card" @tab-click="handleTabClick">
-      <el-tab-pane label="个人资产" name="1" />
-      <el-tab-pane label="划转记录" name="2" />
-      <el-tab-pane label="充币记录" name="3" />
-      <el-tab-pane label="提币记录" name="4" />
-      <el-tab-pane label="奖励分配" name="5" />
-      <el-tab-pane label="返佣记录" name="6" />
-    </el-tabs>
+    <div>
+      <p class="text-info">IXX 总净资产估值</p>
+      <h1 class="numerical">≈ <span id="numerical" /> CNY</h1>
+      <el-divider />
+    </div>
     <custom-table
       v-loading="loading" stripe
       :show-summary="showSummary" border
@@ -30,6 +27,7 @@
 <script>
 import customTable from '@/components/customTable'
 import { getPropertyAccountList, getFinanceList, getDepositList, getWithdrawList } from '@/api/property'
+import CountUp from 'countup/dist/countUp.min'
 export default {
   name: 'PropertyManage',
   components: {
@@ -55,32 +53,34 @@ export default {
   },
   computed: {
     mapAccoutColumns() {
-      return Object.keys(this.chineseLangData[this.activeName]).map(key => {
+      return Object.keys(this.langData[this.activeName]).map(key => {
         const obj = {
           hearderLabel: this.$tR(`${this.activeName}.${key}`),
           prop: key,
-          columnKey: key
-          // handleValue: obj => obj[this.activeCurrency]
+          columnKey: key,
+          handleValue: value => {
+            if (+value && !isNaN(+value)) return this.bigRound(value, 2)
+          }
         }
-        // if (key === 'rates') {
-        //   obj.filters = this.filterObj
-        //   obj.hearderLabel = `${obj.hearderLabel} ${this.activeCurrency}`
-        //   obj['filter-multiple'] = false
-        //   obj['filter-method'] = this.filterHandler
-        //   obj['filtered-value'] = [this.activeCurrency]
-        //   // obj.handleValue = config => config[this.activeCurrency] + this.activeCurrency
-        // }
-        // if (key === 'totalValue') {
-        //   obj.handleValue = (obj, column, row) => {
-        //     const value = (+row.available + (+row.locking)) * (+row.rates[this.activeCurrency])
-        //     return value ? value + ' ' + this.activeCurrency : '--'
-        //   }
-        // }
+        if (key === 'rates') {
+          obj.filters = this.filterObj
+          obj.hearderLabel = `${obj.hearderLabel} ${this.activeCurrency}`
+          obj['filter-multiple'] = false
+          obj['filter-method'] = this.filterHandler
+          obj['filtered-value'] = [this.activeCurrency]
+          obj.handleValue = config => !+config[this.activeCurrency] ? '--' : this.bigRound(config[this.activeCurrency], 4) + ' ' + this.activeCurrency
+        }
+        if (key === 'totalValue') {
+          obj.handleValue = (obj, column, row) => {
+            const value = (+row.available + (+row.locking)) * (+row.rates[this.activeCurrency])
+            return value ? this.bigRound(value, 4) + ' ' + this.activeCurrency : '--'
+          }
+        }
         return obj
       })
     },
     mapTableInfo() {
-      return this.chineseLangData.mapTableInfo
+      return this.langData.mapTableInfo
     },
     userData() {
       return this.$store.state.userData
@@ -97,8 +97,15 @@ export default {
       }
     }
   },
-  created() {
-
+  mounted() {
+    const demo = new CountUp(document.querySelector('#numerical'), 0, {
+      duration: 4
+    })
+    if (!demo.error) {
+      demo.update(111111111)
+    } else {
+      console.error(demo.error)
+    }
   },
   methods: {
     handleTabClick() {
@@ -116,7 +123,7 @@ export default {
       this.pageConfig = obj
       this.loading = true
       this.api[this.activeName]({ user_id: this.id, page: currentPage, size: pageSize }).then(res => {
-        // this.filterObj = Object.keys(res.data[0].rates).map(key => ({ text: key, value: key }))
+        this.activeName === '1' && (this.filterObj = Object.keys(res.data[0].rates).map(key => ({ text: key, value: key })))
         this.tableList = Array.isArray(res.data) ? res.data : res.data.data
         this.loading = false
       })

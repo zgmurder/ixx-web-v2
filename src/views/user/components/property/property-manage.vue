@@ -1,15 +1,42 @@
 <template>
   <div class="property-manage-warp" flex="dir:top">
-    <div class="top">
-      <slot />
-      <el-divider />
-    </div>
+    <slot />
+
     <div class="center">
-      <p>IXX 总净资产估值</p>
-      <h1 class="numerical">≈ 154543734.1 CNY</h1>
+      <p class="text-info">IXX 总净资产估值</p>
+      <h1 class="numerical">≈ <span id="numerical" /> CNY</h1>
       <el-divider />
+      <div class="list-container" flex="main:justify cross:strech">
+        <div class="capital-account" flex="dir:top main:justify">
+          <div>
+            <h2 class="text-info" style="border-bottom:1px solide #999" flex="main:justify">资金账户 <el-link type="primary">关于资金账户</el-link></h2>
+            <hr>
+          </div>
+          <h1 style="text-align:center" class="text-primary"><span />
+            5555555 CNY</h1>
+          <div flex="main:justify box:mean">
+            <el-button><i class="el-icon-sort" />充币</el-button>
+            <el-button><i class="el-icon-sort" />提币</el-button>
+            <el-button><i class="el-icon-sort" />划转</el-button>
+          </div>
+        </div>
+        <div class="capital-account" flex="dir:top main:justify">
+          <div>
+            <h2 class="text-info" style="border-bottom:1px solide #999" flex="main:justify">资金账户 <el-link type="primary">关于资金账户</el-link></h2>
+            <hr>
+          </div>
+          <h1 style="text-align:center" class="text-primary"><span />
+            5555555 CNY</h1>
+          <div flex="main:justify box:mean">
+            <el-button><i class="el-icon-sort" />法币账户</el-button>
+            <el-button><i class="el-icon-sort" />法币账户</el-button>
+            <el-button><i class="el-icon-sort" />法币账户</el-button>
+          </div>
+        </div>
+
+      </div>
     </div>
-    <div class="bottom" flex="main:justify">
+    <!-- <div class="bottom" flex="main:justify">
       <fieldset>
         <legend class="title">资金账户</legend>
         <p flex="main:justify">
@@ -17,12 +44,6 @@
           <el-link type="info">财务记录</el-link>
         </p>
         <h2 class="numerical">≈ {{ propertyAccountTotal }} CNY</h2>
-        <!-- <custom-table v-loading="false" height="250" :table-list="tableList" :table-columns="mapAccoutColumns">
-          <div slot="handlerDom" slot-scope="data">
-              <el-button size="mini" :type="isBuy ? 'success' : 'danger'">{{ isBuy ? $tR(`otc_side_1`):$tR(`otc_side_2`) }}{{ digitalActive }}</el-button>
-            </div>
-        </custom-table> -->
-        <!-- <el-divider /> -->
         <div flex="main:justify box:mean">
           <el-button type="danger" icon="el-icon-edit" plain>充币</el-button>
           <el-button type="warning" icon="el-icon-share" plain>提币</el-button>
@@ -54,7 +75,7 @@
           </p>
         </div>
       </fieldset>
-    </div>
+    </div> -->
     <!-- <ul flex="main:justify cross:strech box:mean" class="center">
       <li flex="dir:top main:center cross:center">
         <el-progress type="circle" :percentage="100" :format="()=>'111111'" status="success" />
@@ -70,8 +91,8 @@
 import customTable from '@/components/customTable'
 import { getPropertyAccountList } from '@/api/property'
 import { bigTimes } from '@/utils/handleNum'
+import CountUp from 'countup/dist/countUp.min'
 export default {
-  name: 'PropertyManage',
   components: {
     customTable
   },
@@ -84,13 +105,13 @@ export default {
   },
   computed: {
     mapAccoutColumns() {
-      return Object.keys(this.chineseLangData.mapAccoutColumns).map(key => ({
+      return Object.keys(this.langData.mapAccoutColumns).map(key => ({
         hearderLabel: this.$tR(`mapAccoutColumns.${key}`),
         prop: key
       }))
     },
     mapTableInfo() {
-      return this.chineseLangData.mapTableInfo
+      return this.langData.mapTableInfo
     },
     userData() {
       return this.$store.state.userData
@@ -112,13 +133,23 @@ export default {
   },
   created() {
     getPropertyAccountList().then(res => (this.tableList = res.data))
+  },
+  mounted() {
+    const demo = new CountUp(document.querySelector('#numerical'), 0, {
+      duration: 4
+    })
+    if (!demo.error) {
+      demo.update(111111111)
+    } else {
+      console.error(demo.error)
+    }
   }
 }
 </script>
 <style lang="scss" scoped>
 .property-manage-warp{
   height: 100%;
-  text-align: center;
+  // text-align: center;
   &>.center{
     .numerical{
       // line-height: 100px;
@@ -129,7 +160,18 @@ export default {
       // border-color: rgba($color: $--color-primary, $alpha: .3);
       // padding-bottom: 20px;
     }
+    .list-container{
+      height: 300px;
+      margin-top:80px;
+      .capital-account{
+        border: solid 1px $--color-primary;
+        box-shadow: 0 -10px 0 $--color-primary;
+        width: 45%;
+        padding: 12px;
+      }
+    }
   }
+
   &>.bottom{
     &>fieldset{
       margin: 0;

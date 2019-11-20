@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     mapShareColumns() {
-      return Object.keys(this.chineseLangData.mapShareColumns).map(key => ({
+      return Object.keys(this.langData.mapShareColumns).map(key => ({
         hearderLabel: this.$tR(`mapShareColumns.${key}`),
         prop: key,
         hearderWidth: key => ['period', 'trade_type', 'amount'].includes(key) && '50px',
@@ -62,7 +62,7 @@ export default {
       }))
     },
     mapTableInfo() {
-      return this.chineseLangData.mapTableInfo
+      return this.langData.mapTableInfo
     },
     userData() {
       return this.$store.state.userData

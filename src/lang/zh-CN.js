@@ -330,8 +330,39 @@ export default {
       'property-manage': '资产管理',
       'capital-account': '资金账户',
       'deal-account': '交易账户',
-      'share-option': '急速合约',
+      'charge-money': '充币',
+      'mention-money': '提币',
+      'funds-transfer': '资金划转',
       'address-manage': '地址管理'
+    },
+    mapMenuList1: {
+      1: {
+        label: '资产管理',
+        children: { 'property-manage': '我的资产' }
+      },
+      2: {
+        label: '资金账户',
+        children: {
+          'capital-account': '资金账户',
+          'financial-record': '财务记录',
+          'charge-money': '充币',
+          'mention-money': '提币',
+          'funds-transfer': '资金划转'
+        }
+      },
+      3: {
+        label: '交易账户',
+        children: {
+          'fiat-Account': '法币账户',
+          'coin-Account': '币币账户',
+          'contract-Account': '合约账户',
+          'share-Account': '急速账户'
+        }
+      },
+      4: {
+        label: '其他',
+        children: { 'address-Manage': '地址管理' }
+      }
     }
   },
   propertyManage: {
@@ -393,15 +424,97 @@ export default {
     }
   },
   dealAccount: {
+    mapTab: {
+      1: '币币交易',
+      2: '合约交易',
+      3: '法币交易',
+      4: '急速合约'
+    },
     mapTableColumns: {
       1: {
+        user_id: '用户id',
+        currency: '币种',
+        available: '可用量',
+        rates: '汇率'
+      },
+      2: {
+        wallet_available: '钱包可用余额',
+        available: '可用余额',
+        currency: '币种',
+        holding: '目前仓位数量',
+        price: '开仓价格',
+        leverage: '杠杆倍数',
+        margin_available: '保证金余额',
+        position_margin: '仓位保证金',
+        order_margin: '委托保证金',
+        unrealized: '未实现盈亏',
+        realized: '已实现盈亏',
+        liq_price: '强平价格',
+        adl: 'ADL值',
+        close_position_price: '平仓委托价格',
+        future_tp_id: '止盈委托ID',
+        future_sl_id: '止损委托ID',
+        tp_price: '止盈委托价格',
+        sl_price: '止损委托价格'
+      },
+      3: {
         currency: '币名',
         available: '可用量',
-        withdrawing: '提币锁定量',
-        quota: '当前提币剩余额度',
-        max_quota: '当前提币总额度',
-        rates: '汇率',
-        totalValue: '总价值'
+        ordering: '委托锁定量',
+        withdrawing: '提币锁定量', // (此字段后续会废弃),
+        quota: '当前提币剩余额度', // (此字段后续会废弃),
+        max_quota: '当前提币总额度', // (此字段后续会废弃),
+        rates: '汇率对象'
+      },
+      4: {
+        user_id: '用户id',
+        currency: '币名',
+        available: '可用量',
+        ordering: '订单冻结量'
+      }
+    },
+    mapHistoryTableColumns: {
+      1: {
+        currency: '币种',
+        create_time: '成交时间',
+        opetate: '类型', // 1转出 2转入 3当日清算 4买入 5卖出
+        amount: '数量',
+        available: '余额'
+      },
+      2: {
+        wallet_available: '钱包可用余额',
+        available: '可用余额',
+        currency: '币种',
+        holding: '目前仓位数量',
+        price: '开仓价格',
+        leverage: '杠杆倍数',
+        margin_available: '保证金余额',
+        position_margin: '仓位保证金',
+        order_margin: '委托保证金',
+        unrealized: '未实现盈亏',
+        realized: '已实现盈亏',
+        liq_price: '强平价格',
+        adl: 'ADL值',
+        close_position_price: '平仓委托价格',
+        future_tp_id: '止盈委托ID',
+        future_sl_id: '止损委托ID',
+        tp_price: '止盈委托价格',
+        sl_price: '止损委托价格'
+      },
+      3: {
+        currency: '币名',
+        available: '可用量',
+        ordering: '委托锁定量',
+        withdrawing: '提币锁定量', // (此字段后续会废弃),
+        quota: '当前提币剩余额度', // (此字段后续会废弃),
+        max_quota: '当前提币总额度', // (此字段后续会废弃),
+        rates: '汇率对象'
+      },
+      4: {
+        user_id: '用户id',
+        currency: '币名',
+        available: '可用量',
+        ordering: '订单冻结量'
       }
     }
   },

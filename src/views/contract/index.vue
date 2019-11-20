@@ -358,7 +358,7 @@ export default {
   },
   computed: {
     // mapTabs() {
-    //   return this.chineseLangData.mapTabs
+    //   return this.langData.mapTabs
     // },
     formValueObj() {
       if (!this.activeProduct.FUTURE || !this.costObj || !this.activeBalance) return {}
@@ -375,16 +375,16 @@ export default {
       return this.$store.state.userData
     },
     mapDishInfo() {
-      return this.chineseLangData.mapDishInfo
+      return this.langData.mapDishInfo
     },
     mapHeader1() {
-      return this.chineseLangData.mapDelegateList.mapHeader1
+      return this.langData.mapDelegateList.mapHeader1
     },
     mapHeader2() {
-      return this.chineseLangData.mapDelegateList.mapHeader2
+      return this.langData.mapDelegateList.mapHeader2
     },
     mapFormContent() {
-      return this.chineseLangData.mapFormContent
+      return this.langData.mapFormContent
     },
     mapInput() {
       // eslint-disable-next-line no-unused-vars
@@ -392,10 +392,10 @@ export default {
       return +this.activeBtnsKey > 2 ? this.mapFormContent.mapInput : data
     },
     mapInformation() {
-      return this.chineseLangData.mapInformation
+      return this.langData.mapInformation
     },
     mapTableTapContents() {
-      return this.chineseLangData.mapTableTapContents
+      return this.langData.mapTableTapContents
     },
     markData() {
       return this.products.reduce((prev, curr) => {

@@ -95,6 +95,9 @@ export default {
     color: #dadada;
     background-color: $--background-color-gray;
     .nav-left-container{
+      &>img{
+        cursor: pointer;
+      }
       .nav-list>li{
         margin: 0 12px;
         overflow: hidden;

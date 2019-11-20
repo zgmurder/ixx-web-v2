@@ -34,13 +34,13 @@ export default {
   },
   computed: {
     tableColumns() {
-      return Object.keys(this.chineseLangData.mapHistoryColumns).map(key => ({
+      return Object.keys(this.langData.mapHistoryColumns).map(key => ({
         hearderLabel: this.$tR(`mapHistoryColumns.${key}`),
         prop: key
       }))
     },
     mapMenuList() {
-      return Object.keys(this.chineseLangData.mapMenuList).map(key => ({
+      return Object.keys(this.langData.mapMenuList).map(key => ({
         label: this.$tR(`mapMenuList.${key}`),
         key
       }))

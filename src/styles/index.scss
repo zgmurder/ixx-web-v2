@@ -19,12 +19,14 @@ body::-webkit-scrollbar {
 }
 .text-nowrap{ max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
 .text-active{ color: $--color-primary;}
+.text-primary{ color: $--color-primary;}
 .text-success{color: $--color-success;}
 .text-danger{color: $--color-danger;}
 .text-warning{color: $--color-warning;}
+.text-info{color: $--color-info;}
 
 
-.background-active{ background-color: $--color-primary;}
+.background-active{ background-color: $--color-primary;color: #fff;}
 
 
 

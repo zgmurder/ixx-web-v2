@@ -1,19 +1,20 @@
 <template>
   <div class="user-center">
-    <div class="container user-center-container" flex="main:justify box:mean">
+    <div class="user-center-container" flex="main:justify box:mean">
       <div class="container-left">
         <navMenu v-model="activeKey" :map-menu-list="mapMenuList" @change="handleClick" />
       </div>
       <div class="container-right">
-        <keep-alive>
-          <component :is="componentId">
-            <div flex="main:justify cross:center" class="container-title">
-              {{ $tR(`mapMenuList.${activeKey}`) }}
-              <el-button size="mini" type="primary" @click="$router.push('/user/property')">个人中心<i class="el-icon-arrow-right" />
-              </el-button>
-            </div>
-          </component>
-        </keep-alive>
+        <component :is="componentId">
+          <div class="container-title">
+            {{ title }}
+            <el-select v-model="selectCurrency" placeholder="请选择">
+              <el-option v-for="item in mapCurrency" :key="item" :label="item" :value="item" />
+            </el-select>
+            <el-divider />
+            <!-- <el-button size="mini" type="primary" @click="$router.push('/user/property')">个人中心<i class="el-icon-arrow-right" /></el-button> -->
+          </div>
+        </component>
       </div>
     </div>
   </div>
@@ -21,6 +22,7 @@
 <script>
 import customTable from '@/components/customTable'
 import navMenu from '@/components/nav-menu'
+import { mapCurrency } from '@/const'
 export default {
   name: 'Property',
   components: {
@@ -32,43 +34,42 @@ export default {
       tableList: [],
       loading: false,
       componentId: null,
-      activeKey: ''
+      activeKey: '',
+      selectCurrency: 'CNY',
+      mapCurrency
     }
   },
   computed: {
-    tableColumns() {
-      return Object.keys(this.chineseLangData.mapHistoryColumns).map(key => ({
-        hearderLabel: this.$tR(`mapHistoryColumns.${key}`),
-        prop: key
-      }))
-    },
     mapMenuList() {
-      return Object.keys(this.chineseLangData.mapMenuList).map(key => ({
-        label: this.$tR(`mapMenuList.${key}`),
-        key
-      }))
+      return this.langData.mapMenuList1
+    },
+    title() {
+      const pathArr = this.activeKey.replace('.', '.children.').split('.')
+      return pathArr.reduce((prev, curr) => {
+        return prev[curr]
+      }, this.mapMenuList)
     }
   },
   watch: {
     '$route.query': {
       handler({ key }) {
-        if (!key) return
-        this.componentId = () => import(`./components/property/${key}`)
-        this.activeKey = key
+        this.activeKey = key || '1.property-manage'
+        const name = this.activeKey.split('.')[1]
+        this.componentId = () => import(`./components/property/${name}`)
       },
       immediate: true
     }
   },
   methods: {
     handleClick(key) {
-      this.$router.push({ path: this.$route.path, query: { key: key || 'property-manage' }})
+      this.$router.push({ path: this.$route.path, query: { key }})
     }
   }
 }
 </script>
 <style lang="scss" scoped>
   .user-center{
-    padding-top: 60px;
+    // padding-top: 60px;
     font-size: 14px;
     background: #fafafa;
     height: calc(100vh - 60px);
@@ -78,7 +79,7 @@ export default {
       height: 100%;
       &>.container-left{
         flex: none;
-        width: 210px;
+        width: 200px;
         margin-right: 40px;
       }
       &>.container-right{
@@ -86,8 +87,8 @@ export default {
         padding: 20px;
         .container-title{
           line-height: 50px;
-          border-bottom: 1px solid #ddd;
-          margin-bottom: 12px;
+          // border-bottom: 1px solid #ddd;
+          // margin-bottom: 12px;
           font-size: 18px;
           font-weight: bold
         }

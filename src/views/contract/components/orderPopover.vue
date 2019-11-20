@@ -94,7 +94,7 @@ export default {
   },
   computed: {
     mapTableColumns() {
-      return this.chineseLangData.mapTableColumns
+      return this.langData.mapTableColumns
     },
     calcData() {
       return Object.values(this.data).reduce((prev, curr, index) => {

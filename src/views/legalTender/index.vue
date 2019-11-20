@@ -107,16 +107,16 @@ export default {
   },
   computed: {
     mapCurrency() {
-      return this.chineseLangData.mapCurrency
+      return this.langData.mapCurrency
     },
     mapSidebarMenu() {
-      return this.chineseLangData.mapSidebarMenu
+      return this.langData.mapSidebarMenu
     },
     mapBuyOrSellMethods() {
-      return this.chineseLangData.mapBuyOrSellMethods
+      return this.langData.mapBuyOrSellMethods
     },
     mapTableColumns() {
-      return this.chineseLangData.mapTableColumns
+      return this.langData.mapTableColumns
     },
     tableColumns() {
       return Object.keys(this.mapTableColumns).map(key => ({

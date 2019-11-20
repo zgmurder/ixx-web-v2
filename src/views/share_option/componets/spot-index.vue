@@ -35,7 +35,7 @@ export default {
   },
   computed: {
     mapList() {
-      return this.chineseLangData.mapList
+      return this.langData.mapList
     },
     mapCurrency() {
       const { Huobi, Okex, Binance } = this.data

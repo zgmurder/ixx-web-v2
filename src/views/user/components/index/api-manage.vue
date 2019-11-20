@@ -24,7 +24,7 @@ export default {
   },
   computed: {
     tableColumns() {
-      return Object.keys(this.chineseLangData.mapHistoryColumns).map(key => ({
+      return Object.keys(this.langData.mapHistoryColumns).map(key => ({
         hearderLabel: this.$tR(`mapHistoryColumns.${key}`),
         prop: key
       }))

@@ -5,8 +5,9 @@ export default {
     thisName() {
       return capitalizeLower(this.$options.name)
     },
-    chineseLangData() {
-      return this.$i18n.messages['zh-CN'][this.thisName]
+    langData() {
+      const locale = this.$i18n.locale
+      return this.$i18n.messages[locale][this.thisName]
     }
   },
   methods: {
