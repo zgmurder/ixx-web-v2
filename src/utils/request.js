@@ -10,6 +10,7 @@ const service = axios.create({
   withCredentials: true, // send cookies when cross-domain requests
   timeout: 10000 // request timeout
 })
+window._axiosPromiseArr = []
 // request interceptor
 service.interceptors.request.use(
   config => {
@@ -30,6 +31,9 @@ service.interceptors.request.use(
 
     config.headers['from'] = 'ixx'
     config.headers['lang'] = localStorage.getItem('locale') || 'zh-CN'
+    config.cancelToken = new axios.CancelToken(cancel => {
+      window._axiosPromiseArr.push({ cancel })
+    })
     return config
   },
   error => {
@@ -65,11 +69,13 @@ service.interceptors.response.use(
         //   store.dispatch('loginout')
         // }, 3000)
       } else {
-        Message({
-          message: res.message || 'Server Error',
-          type: 'error',
-          duration: 5 * 1000
-        })
+        if (res.message !== null) {
+          Message({
+            message: res.message || 'Server Error',
+            type: 'error',
+            duration: 5 * 1000
+          })
+        }
       }
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       // if (res.code === 50008 || res.code === 50012 || res.code === 50014) {

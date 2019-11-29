@@ -174,7 +174,6 @@ export const getCost = (product, leverages, entrustList, currHolding) => {
   // 累加次数 向上取整
   let totalValue = calcTotalValue({ entrustList, currHolding, multiplier })
   totalValue = (totalValue == null || totalValue.eq(0)) ? currValue : totalValue
-  console.log({ totalValue })
   const num = (Big(totalValue).minus(base_risk)).div(gap_risk).round(0, 3)
 
   const endIM = Big(im).plus(num.times(mm))

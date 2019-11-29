@@ -7,9 +7,9 @@
             <div flex="main:left cross:strech" class="tabs-group">
               <div v-for="(product,index) in products" :key="index" :class="{active:activeProduct.name === product.name}" flex="dir:top main:center" @click="handleProductsChange(product)">
                 <p>{{ $tR(`mapTabs.${product.name}`) }}</p>
-                <span v-if="product.FUTURE" :class="[product.FUTURE.increment_24h > 0?'text-success':'text-danger']">
+                <span v-if="product.UNIT" :class="[product.UNIT.increment_24h > 0?'text-success':'text-danger']">
                   {{ calcIncreaseRate(product) }}%
-                  <svg-icon :icon-class="product.FUTURE.increment_24h > 0?'lv':'hong'" />
+                  <svg-icon :icon-class="product.UNIT.increment_24h > 0?'lv':'hong'" />
                 </span>
               </div>
             </div>
@@ -25,11 +25,11 @@
               <span v-for="(value,key) in mapHeader1" :key="key">{{ $tR(`mapDelegateList.mapHeader1.${key}`) }}</span>
             </div>
             <div ref="content-wrap" class="content-wrap">
-              <div v-if="delegateData" class="content-container">
+              <div v-if="delegateData && activeProduct.UNIT" class="content-container">
                 <ul>
                   <li v-for="(item,index) in asks.arr" :key="index" flex="main:justify cross:center">
-                    <span class="text-danger" @click="activeAcountAndPriceArr[1]=item.values[0]">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
-                    <span @click="activeAcountAndPriceArr[0]=item.values[1]">{{ item.values[1] | bigRound(0) }}</span>
+                    <span class="text-danger">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
+                    <span style="flex:1">{{ item.values[1] | bigRound(0) }}</span>
                     <span>{{ item.values[2] }}</span>
                     <div class="mark-bg is-buy" :style="{width:handleWidthBg(item.values[1],asks.max)}" />
                   </li>
@@ -37,7 +37,7 @@
                 <div class="content-center">
                   <p :class="[isBuy?'text-success':'text-danger',triggerBtn && 'justify'||'']">
                     <span>
-                      {{ activeProduct.FUTURE.current | bigRound(activeProduct.price_scale) }}
+                      {{ activeProduct.UNIT.current | bigRound(activeProduct.price_scale) }}
                       <svg-icon :icon-class="isBuy?'lv':'hong'" />
                     </span>
                     <el-link v-if="triggerBtn" :underline="false" type="info" @click="dataLoaded(true)">{{ $tR(`mapDelegateList.return-dish`) }}</el-link>
@@ -46,8 +46,8 @@
                 </div>
                 <ul>
                   <li v-for="(item,index) in bids.arr" :key="index" flex="main:justify cross:center">
-                    <span class="text-success" @click="activeAcountAndPriceArr[1]=item.values[0]">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
-                    <span @click="activeAcountAndPriceArr[0]=item.values[1]">{{ item.values[1] | bigRound(0) }}</span>
+                    <span class="text-success">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
+                    <span style="flex:1">{{ item.values[1] | bigRound(0) }}</span>
                     <span>{{ item.values[2] }}</span>
                     <div class="mark-bg is-sell" :style="{width:handleWidthBg(item.values[1],bids.max)}" />
                   </li>
@@ -79,12 +79,12 @@
           </div>
         </td>
         <td rowspan="7">
-          <div v-login class="form-content">
+          <div class="form-content">
             <div class="header" flex="main:justify">
               <span> {{ $tR(`mapFormContent.submitEntrust`) }}</span>
             </div>
-            <div v-loading="!activeProduct.FUTURE" element-loading-background="rgba(0, 0, 0, 0.3)" class="content-container-submit">
-              <div v-if="activeProduct.FUTURE" flex="main:justify">
+            <div v-loading="!activeProduct.UNIT" element-loading-background="rgba(0, 0, 0, 0.3)" class="content-container-submit">
+              <div v-if="activeProduct.UNIT" flex="main:justify">
                 <div v-for="(value,key) in mapFormContent.mapBtns" :key="key" :class="{active:activeBtnsKey === key}">
                   <dropdown v-if="key === '3'" v-model="activePriceType" :menu-options="menuOptions" label="label">
                     <el-button class="custom-btn" :class="{active:activeBtnsKey === key}" size="small" plain @click="handleSwitch(key)">
@@ -110,7 +110,7 @@
                     </el-select>
                   </div>
                   <template v-else>
-                    <input :value="(i===0 || i===2) ? activeAcountAndPriceArr[i]:(activeAcountAndPriceArr[i]||(activeProduct.FUTURE||{}).current)" type="text" @input="e=>activeAcountAndPriceArr[i] = e.target.value.replace(/^(0+)|[^\d.]+/g,'')">
+                    <input :value="(i===0 || i===2) ? activeAcountAndPriceArr[i]:(activeAcountAndPriceArr[i]||(activeProduct.UNIT||{}).current)" type="text" @input="e=>activeAcountAndPriceArr[i] = e.target.value.replace(/^(0+)|[^\d.]+/g,'')">
                     <span>USD</span>
                   </template>
                 </template>
@@ -130,23 +130,21 @@
                     :disabled="popoverDisabled"
                     :title="handlePopoverTitle(key)"
                   >
-                    <orderPopover v-if="activeProduct.FUTURE" v-model="activeLever" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" :type="key === 'buy'?'success':'danger'" @change="setLeverage" @command="handleCommandOrder" />
+                    <orderPopover v-if="activeProduct.UNIT" v-model="activeLever" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" :type="key === 'buy'?'success':'danger'" @change="setLeverage" @command="handleCommandOrder" />
                     <el-button slot="reference" :type="key === 'buy'?'success':'danger'" :loading="buyBtnLoading" :disabled="handleDisabledBtn(key)" style="width:100%" @click="handlePopoverClick(key)">
                       <div v-show="!buyBtnLoading" flex="main:justify cross:center">
                         <span>{{ $tR(`mapFormContent.mapHandleBtn.${key}`) }}</span>
-                        <span v-if="activeBtnsKey === '1'" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ activeAcountAndPriceArr[1]||(activeProduct.FUTURE||{}).current }} USD</span>
+                        <span v-if="activeBtnsKey === '1'" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ activeAcountAndPriceArr[1]||(activeProduct.UNIT||{}).current }} USD</span>
                         <span v-else-if="activeBtnsKey === '2'" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ key === 'buy'?asks.last[0]:bids.first[0] }} USD</span>
                         <span v-else-if="activeBtnsKey === '3'" style="font-size:12px">
-                          <span v-if="activePriceType.key === '4'">{{ activeAcountAndPriceArr[0] }} @ {{ (activeProduct.FUTURE||{}).current }}</span>
-                          <span>{{ key === 'buy'? '≦':'≧' }} {{ (activeProduct.FUTURE||{}).current }}</span>
+                          <span v-if="activePriceType.key === '4'">{{ activeAcountAndPriceArr[0] }} @ {{ (activeProduct.UNIT||{}).current }}</span>
+                          <span>{{ key === 'buy'? '≦':'≧' }} {{ (activeProduct.UNIT||{}).current }}</span>
                         </span>
                       </div>
                     </el-button>
-                    <!-- @click="submitOrder(key === 'buy'?1:2)" -->
                   </el-popover>
 
                   <p style="font-size:12px;color:#999">{{ $tR(`mapFormContent.cost`) }}：<span>{{ !activeAcountAndPriceArr[0]?'--':costObj[key] }}</span>BTC</p>
-                  <!-- <p v-else style="font-size:12px;color:#999">{{ $tR(`mapFormContent.cost`) }}：<span>{{ !activeAcountAndPriceArr[0]?'--':sellCost }}</span>BTC</p> -->
                 </div>
                 <hr>
                 <div v-for="(value,key) in mapFormContent.mapDescribe" :key="key" style="font-size:12px;line-height:24px" flex="main:justify">
@@ -161,13 +159,13 @@
       </tr>
       <tr>
         <td colspan="3" rowspan="1">
-          <div v-loading="!activeProduct.FUTURE" class="dish-info" element-loading-background="rgba(0, 0, 0, 0.3)">
-            <template v-if="activeProduct.FUTURE">
+          <div v-loading="!activeProduct.UNIT" class="dish-info" element-loading-background="rgba(0, 0, 0, 0.3)">
+            <template v-if="activeProduct.UNIT">
               <div class="info-left">
                 <div class="title">
                   <svg-icon icon-class="star" class="round" />
                   {{ $tR(`mapTabs.${activeProduct.name}`) }}
-                  <svg-icon :class="[activeProduct.FUTURE.increment_24h > 0?'text-success':'text-danger']" :icon-class="activeProduct.FUTURE.increment_24h > 0?'lv':'hong'" />
+                  <svg-icon :class="[activeProduct.UNIT.increment_24h > 0?'text-success':'text-danger']" :icon-class="activeProduct.UNIT.increment_24h > 0?'lv':'hong'" />
                 </div>
                 <span>{{ $tR(`mapInformation.valueRate`) }}： {{ symbolInfo.fee_rate | bigRound(8) }}</span>
                 <span>
@@ -204,7 +202,7 @@
           </div>
         </td>
         <td rowspan="3">
-          <div v-loading="false" v-login class="hold-content" element-loading-background="rgba(0, 0, 0, 0.3)">
+          <div v-loading="false" class="hold-content" element-loading-background="rgba(0, 0, 0, 0.3)">
             <div class="header" flex="main:justify">
               <span> {{ $tR('currentPlace') }}：{{ activeProduct && $tR(`mapTabs.${activeProduct.name}`)||'' }}</span>
             </div>
@@ -214,25 +212,14 @@
                 <p style="border-left:1px solid #333;border-right:1px solid #333">{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('rateOReturn') }}</p>
                 <p>{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('quota') }}</p>
               </div>
-              <orderPopover v-if="activeProduct.FUTURE" v-model="activeLever" only-lever flex="dir:top" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" type="success" @change="setLeverage" @command="handleCommandOrder" />
-              <!-- <div class="linear-bar" flex="main:justify cross:center">
-                <svg-icon icon-class="btc" />
-                <svg-icon icon-class="bug" />
-                <div class="mark">{{ activeLever }} x</div>
-              </div>
-              <div class="multiple-bar">
-                <div> 杠杆倍数：<el-link type="primary" :underline="false" style="font-size:12px">设置</el-link></div>
-                <div>
-                  <el-tag v-for="tag in mapLever" :key="tag" style="cursor: pointer;" size="mini" :effect="activeLever === tag && 'dark'||'plain'" @click="activeLever = tag"> {{ tag === '0'?'全仓':tag+'x' }} </el-tag>
-                </div>
-              </div> -->
+              <orderPopover v-if="activeProduct.UNIT" v-model="activeLever" only-lever flex="dir:top" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" type="success" @change="setLeverage" @command="handleCommandOrder" />
             </div>
           </div>
         </td>
       </tr><tr /><tr />
       <tr>
         <td rowspan="3" colspan="5">
-          <div v-login class="order-list">
+          <div class="order-list">
             <div class="header" flex>
               <div v-for="(value,key) in mapTableTapContents" :key="key" :class="{active:activeTableTabKey === key}" @click="handleTableTabClick(key,amountObj[key][1]=false)">
                 <el-badge v-if="amountObj" is-dot :hidden="activeTableTabKey === key ||!amountObj[key][1]">
@@ -242,7 +229,7 @@
               </div>
             </div>
             <div v-loading="!calcTableList" class="order-list-content" element-loading-background="rgba(0, 0, 0, 0.3)">
-              <shipping v-if="activeTableTabKey === 'shipping'" :mark-data="markData" :data="calcTableList" :table-columns="tableColumns" />
+              <shipping v-if="activeTableTabKey === 'shipping'" :mark-data="markData" :data="calcTableList" :table-columns="tableColumns" @change="handleAmountObj" />
               <customTable v-if="activeTableTabKey !== 'shipping' && calcTableList" header-row-class-name="contract-order-list-row-class" row-class-name="contract-order-list-row-class" size="mini" :table-list="calcTableList" :last-column-config="lastColumnConfig" :table-columns="tableColumns">
                 <div slot="handlerDom" slot-scope="{data}">
                   <el-button size="mini" type="danger" :loading="data.cancelBtnLoading" @click="cancelOrder(data)">{{ $tR('cancel') }}</el-button>
@@ -256,11 +243,11 @@
             <div class="header" flex="main:justify">
               <span> 深度图</span>
             </div>
-            <div v-if="delegateData" class="information-content">
+            <div v-if="delegateData && activeProduct.UNIT" class="information-content">
               <div class="content-center">
                 <p :class="[isBuy?'text-success':'text-danger',triggerBtn && 'justify'||'']">
                   <span>
-                    {{ activeProduct.FUTURE.current | bigRound(activeProduct.price_scale) }}
+                    {{ activeProduct.UNIT.current | bigRound(activeProduct.price_scale) }}
                     <svg-icon :icon-class="isBuy?'lv':'hong'" />
                   </span>
                   <el-link v-if="triggerBtn" :underline="false" type="info" @click="dataLoaded(true)">{{ $tR(`mapDelegateList.return-dish`) }}</el-link>
@@ -283,7 +270,7 @@
 <script>
 import candlestick from '@/components/candlestick'
 import selectBase from '@/components/selectBase'
-import soket from '@/mixins/soket'
+import soket from '@/mixins/resoket'
 import { bigRound, logogramNum, calcValueByAmountAndPrice, bigDiv, bigTimes, bigPlus, bigMinus, getCost } from '@/utils/handleNum'
 import {
   getSymbolInfo,
@@ -301,13 +288,15 @@ import {
   cancelOrder,
   getAllAmount,
   getFinanceRecord,
-  setLeverage
-} from '@/api/contract'
+  setLeverage,
+  getKlineHistoryList
+} from '@/api/currencyUnit'
 import depthMap from './components/depth-map'
 import orderPopover from './components/orderPopover'
 import shipping from './components/shipping'
 import customTable from '@/components/customTable'
 import dropdown from '@/components/dropdown'
+import { mapPeriod } from '@/const'
 export default {
   name: 'Contract',
   components: {
@@ -361,14 +350,14 @@ export default {
     //   return this.langData.mapTabs
     // },
     formValueObj() {
-      if (!this.activeProduct.FUTURE || !this.costObj || !this.activeBalance) return {}
-      const price = this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current
+      if (!this.activeProduct.UNIT || !this.costObj || !this.activeBalance) return {}
+      const price = this.activeAcountAndPriceArr[1] || this.activeProduct.UNIT.current
       return {
         1: calcValueByAmountAndPrice(this.activeAcountAndPriceArr[0], price),
         2: this.costObj[this.side === 1 ? 'buy' : 'sell'],
         3: this.activeBalance.available_balance,
         4: +this.activeBalance.holding + (this.side === 2 ? -this.activeAcountAndPriceArr[0] : +this.activeAcountAndPriceArr[0]),
-        5: this.activeProduct.FUTURE.current
+        5: this.activeProduct.UNIT.current
       }
     },
     userData() {
@@ -404,11 +393,16 @@ export default {
       }, {})
     },
     calcToBTC() {
-      const arr = [this.activeProduct.FUTURE.volume_24h, this.activeProduct.FUTURE.current]
+      const arr = [this.activeProduct.UNIT.volume_24h, this.activeProduct.UNIT.current]
       return this.activeProduct.name === 'FUTURE_BTCUSD' ? bigDiv(arr) : bigTimes([...arr, this.activeProduct.multiplier])
     },
     asks() {
-      const arr = [...(this.delegateData.asks || [])]
+      const value = this.bids.first[0]
+      const data = Array.from({ length: 10 }).map((item, index) => {
+        const obj = { values: [+value + index, 100] }
+        return obj
+      })
+      const arr = [...(this.delegateData.asks || data)]
       let max = 0
       arr.forEach((item, index, arr) => {
         max = Math.max(item.values[1], max)
@@ -483,8 +477,7 @@ export default {
     lastColumnConfig() {
       return ['curEntrust', 'lossEntrust'].includes(this.activeTableTabKey) ? {
         headerLabel: this.$tR('handle'),
-        headerAlign: 'left',
-        width: '50px'
+        headerAlign: 'left'
       } : null
     },
     menuOptions() {
@@ -504,7 +497,7 @@ export default {
     costObj() {
       if (!this.activeBalance) return
       const obj = {}
-      const price = this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current
+      const price = this.activeAcountAndPriceArr[1] || this.activeProduct.UNIT.current
       const activeLever = !+this.activeLever ? 100 : +this.activeLever
       if (+this.activeBalance.holding < 0) {
         let buyAmount
@@ -527,7 +520,7 @@ export default {
     },
     updateTableList() {
       return this.tableList && this.tableList.map(item => {
-        const distancePrice = item.trigger_price - this.activeProduct.FUTURE.current
+        const distancePrice = item.trigger_price - this.activeProduct.UNIT.current
         return { ...item, distancePrice }
       }) || []
     },
@@ -557,17 +550,26 @@ export default {
         value: '合约价值',
         valueRate: this.symbolInfo.fee_rate
       }
+    },
+    mapHandlerSoket() {
+      return {
+        'market': this.handleTickers,
+        'orderbook': this.handleOrderbookSoket,
+        'deal': this.handleDealSoket
+      }
     }
   },
   async created() {
     this.products = (await getSymbolList()).data
-    await this.openWebSocket('/market/tickers', this.handleTickers)
+    await this.openWebSocket(this.handleSoketData, websocket => {
+      this.websocket.send('{"op":"subscribepub","args":["market@ticker"]}')
+      // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
+    })
     this.handleProductsChange(this.products[0])
     this.openWebSocket(WSURL, res => {
       if (res && res[0] && !this.cancelBtnLoading && !this.buyBtnLoading) this.handleAmountObj()
     }, websocket => {
-      if (!this.$store.state.userData) return
-      websocket.send(`{"op":"loginWeb","args":["${this.$store.state.userData.session_id}"]}`)
+      websocket.send('{"op":"login","args":["8be85859c7e2d88c87d6e31d650c6cef","8c7d5d714632ece63bc2eef4301acf94c121ea23065f2456f28e083485e558a1"]}')
       websocket.send('{"op":"subscribe","args":["orderfills"]}')
       // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
     })
@@ -576,9 +578,28 @@ export default {
     // getFinanceRecord()
   },
   methods: {
+    handleOrderbookSoket(data) {
+      this.delegateData = data
+      if (!this._scrolled) {
+        this.$nextTick(() => {
+          this.dataLoaded()
+          this._scrolled = true
+        })
+      }
+    },
+    handleDealSoket(data) {
+      const last = data[data.length - 1]
+      this.newBargainListData.unshift(last)
+      this.newBargainListData.pop()
+      this.isBuy = last.side === 'buy'
+    },
+    handleSoketData(res) {
+      const key = res.topic && res.topic.split('@')[0]
+      this.mapHandlerSoket[key] && this.mapHandlerSoket[key](res.data)
+    },
     handlePopoverTitle(key) {
       const type = this.activeBtnsKey === '3' && this.activePriceType.key || this.activeBtnsKey
-      const price = this.activeAcountAndPriceArr[1] || (this.activeProduct.FUTURE || {}).current
+      const price = this.activeAcountAndPriceArr[1] || (this.activeProduct.UNIT || {}).current
       const calcPrice = ['2', '4', '6'].includes(type) ? '市场最优价格' : price
       return `
         ${this.$tR(`mapFormContent.mapHandleBtn.${key}`)}--
@@ -588,7 +609,7 @@ export default {
     },
     handleDisabledBtn(side) {
       if (+this.activeBtnsKey > 2) {
-        const comparisonValue = ['3', '4'].includes(this.activePriceType.key) ? +this.activeProduct.FUTURE.current : (+this.activeAcountAndPriceArr[1] || +this.activeProduct.FUTURE.current)
+        const comparisonValue = ['3', '4'].includes(this.activePriceType.key) ? +this.activeProduct.UNIT.current : (+this.activeAcountAndPriceArr[1] || +this.activeProduct.UNIT.current)
         const hasValue = this.activeAcountAndPriceArr[0] && this.activeAcountAndPriceArr[2]
         const type = !['3', '4'].includes(this.activePriceType.key) ? 'sell' : 'buy'
         const isSell = side === type ? +this.activeAcountAndPriceArr[2] > comparisonValue : +this.activeAcountAndPriceArr[2] < +comparisonValue
@@ -597,7 +618,7 @@ export default {
       } else return !this.activeAcountAndPriceArr[0]
     },
     setLeverage(leverage) {
-      setLeverage({ currency: this.activeProduct.currency, leverage }).then(res => {
+      setLeverage({ name: this.activeProduct.name, leverage }).then(res => {
         this.$message.success(this.$tR('handleSuccess'))
         return Promise.resolve()
       }).then(res => {
@@ -620,7 +641,7 @@ export default {
         this.entrustList = res.data.data.map(item => {
           item.cancelBtnLoading = false
           item._symbol = item.symbol
-          item.symbol = this.$tR(`mapTabs.${item.symbol}`)
+          item.symbol = this.$tR(`mapTabs.${item.name}`)
           return item
         })
       })
@@ -646,32 +667,39 @@ export default {
       }, this.products)
     },
     handleProductsChange(product) {
+      // ws.send('{"op":"subscribepub","args":["orderbook@FUTURE_BTCUSD@1@2@10"]}')
+      // this.websocket.send(`{"op":"subscribepub","args":["orderbook@${product.name}@1@2@10"]}`)
+      // this.websocket.send(`{"op":"subscribepub","args":["deal@${product.name}"]}`)
+      // this.$nextTick(() => this.dataLoaded())
+      // this.newBargainListData = (await getFutureListByKey(product.name, { size: 20 })).data
+
       if (this.activeProduct) {
-        this.closeWebSocket(`/orderbook/${this.activeProduct.name}/0/1/20`)
-        this.closeWebSocket(`/deal/${this.activeProduct.name}`)
+        this.websocket.send(`{"op":"unsubscribepub","args":["orderbook@${product.product}_${product.currency}@1@2@20"]}`)
+        this.websocket.send(`{"op":"unsubscribepub","args":["deal@${product.product}_${product.currency}"]}`)
       }
-      this.openWebSocket(`/orderbook/${product.name}/0/1/20`, data => {
-        this.delegateData = data
-      }).then(res => { this.$nextTick(() => this.dataLoaded()) })
-      getFutureListByKey(product.name, { size: 16 }).then(res => (this.newBargainListData = res.data)).then(res => {
-        this.openWebSocket(`/deal/${product.name}`, data => {
-          const last = data[data.length - 1]
-          this.newBargainListData.length = this.newBargainListData.length - 1
-          this.newBargainListData.unshift(last)
-          this.isBuy = last.side === 'buy'
-        })
+      this.websocket.send(`{"op":"subscribepub","args":["orderbook@${product.product}_${product.currency}@1@2@20"]}`)
+      this.websocket.send(`{"op":"subscribepub","args":["deal@${product.product}_${product.currency}"]}`)
+      getFutureListByKey(`${product.product}_${product.currency}`, { size: 20 }).then(({ data }) => {
+        this.newBargainListData = data
       })
-      getSymbolInfo({ symbol: product.name }).then(res => {
-        this.symbolInfo = res.data
-      })
+      // if (this.activeProduct) {
+      //   this.closeWebSocket(`/orderbook/${this.activeProduct.name}/0/1/20`)
+      //   this.closeWebSocket(`/deal/${this.activeProduct.name}`)
+      // }
+      // this.openWebSocket(`/orderbook/${product.name}/0/1/20`, data => {
+      //   this.delegateData = data
+      // }).then(res => { this.$nextTick(() => this.dataLoaded()) })
+
+      // getSymbolInfo({ symbol: product.name }).then(res => {
+      //   this.symbolInfo = res.data
+      // })
       this.activeProduct = product
-      this.tvWidget
       if (!this.$refs.candlestick.tvWidget) {
-        this.$refs.candlestick.initTV(product.name)
+        this.$refs.candlestick.initTV(`${product.product}_${product.currency}`)
       } else this.$refs.candlestick.tvWidget.chart().setSymbol(`${product.product}_${product.currency}`)
     },
     calcIncreaseRate(product) {
-      return bigDiv([bigTimes([product.FUTURE.increment_24h, 100]), bigMinus([product.FUTURE.current, product.FUTURE.increment_24h])], Math.max(2, product.price_scale))
+      return bigDiv([bigTimes([product.UNIT.increment_24h, 100]), bigMinus([product.UNIT.current, product.UNIT.increment_24h])], Math.max(2, product.price_scale))
     },
     handleDishInfoItem(key) {
       const price_scale = this.activeProduct.price_scale
@@ -681,14 +709,14 @@ export default {
       } else {
         const fixed = key === 'change_24h' ? 2 : price_scale
         const unit = this.activeProduct.name === 'FUTURE_BTCUSD' ? 'USD' : this.$tR(`sheet`)
-        return key === 'volume_24h' ? logogramNum(this.activeProduct.FUTURE[key]) + unit : bigRound(this.activeProduct.FUTURE[key], fixed)
+        return key === 'volume_24h' ? logogramNum(this.activeProduct.UNIT[key]) + unit : bigRound(this.activeProduct.UNIT[key], fixed)
       }
     },
     handleWidthBg(amount, max) {
       return +bigDiv([amount, max]) * 100 + '%'
     },
+
     async handleAmountObj() {
-      if (!this.$store.state.userData) return
       clearTimeout(this._timer)
       return new Promise(resolve => {
         this._timer = setTimeout(async() => {
@@ -714,29 +742,7 @@ export default {
 
     matchFutureItemByKey(key) {
       if (!this.tickersData) return {}
-      return this.tickersData.FUTURE.find(item => item.pair === key)
-    },
-
-    handleTabClick(key) {
-      if (this.activeProduct === key) return
-      this.delegateData = null
-      this.newBargainListData = []
-      if (this.activeProduct) {
-        this.closeWebSocket(`/orderbook/${this.activeProduct}/0/1/20`)
-        this.closeWebSocket(`/deal/${this.activeProduct}`)
-      }
-      this.openWebSocket(`/orderbook/${key}/0/1/20`, data => {
-        this.delegateData = data
-      }).then(res => { this.$nextTick(() => this.dataLoaded()) })
-      getFutureListByKey(key, { size: 16 }).then(res => (this.newBargainListData = res.data)).then(res => {
-        this.openWebSocket(`/deal/${key}`, data => {
-          const last = data[data.length - 1]
-          this.newBargainListData.length = this.newBargainListData.length - 1
-          this.newBargainListData.unshift(last)
-          this.isBuy = last.side === 'buy'
-        })
-      })
-      this.activeProduct = key
+      return this.tickersData.UNIT.find(item => item.pair === key)
     },
     async handleTableTabClick(key) {
       this.activeTableTabKey = key
@@ -750,6 +756,8 @@ export default {
         if (item.symbol) {
           item._symbol = item.symbol
           item.symbol = key === 'shipped' ? this.$tR(`mapTabs.FUTURE_${item.symbol}`) : this.$tR(`mapTabs.${item.symbol}`)
+        } else {
+          item.symbol = this.$tR(`mapTabs.${item.name}`)
         }
         return item
       })
@@ -787,15 +795,15 @@ export default {
       const data = {
         user_id: this.userData.id,
         amount: this.activeAcountAndPriceArr[0],
-        price: this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current,
+        price: this.activeAcountAndPriceArr[1] || this.activeProduct.UNIT.current,
         type: this.activeBtnsKey === '3' && this.activePriceType.key || this.activeBtnsKey, // 下单类型 1 限价 2市价 3限价止损 4市价止损 5限价止盈 6市价止盈
         side: this.side,
-        symbol: this.activeProduct.name,
+        name: this.activeProduct.name,
         leverage: this.activeLever,
         trigger_price: this.activeAcountAndPriceArr[2],
-        trigger_type: this.trigger_type,
-        trigger_close: this.trigger_close
-        // passive 是否被动委托 0否 1是
+        // trigger_type: this.trigger_type,
+        // trigger_close: this.trigger_close,
+        passive: 0
 
         // tp_type 止盈触发类型 0默认 1盘口价格 2标记价格 3指数价格 如果是-1的话代表从仓位里下的触发单
         // tp_price 止盈价格
@@ -812,9 +820,9 @@ export default {
       })
     },
     cancelOrder(data) {
-      const { user_id, id, _symbol } = data
+      const { user_id, id, name } = data
       data.cancelBtnLoading = true
-      cancelOrder({ user_id, order_id: id, symbol: _symbol }).then(res => {
+      cancelOrder({ user_id, order_id: id, name }).then(res => {
         this.handleAmountObj().then(res => {
           setTimeout(() => {
             // this.cancelBtnLoading = false
@@ -940,16 +948,8 @@ export default {
         &>ul{
           padding: 0 10px;
           &>li{
-           &:nth-child(2n){
+            &:nth-child(2n){
               background: #151927
-            }
-            &>span{
-              position: relative;
-              z-index: 1;
-              &:hover{
-                cursor: pointer;
-                opacity: .8;
-              }
             }
             margin: 1px 0;
             &>.mark-bg{

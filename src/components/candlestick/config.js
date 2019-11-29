@@ -2,11 +2,11 @@
 // getSymbolList
 import { getKlineHistoryList } from '@/api/contract'
 import ReconnectingWebSocket from 'reconnecting-websocket'
-import { mapPeriod, upColor, downColor } from '@/const'
+import { mapPeriod, upColor, downColor, WSURL } from '@/const'
 
 const wsurl = process.env.VUE_APP_WS_API
 const mapItemFun = item => ({
-  time: item.time,
+  time: +item.time,
   open: +item.values[0],
   close: +item.values[1],
   low: +item.values[2],
@@ -57,8 +57,11 @@ const udf_datafeed = {
   },
 
   getBars: (symbolInfo, resolution, from, to, onHistoryCallback, onErrorCallback, firstDataRequest) => {
+    // Vue.prototype.$eventBus.$emit('getBars', { mapItemFun, symbolInfo, resolution, from, to, onHistoryCallback, onErrorCallback, firstDataRequest })
+    console.log(new Date(from * 1000), new Date(to * 1000))
+
     const [period, begin, end] = [mapPeriod[resolution], from * 1000, to * 1000]
-    getKlineHistoryList('FUTURE_BTCUSD', { period, begin, end }).then(res => {
+    getKlineHistoryList(symbolInfo.name, { period, begin, end }).then(res => {
       const data = res.data.map(mapItemFun)
       return onHistoryCallback(data, { noData: !data.length })
     })
@@ -97,7 +100,6 @@ const udf_datafeed = {
 }
 export const widgetOptions = {
   debug: false,
-  symbol: 'FUTURE_BTCUSD',
   datafeed: udf_datafeed, // our datafeed object
   interval: '15',
   container_id: 'tv_chart_container',

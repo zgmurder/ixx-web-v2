@@ -7,6 +7,7 @@ import 'flex.css'
 import 'hover.css'
 
 import ElementUI from 'element-ui'
+
 import '@/styles/index.scss' // global css
 import enLocale from 'element-ui/lib/locale/lang/en'
 import zhLocale from 'element-ui/lib/locale/lang/zh-CN'
@@ -55,3 +56,4 @@ new Vue({
   data: { modelVisible: false },
   render: h => h(App)
 }).$mount('#app')
+

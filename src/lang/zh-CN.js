@@ -8,6 +8,7 @@ export default {
     mapNavList: {
       'trading': '币币交易',
       'contract': '合约交易',
+      'currency-unit': '币本位交易',
       'legalTender': '法币交易',
       'bidTitle': '币盈盈',
       'fund_assets_node_buy': '节点认购',
@@ -103,7 +104,9 @@ export default {
       FUTURE_BTCUSD: `BTC永续`,
       FUTURE_ETHUSD: `ETH永续`,
       FUTURE_EOSUSD: `EOS永续`,
-      FUTURE_BHDUSD: `BHD永续`
+      FUTURE_BHDUSD: `BHD永续`,
+      ETHUSD: `ETH币本位`,
+      EOSUSD: `EOS币本位`
     },
     mapTableTapContents: {
       shipping: {

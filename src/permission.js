@@ -81,5 +81,9 @@ router.beforeEach(async(to, from, next) => {
 
 router.afterEach(() => {
   // finish progress bar
+  window._axiosPromiseArr && window._axiosPromiseArr.forEach((item, index) => {
+    item.cancel()
+    delete window._axiosPromiseArr[index]
+  })
   NProgress.done()
 })

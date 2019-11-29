@@ -37,15 +37,28 @@ export default {
     return {
       schema: [
         { fieldType: 'select', on: { change: this.handleClick }, style: { width: '100%' }, prefixIcon: 'el-icon-search', optLabel: 'currency', optValue: 'currency', options: [], label: '币种', placeholder: '币种', vModel: 'currency', default: '', required: true },
+        { render(h) {
+          return <div class='text-info' flex='main:justify'>
+            <div>可用余额: 999998.64985000</div>
+            <div>限额: 20000</div>
+            <el-link type='success' underline={false}>额度已提升</el-link>
+          </div>
+        } },
         { fieldType: 'select', options: [], label: '链名称', optLabel: '_chain', optValue: 'chain', style: { width: '100%' }, placeholder: '链名称', vModel: 'chain', default: '' },
-        { fieldType: 'input', prefixIcon: 'el-icon-loading', label: '充币地址', placeholder: '充币地址', vModel: 'address', default: '正在获取地址...', readonly: true }
+        { fieldType: 'input', prefixIcon: 'el-icon-check', label: '提币地址', placeholder: '提币地址', vModel: 'address', default: '', readonly: true }
       ],
       loading: true
     }
   },
   computed: {
     calcOptions() {
-      return this.schema[0].options.length ? this.schema[0].options.slice(0, 10) : []
+      return this.schemaObj.currencySchema.options.length ? this.schemaObj.currencySchema.options.slice(0, 10) : []
+    },
+    schemaObj() {
+      return this.schema.reduce((prev, curr) => {
+        prev[`${curr.vModel}Schema`] = curr
+        return prev
+      }, {})
     }
   },
   created() {
@@ -56,31 +69,28 @@ export default {
         else otherArr.push(item)
       })
       otherArr.unshift(ustdArr[0])
-      this.schema[0].options = otherArr
+      this.schemaObj.currencySchema.options = otherArr
       // this.schema[0][this.schema[0].vModel] = res.data[0].currency
-      this.schema[1].options = ustdArr.map(item => {
+      this.schemaObj.chainSchema.options = ustdArr.map(item => {
         if (item.chain === 'ETH')item._chain = `USDT-ERC20`
         else item._chain = `${item.currency}-${item.chain}`
         return item
       }).reverse()
-      this.schema[1][this.schema[1].vModel] = this.schema[1].options[0].chain
+      this.schemaObj.chainSchema[this.schemaObj.chainSchema.vModel] = this.schemaObj.chainSchema.options[0].chain
       this.handleClick(otherArr[0].currency)
     })
   },
   methods: {
     handleClick(value) {
       if (typeof value === 'object')value = value.elementArgs[0]
-      this.schema[1].hidden = value !== 'USDT'
-      this.schema[0][this.schema[0].vModel] = value
-      this.getCurrencyAddress()
+      this.schemaObj.chainSchema.hidden = value !== 'USDT'
+      this.schemaObj.currencySchema[this.schemaObj.currencySchema.vModel] = value
+      // this.getCurrencyAddress()
     },
     getCurrencyAddress() {
       const obj = this.$refs.customForm.verifyAll()
       if (!obj) return
       delete obj.address
-      this.schema[2][this.schema[2].vModel] = '正在获取地址...'
-      this.schema[2].disabled = false
-      this.schema[2].prefixIcon = 'el-icon-loading'
       getCurrencyAddress(obj).then(res => {
         this.loading = false
       }).catch(res => {

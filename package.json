@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve --open",
-    "dev": "vue-cli-service serve --open",
-    "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve --open --copy",
+    "dev:ixx": "vue-cli-service serve --open --copy --mode ixx-dev",
+    "dev:ix": "vue-cli-service serve --open --copy --mode ix-dev",
+    "build:ixx:stage": "vue-cli-service build --mode ixx-stage",
+    "build:ixx:prod": "vue-cli-service build --mode ixx-prod",
+    "build:ix:stage": "vue-cli-service build --mode ix-stage",
+    "build:ix:prod": "vue-cli-service build --mode ix-prod",
     "lint": "vue-cli-service lint",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs"

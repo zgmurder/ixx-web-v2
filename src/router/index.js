@@ -15,6 +15,7 @@ import bidTitleRouter from './modules/bidTitle'
 import share_optionRouter from './modules/share_option'
 import otherRouter from './modules/other'
 import userRouter from './modules/user'
+import currencyUnitRouter from './modules/currency_unit'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -80,6 +81,7 @@ export const constantRoutes = [
   share_optionRouter,
   userRouter,
   otherRouter,
+  currencyUnitRouter,
   { path: '*', redirect: '/404', hidden: true },
   {
     path: '/404',

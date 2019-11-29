@@ -8,7 +8,7 @@
         <component :is="componentId">
           <div class="container-title">
             {{ title }}
-            <el-select v-model="selectCurrency" placeholder="请选择">
+            <el-select v-if="!hiddenSelect" v-model="selectCurrency" placeholder="请选择">
               <el-option v-for="item in mapCurrency" :key="item" :label="item" :value="item" />
             </el-select>
             <el-divider />
@@ -36,7 +36,8 @@ export default {
       componentId: null,
       activeKey: '',
       selectCurrency: 'CNY',
-      mapCurrency
+      mapCurrency,
+      hiddenSelect: false
     }
   },
   computed: {
@@ -55,6 +56,7 @@ export default {
       handler({ key }) {
         this.activeKey = key || '1.property-manage'
         const name = this.activeKey.split('.')[1]
+        this.hiddenSelect = ['charge-money', 'mention-money'].includes(name)
         this.componentId = () => import(`./components/property/${name}`)
       },
       immediate: true

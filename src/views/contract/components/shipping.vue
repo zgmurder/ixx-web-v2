@@ -6,7 +6,7 @@
         <h3 v-if="item.holding > 0" class="text-success">{{ $t(`contract.mapFormContent.mapHandleBtn.buy`) }}</h3>
         <h3 v-else class="text-danger">{{ $t(`contract.mapFormContent.mapHandleBtn.sell`) }}</h3>
         <p class="interval">{{ $tR('lossLimit') }} / {{ $tR('winLimit') }}</p>
-        <p>-- / -- </p>
+        <p><span class="text-success">--</span>  / <span class="text-danger">--</span><i class="el-icon-edit hover-point" /></p>
       </div>
       <div flex>
         <div v-for="(value,key,i) in tableColumns" :key="key">

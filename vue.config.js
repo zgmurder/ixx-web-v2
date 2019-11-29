@@ -5,9 +5,10 @@ const path = require('path')
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
+
 module.exports = {
   css: {
-    loaderOptions: { sass: { data: `@import "@/styles/variables.scss";` }}
+    loaderOptions: { sass: { data: `@import "@/styles/${process.env.VUE_APP_SITE}-variables.scss";` }}
   },
   publicPath: './',
   outputDir: 'dist',

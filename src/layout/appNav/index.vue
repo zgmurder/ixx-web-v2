@@ -3,7 +3,7 @@
     <div flex class="nav-left-container">
       <img src="@/assets/ixx_logo.png" height="40px" alt="" @click="$router.push('/')">
       <ul flex="main:justify cross:center" class="nav-list">
-        <li v-for="(item,index) in navDataArr" :key="index" class="text-nowrap" :class="{active:$route.path.includes(item.path)}" @click="$router.push(item.path)">{{ $t(item.keyPath) }}</li>
+        <li v-for="(value,key) in mapNavList" :key="key" class="text-nowrap" :class="{active:$route.path.includes(key)}" @click="$router.push(`/${key}`)">{{ value }}</li>
       </ul>
     </div>
     <div class="nav-right-container" flex="cross:center">
@@ -44,12 +44,6 @@ export default {
     selectLang,
     dropdown
   },
-  props: {
-    navDataArr: {
-      type: Array,
-      default: () => []
-    }
-  },
   data() {
     return {
       activeIndex2: '1'
@@ -78,6 +72,9 @@ export default {
         localStorage.setItem('ACTIVESHAREACCOUNT', value.currency)
         this.$store.commit('SET_ACTIVESHAREACCOUNT', value)
       }
+    },
+    mapNavList() {
+      return this.langData.mapNavList
     }
   },
   methods: {

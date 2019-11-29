@@ -47,6 +47,25 @@ export const getShareBalanceList = (data = { currencys: [] }) => request({
   method: 'post',
   data
 })
+// 提币币种列表 POST /account/currency/list
+export const getCurrencyList = (data) => request({
+  url: '/account/currency/list',
+  method: 'post',
+  data
+})
+// 获取充币地址 POST /account/address/query
+// - 参数
+//   - chain
+//   - currency
+// - 返回值
+//   - code(200表示正常读取data内容，非200则表示失败读取message失败信息)
+//   - data(user_id/chain/currency/address)
+//   - message
+export const getCurrencyAddress = data => request({
+  url: '/account/address/query',
+  method: 'post',
+  data
+})
 // 法币账单 POST /otc/account/balancefills
 /* type 收款方式id
 currency

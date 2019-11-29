@@ -8,6 +8,7 @@ export const mapNavBackground = {
   legalTender: '#3E3E3E',
   login: '#303E4B',
   contract: '#000',
+  'currency-unit': '#000',
   share_option: '#111621'
 }
 export const mapTabTimes = ['1M', '5M', '10M', '1H', '3H', '1D', '7D']
@@ -32,3 +33,6 @@ export const mapPeriod = {
 }
 
 export const mapCurrency = ['CNY', 'USD']
+
+export const WSURL = 'wss://wss.ixex.pro/v1'
+

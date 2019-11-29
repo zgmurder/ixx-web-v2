@@ -11,10 +11,9 @@
 
 import { widgetOptions } from './config'
 export default {
-  props: {
-    product: {
-      type: [Object, String],
-      default: () => {}
+  data() {
+    return {
+      tvWidget: null
     }
   },
   watch: {
@@ -24,8 +23,10 @@ export default {
       }
     }
   },
-  mounted() {
-    window.tvWidget = new TradingView.widget(Object.assign(widgetOptions, { container_id: 'container-view' }))
+  methods: {
+    initTV(symbol) {
+      this.tvWidget = new TradingView.widget(Object.assign(widgetOptions, { container_id: 'container-view', symbol }))
+    }
   }
 }
 </script>

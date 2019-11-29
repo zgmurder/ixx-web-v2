@@ -1,7 +1,7 @@
 <template>
   <el-form ref="form" class="custom-form" v-bind="$attrs">
     <slot name="title" />
-    <el-form-item v-for="(field, index) in schema" :key="index" class="custom-form-item" v-bind="filterFormItemAttrs(field)">
+    <el-form-item v-for="(field, index) in schema" v-show="!field.hidden" :key="index" class="custom-form-item" v-bind="filterFormItemAttrs(field)">
       <!--  v-show="handleControl(field.controlBy) && !field.hidden" -->
       <!--
         @input="handleInput($event,field)"

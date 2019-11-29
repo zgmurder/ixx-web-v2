@@ -1,5 +1,5 @@
 @import './transition.scss';
-@import './variables.scss';
+// @import './variables.scss';
 @import "~element-ui/packages/theme-chalk/src/index";
 @import './reset-element-ui.scss';
 
@@ -24,11 +24,28 @@ body::-webkit-scrollbar {
 .text-danger{color: $--color-danger;}
 .text-warning{color: $--color-warning;}
 .text-info{color: $--color-info;}
+.hover-point:hover{cursor: pointer;color:$--color-primary}
 
 
 .background-active{ background-color: $--color-primary;color: #fff;}
+.border-active{ border:1px solid $--color-primary;}
 
-
+.directive-login{
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+  display: flex;
+  /* transform: translateX(10px); */
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,.8);
+  z-index: 3;
+}
+.custom-popper{
+  background: #000;
+}   
 
 
 .share-text-info{

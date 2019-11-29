@@ -77,8 +77,10 @@ export default {
           const res = JSON.parse(e.data)
           const data = res.data || res
           if (!res.code || res.code === 200) {
-            callBack(data)
-            resolve(websocket)
+            if (!data.msg) {
+              callBack(data)
+              resolve(websocket)
+            }
           } else reject(res)
         }
       })
