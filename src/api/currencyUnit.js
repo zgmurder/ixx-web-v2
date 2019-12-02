@@ -218,3 +218,13 @@ export const setModify = data => request({
   method: 'post',
   data
 })
+/* 修改保证金 POST /unit/account/transfer_margin
+参数
+user_id 用户id
+name 合约名(EHTUSD,EOSUSD)
+amount 增加或减少数量 */
+export const setTransferMargin = data => request({
+  url: `/unit/account/transfer_margin`,
+  method: 'post',
+  data
+})

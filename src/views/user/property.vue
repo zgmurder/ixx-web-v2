@@ -5,15 +5,22 @@
         <navMenu v-model="activeKey" :map-menu-list="mapMenuList" @change="handleClick" />
       </div>
       <div class="container-right">
+        <div>
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item :to="{ path: '/' }">我的资产</el-breadcrumb-item>
+            <el-breadcrumb-item>法币账户</el-breadcrumb-item>
+          </el-breadcrumb>
+          <hr>
+        </div>
         <component :is="componentId">
-          <div class="container-title">
+
+          <!-- <div class="container-title">
             {{ title }}
             <el-select v-if="!hiddenSelect" v-model="selectCurrency" placeholder="请选择">
               <el-option v-for="item in mapCurrency" :key="item" :label="item" :value="item" />
             </el-select>
             <el-divider />
-            <!-- <el-button size="mini" type="primary" @click="$router.push('/user/property')">个人中心<i class="el-icon-arrow-right" /></el-button> -->
-          </div>
+          </div> -->
         </component>
       </div>
     </div>

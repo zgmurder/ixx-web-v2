@@ -44,20 +44,19 @@
         <div flex>
           <div v-for="(value,key,i) in tableColumns" :key="key">
             <p class="text-info" :class="{interval:i>4}">{{ $t(`contract.mapTableTapContents.shipping.mapTableColumns.${key}`) }}
-              <el-popover v-if="key === 'margin_position'" placement="top" width="300">
+              <el-popover v-if="key === 'margin_position'" placement="top" width="400">
                 <div>
-                  <div flex="main:justify">
+                  <!-- <div flex="main:justify">
                     <el-radio v-model="checked">增加仓位保证金</el-radio>
                     <el-radio v-model="checked">减少仓位保证金</el-radio>
                   </div>
-                  <hr>
-                  <div style="font-size:12px; line-height:24px">
+                  <hr> -->
+                  <div class="text-info" style="font-size:12px; line-height:24px">
                     <p>你的当前仓位: <span class="text-danger"> 1</span> 张合约 (70x)</p>
-                    <p>当前已分配的保证金: <span class="text-danger">1.00000203</span> BTC</p>
-                    <p>可用保证金: <span class="text-danger">115.82328763</span> BTC</p>
+                    <p>当前已分配的保证金: <span class="text-danger">1.00000203</span> BTC 【最大可减少<span class="text-danger">1</span> BTC】<span class="text-danger hover-point">全部</span></p>
+                    <p>可用保证金: <span class="text-danger">115.82328763</span> BTC【最大可增加<span class="text-danger">1</span> BTC】<span class="text-danger hover-point">全部</span></p>
                   </div>
-                  <hr>
-                  <el-input v-model="input" size="small" placeholder="请输入数量" />
+                  <el-input-number v-model="input" size="small" style="width:100%" placeholder="请输入数量" />
                 </div>
 
                 <hr>
@@ -116,7 +115,7 @@
 </template>
 <script>
 import { bigDiv, bigTimes } from '@/utils/handleNum'
-import { getRates, closeStorehouse, cancelOrder, setModify } from '@/api/currencyUnit'
+import { getRates, closeStorehouse, cancelOrder, setModify, setTransferMargin } from '@/api/currencyUnit'
 export default {
   name: 'Shipping',
   props: {
