@@ -1,10 +1,9 @@
 
 import request from '@/utils/request'
-console.log(process.env)
-console.log(process.env.NODE_ENV)
 
 const proxy_q = process.env.NODE_ENV === 'development' ? process.env.VUE_APP_PROXY_Q : process.env.VUE_APP_BASE_API_Q
-
+// const proxy_q = process.env.VUE_APP_PROXY_Q
+console.log(proxy_q)
 export const getFutureDictionaryList = query => request({
   url: '/unit/symbol/list',
   method: 'post',
