@@ -1,7 +1,7 @@
 
 import request from '@/utils/request'
 
-const proxy_q = process.env.VUE_APP_PROXY_Q
+const proxy_q = process.env.NODE_ENV === 'production' ? process.env.VUE_APP_BASE_API_Q : process.env.VUE_APP_PROXY_Q
 
 export const getFutureDictionaryList = query => request({
   url: '/unit/symbol/list',

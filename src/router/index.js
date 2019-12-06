@@ -108,9 +108,10 @@ export const asyncRoutes = [
   // otc_tradeRouter,
   { path: '*', redirect: '/404', hidden: true }
 ]
+console.log()
 
 const createRouter = () => new Router({
-  // mode: 'history', // require service support
+  mode: process.env.NODE_ENV === 'production' ? 'hash' : 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })
