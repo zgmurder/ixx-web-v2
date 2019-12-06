@@ -43,7 +43,8 @@ export default {
         minPadding: 0,
         maxPadding: 0,
         gridLineColor: 'rgba(167, 174, 196, 0.1)',
-        gridLineWidth: 1
+        gridLineWidth: 1,
+        tickPixelInterval: 100
       },
       yAxis: [{
         lineWidth: 1,
