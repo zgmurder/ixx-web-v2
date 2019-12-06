@@ -7,7 +7,7 @@ import { getUser } from '@/utils/auth'
 // axios.defaults.withCredentials = true
 const service = axios.create({
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  withCredentials: false, // send cookies when cross-domain requests
+  withCredentials: true, // send cookies when cross-domain requests
   timeout: 10000 // request timeout
 })
 window._axiosPromiseArr = []
@@ -20,7 +20,9 @@ service.interceptors.request.use(
     // if (arr.length > 1)config.url = arr[arr.length - 1]
     const proxy_q = process.env.VUE_APP_PROXY_Q
     !config.url.includes(proxy_q) && (config.baseURL = process.env.VUE_APP_BASE_API)
+    if (config.url.includes('q.ixex'))config.withCredentials = false
     const userDataStr = getUser()
+
     if (userDataStr) {
       const userData = JSON.parse(userDataStr)
       config.headers['token'] = userData.token
