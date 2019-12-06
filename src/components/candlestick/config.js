@@ -112,6 +112,7 @@ export const widgetOptions = {
   fullscreen: false,
   autosize: true,
   toolbar_bg: '#1c273e',
+  custom_css_url: '/static/charting_library/tradingView.css',
   overrides: {
     'symbolWatermarkProperties.color': 'rgba(0, 0, 0, 0)',
     'paneProperties.background': '#0c1222',
