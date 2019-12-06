@@ -28,8 +28,8 @@
               <div v-if="delegateData && activeProduct.UNIT" class="content-container">
                 <ul>
                   <li v-for="(item,index) in asks.arr" :key="index" flex="main:justify cross:center">
-                    <span class="text-danger" @click="activeAcountAndPriceArr[1]=item.values[0]">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
-                    <span style="flex:1" @click="activeAcountAndPriceArr[0]=item.values[1]">{{ item.values[1] | bigRound(0) }}</span>
+                    <span class="text-danger" @click="userData && (activeAcountAndPriceArr[1]=item.values[0])">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
+                    <span style="flex:1" @click="userData && (activeAcountAndPriceArr[0]=item.values[1])">{{ item.values[1] | bigRound(0) }}</span>
                     <span>{{ item.values[2] }}</span>
                     <div class="mark-bg is-buy" :style="{width:handleWidthBg(item.values[1],asks.max)}" />
                   </li>
@@ -46,8 +46,8 @@
                 </div>
                 <ul>
                   <li v-for="(item,index) in bids.arr" :key="index" flex="main:justify cross:center">
-                    <span class="text-success" @click="activeAcountAndPriceArr[1]=item.values[0]">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
-                    <span style="flex:1" @click="activeAcountAndPriceArr[0]=item.values[1]">{{ item.values[1] | bigRound(0) }}</span>
+                    <span class="text-success" @click="userData && (activeAcountAndPriceArr[1]=item.values[0])">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
+                    <span style="flex:1" @click="userData && (activeAcountAndPriceArr[0]=item.values[1])">{{ item.values[1] | bigRound(0) }}</span>
                     <span>{{ item.values[2] }}</span>
                     <div class="mark-bg is-sell" :style="{width:handleWidthBg(item.values[1],bids.max)}" />
                   </li>

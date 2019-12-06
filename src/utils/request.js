@@ -7,7 +7,7 @@ import { getUser } from '@/utils/auth'
 // axios.defaults.withCredentials = true
 const service = axios.create({
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  withCredentials: true, // send cookies when cross-domain requests
+  withCredentials: false, // send cookies when cross-domain requests
   timeout: 10000 // request timeout
 })
 window._axiosPromiseArr = []
