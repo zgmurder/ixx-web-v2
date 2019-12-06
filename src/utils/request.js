@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { Message } from 'element-ui'
-// import store from '@/store'
+import store from '@/store'
 import { getUser } from '@/utils/auth'
 
 // create an axios instance
@@ -61,13 +61,13 @@ service.interceptors.response.use(
     if (res.code !== 200 && res.code !== 0) {
       if (res.code === 401) {
         Message({
-          message: res.message,
+          message: '登录信息失效,准备退出登录...',
           type: 'warning',
           duration: 3 * 1000
         })
-        // setTimeout(() => {
-        //   store.dispatch('loginout')
-        // }, 3000)
+        setTimeout(() => {
+          store.dispatch('loginout')
+        }, 3000)
       } else {
         if (res.message !== null) {
           Message({

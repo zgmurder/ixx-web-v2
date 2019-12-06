@@ -4,6 +4,8 @@ export default {
   confirm: '确定',
   cancel: '取消',
   noShow: '不在显示',
+  up: '上涨',
+  down: '下跌',
   appNav: {
     mapNavList: {
       'trading': '币币交易',
@@ -301,7 +303,8 @@ export default {
       7: '标记价格/预期强平价格 差异'
     },
     setLever: '设置杠杆倍数',
-    tip: '您的操作将会把已持仓杠杆倍数和委托订单杠杆倍数修改为25倍，仓位保证金调节为0.0041495，委托保证金为0',
+    tip: '您的操作将会把已持仓杠杆倍数和委托订单杠杆倍数修改为<i class="text-danger">{leverage}</i>倍，仓位保证金调节为<i class="text-danger">{margin_position}</i>，委托保证金为<i class="text-danger">{margin_delegation}</i>',
+    leverageTip: '确定将杠杆倍数调节至{leverage}吗',
     allstorehouse: '全仓'
   },
   userCenter: {
@@ -378,64 +381,7 @@ export default {
         rates: '汇率对象'
       }
     },
-    propertyManage: {
-      1: {
-        currency: '币名',
-        available: '可用量',
-        withdrawing: '提币锁定量',
-        quota: '当前提币剩余额度',
-        max_quota: '当前提币总额度',
-        rates: '汇率',
-        totalValue: '总价值'
-      },
-      2: {
-        currency: '币种',
-        balance: '账户',
-        opetate: '操作', // 1-转入 2-传出 3-当日清算
-        amount: '操作数量',
-        available: '剩余量',
-        createdTime: '操作时间',
-        status: '状态' // 0-失败 1-成功
-      },
-      3: {
-        id: '流水号',
-        user_id: '用户ID',
-        chain: '链名',
-        currency: '币名',
-        to_address: '目标地址',
-        memo: '备忘',
-        amount: '充值量',
-        txid: '链上交易号',
-        confirm: '确认数',
-        state: '状态',
-        create_time: '开始时间',
-        update_time: '最近更新时间'
-      },
-      4: {
-        id: '流水号',
-        wallet_tx_id: '钱包流水号',
-        user_id: '用户ID',
-        chain: '链名',
-        currency: '币名',
-        from_address: '源地址',
-        to_address: '目标地址',
-        change_address: '找零地址',
-        memo: '备忘',
-        amount: '提币量',
-        fee: '提币手续费',
-        txid: '链上交易号',
-        confirm: '确认数',
-        state: '状态',
-        create_time: '开始时间',
-        update_time: '最近更新时间',
-        reviewer_id: '审核人ID',
-        reviewer_nonce: '审核人nonce',
-        reviewer_signature: '审核人签名',
-        review_time: '审核时间',
-        raw_tx: '原始tx',
-        sign_result: '签名结果'
-      }
-    },
+
     dealAccount: {
       mapTab: {
         1: '币币交易',
@@ -530,43 +476,102 @@ export default {
           ordering: '订单冻结量'
         }
       }
+    }
+
+  },
+  shareOption: {
+    up_rate: '看涨',
+    down_rate: '看跌',
+    newPrice: '最新价格',
+    fullHistory: '完整历史记录',
+    describe: '期权预期收益率。即，如果您购买看涨期权，且期权到期时标的价格高于初始行权价格，则您的净收益=看涨收益率*投资金额。',
+    mapLeftNav: {
+      'spot-index': '现货指数',
+      'history': '历史记录'
     },
-    shareOption: {
-      up_rate: '看涨',
-      down_rate: '看跌',
-      newPrice: '最新价格',
-      fullHistory: '完整历史记录',
-      describe: '期权预期收益率。即，如果您购买看涨期权，且期权到期时标的价格高于初始行权价格，则您的净收益=看涨收益率*投资金额。',
-      'mapLeftNav': {
-        'spot-index': '现货指数',
-        'history': '历史记录'
-      },
-      'rightSideBar': {
-        'inputTitle': '投资'
-      },
-      mapShareColumns: {
-        currency: ' 支付货币',
-        symbol: ' 产品类型',
-        period: '周期',
-        trade_type: '交易方向',
-        // rate: ' 赔率',
-        amount: '下单金额',
-        income: '收益金额',
-        profile: '价值金额',
-        // spot: '现货指数',
-        strike: '行权价格',
-        sett_price: '结算价格',
-        create_time: '下单时间',
-        sett_time: '结算时间',
-        state: '是否结算'
-      }
+    rightSideBar: {
+      'inputTitle': '投资'
     },
-    spotIndex: {
-      'USD': '现货指数',
-      mapList: {
-        price: 'USDT指数',
-        usdtRate: '汇率(USDT/USD)'
-      }
+    mapShareColumns: {
+      currency: ' 支付货币',
+      symbol: ' 产品类型',
+      period: '周期',
+      trade_type: '交易方向',
+      // rate: ' 赔率',
+      amount: '下单金额',
+      income: '收益金额',
+      profile: '价值金额',
+      // spot: '现货指数',
+      strike: '行权价格',
+      sett_price: '结算价格',
+      create_time: '下单时间',
+      sett_time: '结算时间',
+      state: '是否结算'
+    }
+  },
+  spotIndex: {
+    'USD': '现货指数',
+    mapList: {
+      price: 'USDT指数',
+      usdtRate: '汇率(USDT/USD)'
+    }
+  },
+  propertyManage: {
+    1: {
+      currency: '币名',
+      available: '可用量',
+      withdrawing: '提币锁定量',
+      quota: '当前提币剩余额度',
+      max_quota: '当前提币总额度',
+      rates: '汇率',
+      totalValue: '总价值'
+    },
+    2: {
+      currency: '币种',
+      balance: '账户',
+      opetate: '操作', // 1-转入 2-传出 3-当日清算
+      amount: '操作数量',
+      available: '剩余量',
+      createdTime: '操作时间',
+      status: '状态' // 0-失败 1-成功
+    },
+    3: {
+      id: '流水号',
+      user_id: '用户ID',
+      chain: '链名',
+      currency: '币名',
+      to_address: '目标地址',
+      memo: '备忘',
+      amount: '充值量',
+      txid: '链上交易号',
+      confirm: '确认数',
+      state: '状态',
+      create_time: '开始时间',
+      update_time: '最近更新时间'
+    },
+    4: {
+      id: '流水号',
+      wallet_tx_id: '钱包流水号',
+      user_id: '用户ID',
+      chain: '链名',
+      currency: '币名',
+      from_address: '源地址',
+      to_address: '目标地址',
+      change_address: '找零地址',
+      memo: '备忘',
+      amount: '提币量',
+      fee: '提币手续费',
+      txid: '链上交易号',
+      confirm: '确认数',
+      state: '状态',
+      create_time: '开始时间',
+      update_time: '最近更新时间',
+      reviewer_id: '审核人ID',
+      reviewer_nonce: '审核人nonce',
+      reviewer_signature: '审核人签名',
+      review_time: '审核时间',
+      raw_tx: '原始tx',
+      sign_result: '签名结果'
     }
   }
 }

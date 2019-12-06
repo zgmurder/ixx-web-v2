@@ -41,7 +41,7 @@ body::-webkit-scrollbar {
   justify-content: center;
   align-items: center;
   background-color: rgba(0,0,0,.8);
-  z-index: 3;
+  z-index: 9999;
 }
 .custom-popper{
   background: #000;

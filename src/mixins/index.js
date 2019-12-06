@@ -12,6 +12,9 @@ export default {
     allLangData() {
       const locale = this.$i18n.locale
       return this.$i18n.messages[locale]
+    },
+    isLogin() {
+      return !!this.$store.state.userData
     }
   },
   methods: {

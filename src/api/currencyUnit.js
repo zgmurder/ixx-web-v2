@@ -228,3 +228,13 @@ export const setTransferMargin = data => request({
   method: 'post',
   data
 })
+/* 设置杠杆倍数(预览) POST /unit/account/leverage_preview
+参数
+user_id
+name 合约名(EHTUSD,EOSUSD)
+leverage 杠杆倍数 */
+export const leveragePreview = data => request({
+  url: `/unit/account/leverage_preview`,
+  method: 'post',
+  data
+})

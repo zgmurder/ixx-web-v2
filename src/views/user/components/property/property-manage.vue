@@ -1,10 +1,10 @@
 <template>
   <div class="property-manage-warp" flex="dir:top">
-    <slot />
-
-    <div class="center">
+    <div style="padding-top:20px">
       <p class="text-info">IXX 总净资产估值</p>
       <h1 class="numerical">≈ <span id="numerical" /> CNY</h1>
+    </div>
+    <div class="center">
       <el-divider />
       <div class="list-container" flex="main:justify cross:strech">
         <div class="capital-account" flex="dir:top main:justify">

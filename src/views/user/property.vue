@@ -7,8 +7,8 @@
       <div class="container-right">
         <div>
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/' }">我的资产</el-breadcrumb-item>
-            <el-breadcrumb-item>法币账户</el-breadcrumb-item>
+            <el-breadcrumb-item v-if="activeKey !== '1.property-manage'" :to="{ path: '/user/property' }">{{ $tR(`mapMenuList1.1.children.property-manage`) }}</el-breadcrumb-item>
+            <el-breadcrumb-item>{{ title }}</el-breadcrumb-item>
           </el-breadcrumb>
           <hr>
         </div>

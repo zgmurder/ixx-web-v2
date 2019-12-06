@@ -10,11 +10,14 @@
         <el-divider content-position="center"> <span style="font-size:12px" class="text-nowrap">{{ $tR(`setLever`) }}</span> </el-divider>
         <div :flex="$attrs.flex || 'main:justify cross:center'" style="margin-top:30px">
           <el-input-number v-model="sliderValue" :min="1" :max="100" size="mini" :style="{width: !onlyLever ? '100px':'100%'}" @change="handleSliderChange" />
-          <el-popover ref="popover" v-model="popoverVisible" placement="top" width="270" trigger="manual">
-            <p>{{ $tR('tip') }}</p>
+          <el-popover ref="popover" v-model="popoverVisible" placement="top" width="270" trigger="manual" @show="leveragePreview">
+            <p>
+              <span v-if="+leverageTipObj.margin_position" v-html="$tR('tip',leverageTipObj)" />
+              <span v-else v-html="$tR('leverageTip',leverageTipObj)" />
+            </p>
             <hr>
-            <div flex="main:justify cross:center">
-              <el-checkbox v-model="checked">{{ $t('noShow') }}</el-checkbox>
+            <div flex="main:justify dir:right cross:center">
+              <!-- <el-checkbox v-model="checked">{{ $t('noShow') }}</el-checkbox> -->
               <div>
                 <el-button size="mini" type="text" @click="cancelClick">{{ $t('cancel') }}</el-button>
                 <el-button type="primary" size="mini" @click="handleTagClick">{{ $t('confirm') }}</el-button>
@@ -37,7 +40,8 @@
       <div v-if="!onlyLever">
         <div v-for="(value,key) in mapTableColumns" :key="key" style="color:#ccc" flex="box:mean">
           <span>{{ $tR(`mapTableColumns.${key}`) }}</span>
-          <span>{{ formValueObj[key] }}</span>
+          <span>{{ ['4','5'].includes(key)?formValueObj[key]:bigRound(formValueObj[key],8) }}</span>
+
         </div>
         <el-divider />
         <div flex="box:mean">
@@ -49,6 +53,7 @@
   </div>
 </template>
 <script>
+import { leveragePreview } from '@/api/currencyUnit'
 export default {
   name: 'OrderPopover',
   model: {
@@ -86,10 +91,11 @@ export default {
       input: '',
       isSeting: false,
       inputVisible: false,
-      sliderValue: 0,
+      sliderValue: +this.active,
       popoverVisible: false,
       checked: false,
-      activeTag: ''
+      activeTag: '',
+      leverageTipObj: {}
     }
   },
   computed: {
@@ -102,6 +108,7 @@ export default {
         return prev
       }, {})
     }
+
   },
   watch: {
     active: {
@@ -111,6 +118,11 @@ export default {
     }
   },
   methods: {
+    leveragePreview() {
+      leveragePreview({ name: this.$parent.activeProduct.name, leverage: this.sliderValue }).then(res => {
+        this.leverageTipObj = res.data
+      })
+    },
     handleInput(value) {
       // if (!value || +value) return
       this.input = value.replace(/^(0+)|[^\d^.]+/g, '')

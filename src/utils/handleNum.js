@@ -1,4 +1,5 @@
 import Big from 'big.js/big.mjs'
+import { mapRisk } from '@/const'
 export const logogramNum = num => {
   const numberObj = Big(num)
   if (numberObj.e > 6) {
@@ -76,7 +77,14 @@ export const toThousand = (num = 0) => {
  */
 export const calcValueByAmountAndPrice = (amount, price, multiplier) => {
   if (!amount || !+amount || !price || !+price) return 0
-  else return !+multiplier ? Big(amount).div(price) : Big(multiplier).times(price).times(amount)
+  else return multiplier === '1' || !+multiplier ? Big(amount).div(price) : Big(multiplier).times(price).times(amount)
+}
+const initalMargin = (entrustValue, leverages, IM) => entrustValue.div(leverages).times(Big(IM).plus(1))
+
+const calcIM = (totalValue, base_risk, gap_risk, im, mm) => {
+  let gears = (Big(totalValue).minus(base_risk)).div(gap_risk).round(0, 3)
+  gears = gears.lte(1) ? Big(0) : gears
+  return Big(im).plus(gears.mul(mm))
 }
 
 export const calcTotalValue = ({ entrustList, holding = { amount: 0, price: 0, side: 1 }, multiplier },) => {
@@ -122,14 +130,14 @@ export const calcTotalValue = ({ entrustList, holding = { amount: 0, price: 0, s
 /*
   { 开平仓费率：后台返回take_rate ，IM百分比：当前档位，合约乘数：后台返回multiplier BTC为1，合约数量：合约乘数 * 合约数量}
 
-  成本 = 起始保证 + 开平仓手续费
+  成本 = 起始保证金 + 开平仓手续费
   起始保证金 = 委托价值 / 当前杠杆倍数 *（1 + IM百分比）
   委托价值 = 合约数量 / 成交价格
   开平仓手续费 = 委托价值 * 开平仓费率
 
-  成本 = 委托价值 / 当前杠杆倍数 *（1 + IM百分比） + 开平仓手续费
+  成本 = 起始保证金 + 开平仓手续费
 
-  价值 = 如果是BTC ? 合约数量 / 成交价格 : 乘数 * 价格 * 数量
+  委托价值 = 如果是BTC ? 合约数量 / 成交价格 : 乘数 * 价格 * 数量
   总价值 = 仓位价值 + 委托列表价值（对冲仓位）
 */
 /**
@@ -151,7 +159,8 @@ export const getCost = (product, leverages, entrustList, currHolding) => {
   // return entrustValue.div(leverages).times(+IM + 1).plus(serviceCharge).toFixed(fixed)
 
   // if (amount === 0 || price === 0) return 0 // 价格或数量为0时成本为0
-  const { amount, price, base_risk, gap_risk, take_rate, mm, im, multiplier } = product
+
+  const { amount, price, base_risk, gap_risk, take_rate, mm, im, multiplier, max_leverage } = product
 
   // const base_risk = pairInfo.base_risk || 200 // 起始风险限额
   // const gap_risk = pairInfo.gap_risk || 100 // 每100BTC加一档
@@ -166,6 +175,7 @@ export const getCost = (product, leverages, entrustList, currHolding) => {
   // }
   // 输入价值
   const currValue = calcValueByAmountAndPrice(amount, price, multiplier)
+
   if (!currValue) return 0
   // 总价值=仓位价值+委托列表价值（对冲仓位）
   // 委托列表价值 = 当前委托列表价值+即将要下单的价值
@@ -174,44 +184,27 @@ export const getCost = (product, leverages, entrustList, currHolding) => {
   // 累加次数 向上取整
   let totalValue = calcTotalValue({ entrustList, currHolding, multiplier })
   totalValue = (totalValue == null || totalValue.eq(0)) ? currValue : totalValue
-  const num = (Big(totalValue).minus(base_risk)).div(gap_risk).round(0, 3)
-
-  const endIM = Big(im).plus(num.times(mm))
 
   // 平仓手续费
   const serviceCharge = currValue.times(take_rate).times(2)
   // 起始保证金
-  const margin = Big(currValue).div(leverages).times(Big(1).plus(endIM)).plus(serviceCharge)
+  // const margin = Big(currValue).div(leverages).times(Big(1).plus(endIM)).plus(serviceCharge)
+  const IM = calcIM(totalValue, base_risk, gap_risk, im, mm)
+  const margin = initalMargin(currValue, !+leverages ? max_leverage : leverages, IM)
   // 成本
   return margin.plus(serviceCharge).round(8)
 }
 
 /**
-   * 获取总价值
-   * futures 当前委托列表 （委托列表 + 输入窗口的值）
-   * holding 持仓
-   * price 持仓价格
-   * pair 合约类型
+   * @param {Array} futures 当前委托列表
+   * @param {Object} holding 持仓
+   * @param {(|string|number)} multiplier
+   *
    */
-export const getTotalValue = ({ futures, holding, pairInfo, mul, fixed = 8 }) => {
-  const down = 0
-  const price = holding.price === '--' ? 0 : holding.price
-
-  let totalValue = Big(price || 0).eq(0) ? Big(0) : Big(holding.amount).div(price)
-  if (pairInfo.name !== 'FUTURE_BTCUSD') {
-    totalValue = Big(holding.amount || 0).times(price || 0).times(mul)
-  }
-  for (const future of futures) {
-    // 数量 = 委托总数量 - 已成交数量
-    const fprice = future.price === '--' ? 0 : future.price
-    const amount = Big(future.amount).minus(future.executed)
-    let value = Big(fprice || 0).eq(0) ? Big(0) : amount.div(fprice)
-    if (pairInfo.name !== 'FUTURE_BTCUSD') {
-      value = Big(future.amount || 0).times(fprice || 0).times(mul)
-    }
-    totalValue = future.side === 1 ? totalValue.plus(value) : totalValue.minus(value)
-  }
-  return totalValue.round(fixed, down).abs()
+export const getTotalValue = (futures, holding, multiplier) => {
+  const { price, amount } = holding
+  const holdingValue = calcValueByAmountAndPrice(amount, price, multiplier)
+  return futures.reduce((prev, curr) => holdingValue[curr.side === 1 ? 'plus' : 'minus'](prev), holdingValue)
 }
 
 /** 盈亏计算
@@ -222,6 +215,9 @@ export const getTotalValue = ({ futures, holding, pairInfo, mul, fixed = 8 }) =>
  * close_price 平仓价格
  * product 币对属性
 */
+export const calcProfit = (amount, open_price, close_price) => {
+  return (Big(amount).div(open_price)).minus(Big(amount).div(close_price)).toFixed(8)
+}
 export const getProfitLoss = ({ direction, leverages, amount, open_price, close_price, product }) => {
   if (direction === 'less') {
     amount = -amount
@@ -256,57 +252,11 @@ export const getProfitLoss = ({ direction, leverages, amount, open_price, close_
 }
 
 // 风险限额及最大杠杆倍数
-export const riskLimitDict = (maxLeverage) => {
-  if (maxLeverage == 100) {
-    return [
-      { r: 0, m: 100 },
-      { r: 200, m: 100 },
-      { r: 300, m: 66.66 },
-      { r: 400, m: 50 },
-      { r: 500, m: 40 },
-      { r: 600, m: 33.33 },
-      { r: 700, m: 28.5 },
-      { r: 800, m: 25 },
-      { r: 900, m: 22.22 },
-      { r: 1000, m: 20 },
-      { r: 1100, m: 18.1 }
-    ]
-  } else if (maxLeverage == 50) {
-    return [
-      { r: 0, m: 50 },
-      { r: 50, m: 50 },
-      { r: 100, m: 33.3 },
-      { r: 150, m: 25 },
-      { r: 200, m: 20 },
-      { r: 250, m: 16.6 },
-      { r: 300, m: 14.2 },
-      { r: 350, m: 12.5 },
-      { r: 400, m: 11.1 },
-      { r: 450, m: 10 },
-      { r: 500, m: 9 }
-    ]
-  } else if (maxLeverage == 20) {
-    return [
-      { r: 0, m: 20 },
-      { r: 50, m: 20 },
-      { r: 100, m: 10 },
-      { r: 150, m: 6.6 },
-      { r: 200, m: 5 },
-      { r: 250, m: 4 },
-      { r: 300, m: 3.3 },
-      { r: 350, m: 2.8 },
-      { r: 400, m: 2.5 },
-      { r: 450, m: 2.2 },
-      { r: 500, m: 2 }
-    ]
-  } else {
-    return []
-  }
-}
+export const riskLimitDict = maxLeverage => mapRisk[maxLeverage] || []
 
 // 强平价格
 /**
- * direction 多空方向 less空 more多
+ * direction 多空方向 false空 true多
  * leverages 杠杆倍数
  * amount 下单数量
  * open_price 开仓价格
@@ -314,90 +264,53 @@ export const riskLimitDict = (maxLeverage) => {
  * isCross 是否是全仓
  * multiplier 乘数
  * take_rate 手续费率
+ * 用户多单500张，开仓价格5500，杠杆倍数10；
 */
-export const getLiqPrice = ({ direction, leverages, amount, open_price, price_scale, isCross, multiplier, take_rate }, holding, symbol) => {
-  const current = holding.holding || 0 // 持仓量
-  let force_price = '0'
-  if (open_price == 0 || amount == 0) {
-    return {
-      current, // 当前持仓量
-      new_amount: amount, // 新的持仓量
-      force_price: '--' // 强平价格
-    }
-  }
+export const getLiqPrice = ({ isBuy, leverages, amount, price, available_balance, totalValue }, product) => {
+  const { base_risk, gap_risk, im, mm, take_rate, multiplier, max_leverage } = product
+  // 委托价值
+  const entrustValue = calcValueByAmountAndPrice(amount, price, multiplier)
+  /* 初始保证金 */
+  // 档位【(总价值-初始风险限额)/递增额度 向下取整】
+  // let gears = (Big(totalValue).minus(base_risk)).div(gap_risk).round(0, 3)
+  // gears = gears.lte(1) ? Big(0) : gears
+  // IM值【IM百分比】
+  // const IM = Big(im).plus(gears.mul(mm))
+  // 初始保证金【委托价值/当前杠杆倍数*（100%+IM百分比--当前档位）】
+  const IM = calcIM(entrustValue, base_risk, gap_risk, im, mm)
+  const margin = initalMargin(entrustValue, !+leverages ? max_leverage : leverages, IM)
+  // const initalMargin = entrustValue.div(!+leverages ? max_leverage : leverages).times(Big(IM).plus(1))
+  // 维持保证金【MM百分比（当前挡位）*委托价值】
+  const MM = Big(entrustValue).mul(mm)
+  // 全仓ture 逐仓false
+  const isCross = +leverages === 0
 
-  if (leverages === 0) {
-    leverages = symbol.max_leverage
-  }
-
-  if (symbol.product_name === 'BTC') {
-    const value = Big(amount).div(open_price)
-    const im = Big(value).mul(symbol.max_leverage / leverages).mul(symbol.im)
-    const mm = Big(value).mul(symbol.mm)
-    const available = holding.available_balance
-
-    let result = Big(open_price).mul(amount)
-    let imDiff = Big(im - mm)
-    if (isCross) {
-      // 全仓--空仓Lp=open_price*amount/[amount-(可用余额+IM-MM)*open_price*（1-R）]
-      imDiff = imDiff.plus(available)
-    }
-    // 空仓
-    if (direction === 'less') {
-      result = result.div(Big(amount).minus(imDiff.mul(open_price).mul(1 - Number(take_rate || 0))))
-      // 如果result小于0， 强平价格无限大
-      if (result.lt(0)) {
-        force_price = '999999'
-      } else {
-        force_price = result.round(price_scale || 4).toString()
-      }
-    } else {
-      result = result.div(Big(amount).plus(imDiff.mul(open_price).mul(1 - Number(take_rate || 0))))
-      if (result.lt(0)) {
-        force_price = '--'
-      } else {
-        force_price = result.round(price_scale || 4).toString()
-      }
-    }
-    if (Big(force_price || 0).lt(0)) {
-      force_price = Big(0)
-    }
+  // 合约 【开仓价值-（开仓保证金-维持保证金）】/（乘数X合约张数）
+  if (!isCross) {
+    // 多仓Lp=price*amount/[amount+(IM-MM)*price*（1-take_rate）]
+    // （乘数X合约张数）/【开仓价值+（开仓保证金-维持保证金）】
+    const tem = margin.minus(MM).mul(price).mul(1 - +take_rate)
+    const temContract = margin.minus(MM)
+    // const temCoin = margin
+    // if (multiplier === '1' || !multiplier || !+multiplier) return Big(price).mul(amount).div(Big(amount)[isBuy ? 'plus' : 'minus'](tem)).toFixed(8)
+    if (multiplier === '1' || !multiplier || !+multiplier) return Big(amount).div(entrustValue[isBuy ? 'plus' : 'minus'](temContract)).toFixed(8)
+    else return entrustValue[!isBuy ? 'plus' : 'minus'](temContract).plus(MM).div(Big(multiplier).mul(amount)).toFixed(8)
   } else {
-    const value = Big(multiplier).times(amount).times(open_price)
-    const im = value.div(leverages).times(Big(1).plus(symbol.im))
-    const mm = Big(symbol.mm).times(value)
-    const mulvol = multiplier.times(amount)
-    const imDiff = im.minus(mm)
-    const fee = Big(take_rate).times(value)
-    // 全仓
-    if (isCross) {
-      const avia = Big(holding.available_balance).minus(fee).minus(im)
-      // 空单
-      if (direction === 'less') {
-        force_price = (value.plus(imDiff).plus(avia)).div(mulvol)
-      }
-      // 多单
-      else {
-        force_price = (value.minus(imDiff).minus(avia)).div(mulvol)
-      }
-    } else {
-      // 空单
-      if (direction === 'less') {
-        force_price = (value.plus(imDiff)).div(mulvol)
-      }
-      // 多单
-      else {
-        force_price = (value.minus(imDiff)).div(mulvol)
-      }
-    }
-    if (Big(force_price || 0).lt(0)) {
-      force_price = Big(0)
-    }
-  }
-  const new_amount = Number(current) + Number(amount * (direction === 'less' ? -1 : 1))
-  return {
-    current, // 当前持仓量
-    new_amount, // 新的持仓量
-    force_price // 强平价格
+    // 全仓Hp*VoL/[Vol+(可用余额+IM-MM)*Hp*（1-R）]
+    const tem = (Big(available_balance).minus(margin).plus(IM).minus(MM)).mul(price).mul(1 - +take_rate)
+    // const tem = initalMargin.plus(Big(available_balance)).minus(MM).mul(price).mul(1 - +take_rate)
+    const temContract = margin.minus(MM)
+    if (multiplier === '1' || !multiplier || !+multiplier) return Big(price).mul(amount).div(Big(amount)[isBuy ? 'plus' : 'minus'](tem)).toFixed(8)
+    else return entrustValue[!isBuy ? 'plus' : 'minus'](temContract)[!isBuy ? 'plus' : 'minus'](available_balance).plus(MM).div(Big(multiplier).mul(amount)).toFixed(8)
   }
 }
+// 500*5500/[500+(0.00918181-0.00045454)*5500*0.9993]
+
+// console.log(getLiqPrice({ isBuy: true, leverages: 0, amount: 500, price: 9150, available_balance: 0.088, totalValue: 0.0546448 }, {
+//   im: 0.01,
+//   mm: 0.005,
+//   base_risk: 200,
+//   gap_risk: 100,
+//   take_rate: 0.0007,
+//   max_leverage: 100
+// }))

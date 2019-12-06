@@ -1,6 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
+const replaceFn = Router.prototype.replace
+Router.prototype.replace = function push(location) {
+  return replaceFn.call(this, location).catch(err => err)
+}
+
 Vue.use(Router)
 
 /* Layout */
