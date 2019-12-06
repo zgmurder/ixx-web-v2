@@ -24,8 +24,8 @@
             <div class="content-header" flex="main:justify">
               <span v-for="(value,key) in mapHeader1" :key="key">{{ $tR(`mapDelegateList.mapHeader1.${key}`) }}</span>
             </div>
-            <div ref="content-wrap" class="content-wrap">
-              <div v-if="delegateData && activeProduct.UNIT" class="content-container">
+            <div v-if="delegateData && activeProduct.UNIT" ref="content-wrap" class="content-wrap">
+              <div class="content-container">
                 <ul>
                   <li v-for="(item,index) in asks.arr" :key="index" flex="main:justify cross:center">
                     <span class="text-danger" @click="userData && (activeAcountAndPriceArr[1]=item.values[0])">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
@@ -802,8 +802,9 @@ export default {
     },
     dataLoaded(lessPosition) {
       const element = this.$refs['content-wrap']
-      const centerEle = document.querySelector('.content-center') || {}
-      element.scrollTop = (element.scrollHeight - element.clientHeight + (lessPosition ? centerEle.clientHeight || 0 : 0)) / 2
+      if (!element) return setTimeout(() => this.dataLoaded(), 200)
+      const centerEle = element.querySelector('.content-center') || {}
+      element.scrollTop = (element.scrollHeight - element.clientHeight + (lessPosition ? centerEle.clientHeight || 64 : 64)) / 2
       element.removeEventListener('scroll', this.handleScroll)
       element.addEventListener('scroll', this.handleScroll)
     },
