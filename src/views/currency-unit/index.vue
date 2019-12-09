@@ -130,7 +130,7 @@
                     :disabled="popoverDisabled"
                     :title="handlePopoverTitle(key)"
                   >
-                    <orderPopover v-if="activeProduct.UNIT" v-model="activeLever" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" :type="key === 'buy'?'success':'danger'" @change="setLeverage" @command="handleCommandOrder" />
+                    <orderPopover v-if="activeProduct.UNIT" v-model="activeLever" :active-product="activeProduct" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" :type="key === 'buy'?'success':'danger'" @change="setLeverage" @command="handleCommandOrder" />
                     <el-button slot="reference" :type="key === 'buy'?'success':'danger'" :class="{activeBtn:isBuy ? key === 'buy': key === 'sell'}" :loading="buyBtnLoading" :disabled="handleDisabledBtn(key)" style="width:100%" @click="handlePopoverClick(key)">
                       <div v-show="!buyBtnLoading" flex="main:justify cross:center">
                         <span>{{ $tR(`mapFormContent.mapHandleBtn.${key}`) }}</span>
@@ -212,7 +212,14 @@
                 <p style="border-left:1px solid #333;border-right:1px solid #333">{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('rateOReturn') }}</p>
                 <p>{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('quota') }}</p>
               </div>
-              <orderPopover v-if="activeProduct.UNIT" v-model="activeLever" only-lever flex="dir:top" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" type="success" @change="setLeverage" @command="handleCommandOrder" />
+              <orderPopover
+                v-if="activeProduct.UNIT" v-model="activeLever"
+                only-lever flex="dir:top"
+                :loading="buyBtnLoading" :form-value-obj="formValueObj"
+                :active-product="activeProduct" :data="mapLever"
+                type="success" @change="setLeverage"
+                @command="handleCommandOrder"
+              />
             </div>
           </div>
         </td>
