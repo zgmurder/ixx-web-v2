@@ -5,23 +5,14 @@
         <navMenu v-model="activeKey" :map-menu-list="mapMenuList" @change="handleClick" />
       </div>
       <div class="container-right">
-        <div>
+        <div v-if="!showHistory">
           <el-breadcrumb separator="/">
             <el-breadcrumb-item v-if="activeKey !== '1.property-manage'" :to="{ path: '/user/property' }">{{ $tR(`mapMenuList1.1.children.property-manage`) }}</el-breadcrumb-item>
             <el-breadcrumb-item>{{ title }}</el-breadcrumb-item>
           </el-breadcrumb>
           <hr>
         </div>
-        <component :is="componentId">
-
-          <!-- <div class="container-title">
-            {{ title }}
-            <el-select v-if="!hiddenSelect" v-model="selectCurrency" placeholder="请选择">
-              <el-option v-for="item in mapCurrency" :key="item" :label="item" :value="item" />
-            </el-select>
-            <el-divider />
-          </div> -->
-        </component>
+        <component :is="componentId" @showHistory="value =>showHistory = value " />
       </div>
     </div>
   </div>
@@ -44,7 +35,7 @@ export default {
       activeKey: '',
       selectCurrency: 'CNY',
       mapCurrency,
-      hiddenSelect: false
+      showHistory: false
     }
   },
   computed: {
@@ -61,9 +52,9 @@ export default {
   watch: {
     '$route.query': {
       handler({ key }) {
+        this.showHistory = false
         this.activeKey = key || '1.property-manage'
         const name = this.activeKey.split('.')[1]
-        this.hiddenSelect = ['charge-money', 'mention-money'].includes(name)
         this.componentId = () => import(`./components/property/${name}`)
       },
       immediate: true

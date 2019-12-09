@@ -77,4 +77,3 @@ export const mapRisk = {
     { r: 1100, m: 18.1 }
   ]
 }
-
