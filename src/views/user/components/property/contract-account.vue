@@ -63,7 +63,8 @@ export default {
     columns() {
       return {
         1: this.allLangData.contract.mapTableTapContents.historyEntrust.mapTableColumns,
-        2: this.langData.mapFinanceColumns
+        2: this.langData.mapFinanceColumns,
+        3: this.langData.mapFinanceColumns
       }
     },
     api() {

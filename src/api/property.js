@@ -24,6 +24,7 @@ export const getWithdrawList = (data = { page: 1, size: 10 }) => request({
   data
 })
 // 获取奖励分配 POST /account/candy/list
+
 export const getCandyList = (data = { page: 1, size: 10 }) => request({
   url: '/account/candy/list',
   method: 'post',
@@ -32,6 +33,17 @@ export const getCandyList = (data = { page: 1, size: 10 }) => request({
 // 获取奖励分配 POST /mine/invite/list
 export const getInviteList = (data = { page: 1, size: 10 }) => request({
   url: '/mine/invite/list',
+  method: 'post',
+  data
+})
+// 划转 POST /future/account/transfer
+/* amount: "111"
+currency: "BTC"
+from: 1
+to: 2
+type: 1 */
+export const transferAccount = (data = { page: 1, size: 10 }) => request({
+  url: '/future/account/transfer',
   method: 'post',
   data
 })

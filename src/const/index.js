@@ -77,3 +77,10 @@ export const mapRisk = {
     { r: 1100, m: 18.1 }
   ]
 }
+
+export const mapAccount = {
+  1: '资金账户',
+  2: '币币账户',
+  3: '合约账户',
+  4: '法币账户'
+}
