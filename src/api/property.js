@@ -23,6 +23,18 @@ export const getWithdrawList = (data = { page: 1, size: 10 }) => request({
   method: 'post',
   data
 })
+// 获取奖励分配 POST /account/candy/list
+export const getCandyList = (data = { page: 1, size: 10 }) => request({
+  url: '/account/candy/list',
+  method: 'post',
+  data
+})
+// 获取奖励分配 POST /mine/invite/list
+export const getInviteList = (data = { page: 1, size: 10 }) => request({
+  url: '/mine/invite/list',
+  method: 'post',
+  data
+})
 // 法币账户 POST /otc/account/balance/list
 export const getlegalTenderBalanceList = (data = { page: 1, size: 10 }) => request({
   url: '/otc/account/balance/list',
@@ -35,9 +47,27 @@ export const getCoinsBalanceList = (data = { page: 1, size: 10 }) => request({
   method: 'post',
   data
 })
+// 币币账户历史记录 POST /account/balance/list
+export const getCoinsBalanceHistoryList = (data = { page: 1, size: 10 }) => request({
+  url: '/fee/transaction/history',
+  method: 'post',
+  data
+})
 // 合约账户 POST /future/account/balance/list
 export const getFutureBalanceList = (data = { page: 1, size: 10 }) => request({
   url: '/future/account/balance/list',
+  method: 'post',
+  data
+})
+// 合约账户交易历史 POST /contract/orderhistory
+export const getFutureBalanceHistoryList = (data = { page: 1, size: 10 }) => request({
+  url: '/contract/orderhistory',
+  method: 'post',
+  data
+})
+// 合约账户财务记录 POST /future/account/fund/history
+export const getFutureRecordList = (data = { page: 1, size: 10 }) => request({
+  url: '/future/account/fund/history',
   method: 'post',
   data
 })

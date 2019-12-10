@@ -110,6 +110,7 @@ export default {
       ETHUSD: `ETH币本位`,
       EOSUSD: `EOS币本位`
     },
+
     mapTableTapContents: {
       shipping: {
         text: '仓位',
@@ -359,125 +360,17 @@ export default {
       3: {
         label: '交易账户',
         children: {
-          'fiat-Account': '法币账户',
-          'coin-Account': '币币账户',
-          'contract-Account': '合约账户',
-          'share-Account': '急速账户'
+          'fiat-account': '法币账户',
+          'coin-account': '币币账户',
+          'contract-account': '合约账户',
+          'share-account': '急速账户'
         }
       },
       4: {
         label: '其他',
         children: { 'address-Manage': '地址管理' }
       }
-    },
-    fiatAccount: {
-      mapTableColumn: {
-        currency: '币名',
-        available: '可用量',
-        ordering: '委托锁定量',
-        withdrawing: '提币锁定量', // (此字段后续会废弃),
-        quota: '当前提币剩余额度', // (此字段后续会废弃),
-        max_quota: '当前提币总额度', // (此字段后续会废弃),
-        rates: '汇率对象'
-      }
-    },
-
-    dealAccount: {
-      mapTab: {
-        1: '币币交易',
-        2: '合约交易',
-        3: '法币交易',
-        4: '急速合约'
-      },
-      mapTableColumns: {
-        1: {
-          user_id: '用户id',
-          currency: '币种',
-          available: '可用量',
-          rates: '汇率'
-        },
-        2: {
-          wallet_available: '钱包可用余额',
-          available: '可用余额',
-          currency: '币种',
-          holding: '目前仓位数量',
-          price: '开仓价格',
-          leverage: '杠杆倍数',
-          margin_available: '保证金余额',
-          position_margin: '仓位保证金',
-          order_margin: '委托保证金',
-          unrealized: '未实现盈亏',
-          realized: '已实现盈亏',
-          liq_price: '强平价格',
-          adl: 'ADL值',
-          close_position_price: '平仓委托价格',
-          future_tp_id: '止盈委托ID',
-          future_sl_id: '止损委托ID',
-          tp_price: '止盈委托价格',
-          sl_price: '止损委托价格'
-        },
-        3: {
-          currency: '币名',
-          available: '可用量',
-          ordering: '委托锁定量',
-          withdrawing: '提币锁定量', // (此字段后续会废弃),
-          quota: '当前提币剩余额度', // (此字段后续会废弃),
-          max_quota: '当前提币总额度', // (此字段后续会废弃),
-          rates: '汇率对象'
-        },
-        4: {
-          user_id: '用户id',
-          currency: '币名',
-          available: '可用量',
-          ordering: '订单冻结量'
-        }
-      },
-      mapHistoryTableColumns: {
-        1: {
-          currency: '币种',
-          create_time: '成交时间',
-          opetate: '类型', // 1转出 2转入 3当日清算 4买入 5卖出
-          amount: '数量',
-          available: '余额'
-        },
-        2: {
-          wallet_available: '钱包可用余额',
-          available: '可用余额',
-          currency: '币种',
-          holding: '目前仓位数量',
-          price: '开仓价格',
-          leverage: '杠杆倍数',
-          margin_available: '保证金余额',
-          position_margin: '仓位保证金',
-          order_margin: '委托保证金',
-          unrealized: '未实现盈亏',
-          realized: '已实现盈亏',
-          liq_price: '强平价格',
-          adl: 'ADL值',
-          close_position_price: '平仓委托价格',
-          future_tp_id: '止盈委托ID',
-          future_sl_id: '止损委托ID',
-          tp_price: '止盈委托价格',
-          sl_price: '止损委托价格'
-        },
-        3: {
-          currency: '币名',
-          available: '可用量',
-          ordering: '委托锁定量',
-          withdrawing: '提币锁定量', // (此字段后续会废弃),
-          quota: '当前提币剩余额度', // (此字段后续会废弃),
-          max_quota: '当前提币总额度', // (此字段后续会废弃),
-          rates: '汇率对象'
-        },
-        4: {
-          user_id: '用户id',
-          currency: '币名',
-          available: '可用量',
-          ordering: '订单冻结量'
-        }
-      }
     }
-
   },
   shareOption: {
     up_rate: '看涨',
@@ -516,62 +409,160 @@ export default {
       usdtRate: '汇率(USDT/USD)'
     }
   },
-  propertyManage: {
-    1: {
+  financialRecord: {
+    mapTab: {
+      1: '划转记录',
+      2: '充币记录',
+      3: '提币记录',
+      4: '奖励分配',
+      5: '返佣记录'
+    },
+    mapTableColumns: {
+      1: {
+        from_balance: '划转账户',
+        to_balance: '目标账户',
+        currency: '划转币种',
+        amount: '划转数量',
+        available: '账户剩余量',
+        opetate: '转入 | 转出', // 1-转入 2-传出 3-当日清算
+        create_time: '操作时间',
+        status: '状态' // 0-失败 1-成功
+      },
+      2: {
+        id: '流水号',
+        // user_id: '用户ID',
+        chain: '链名',
+        currency: '币名',
+        to_address: '目标地址',
+        memo: '备忘',
+        amount: '充值量',
+        txid: '链上交易号',
+        confirm: '确认数',
+        state: '状态',
+        create_time: '开始时间',
+        update_time: '最近更新时间'
+      },
+      3: {
+        id: '流水号',
+        wallet_tx_id: '钱包流水号',
+        user_id: '用户ID',
+        chain: '链名',
+        currency: '币名',
+        from_address: '源地址',
+        to_address: '目标地址',
+        change_address: '找零地址',
+        memo: '备忘',
+        amount: '提币量'
+        // fee: '提币手续费',
+        // txid: '链上交易号',
+        // confirm: '确认数',
+        // state: '状态',
+        // create_time: '开始时间',
+        // update_time: '最近更新时间',
+        // reviewer_id: '审核人ID',
+        // reviewer_nonce: '审核人nonce',
+        // reviewer_signature: '审核人签名',
+        // review_time: '审核时间',
+        // raw_tx: '原始tx',
+        // sign_result: '签名结果'
+      },
+      4: {
+        user_id: '用户ID',
+        currency: '币名',
+        type: '活动类型',
+        name: '活动名称',
+        amount: '数量',
+        state: '状态', // 0未发放 1已发放
+        release_time: '发放时间',
+        create_time: '生成时间',
+        payload: '其他信息'
+      },
+      5: {
+        currency: '币种',
+        total: '下线用户返佣总额',
+        already_total: '下线用户已返佣总额',
+        today_total: '今日下线返佣额',
+        today_nTotal: '待返佣额'
+      }
+    }
+  },
+  capitalAccount: {
+    mapTableColumns: {
+      currency: '币名',
+      available: '可用量',
+      ordering: '冻结量',
+      totalValue: '估值'
+    }
+  },
+  fiatAccount: {
+    mapTableColumns: {
+      currency: '币名',
+      available: '可用量',
+      ordering: '冻结量',
+      // quota: '当前提币剩余额度',
+      // max_quota: '当前提币总额度',
+      // rates: '汇率',
+      totalValue: '估值'
+    }
+  },
+  coinAccount: {
+    mapTableColumns: {
       currency: '币名',
       available: '可用量',
       withdrawing: '提币锁定量',
       quota: '当前提币剩余额度',
       max_quota: '当前提币总额度',
-      rates: '汇率',
       totalValue: '总价值'
     },
-    2: {
+    mapHistoryColumns: {
+      'order_id': '订单ID',
+      'symbol': '交易对',
+      'side': '方向', // (1买 2卖)
+      'type': '类型', // (1限价 2市价)
+      'price': '成交均价',
+      'amount': '成交数量',
+      'fee': '手续费',
+      'create_time': '时间'
+    }
+  },
+  contractAccount: {
+    mapTableColumns: {
       currency: '币种',
-      balance: '账户',
-      opetate: '操作', // 1-转入 2-传出 3-当日清算
-      amount: '操作数量',
-      available: '剩余量',
-      createdTime: '操作时间',
-      status: '状态' // 0-失败 1-成功
+      // wallet_available: '钱包可用余额',
+      available: '可用余额',
+      holding: '仓位数量',
+      price: '开仓价格',
+      leverage: '杠杆倍数',
+      // margin_available: '保证金余额',
+      position_margin: '仓位保证金',
+      order_margin: '委托保证金',
+      unrealized: '未实现盈亏',
+      realized: '已实现盈亏',
+      liq_price: '强平价格',
+      adl: 'ADL值',
+      // close_position_price: '平仓委托价格',
+      // future_tp_id: '止盈委托ID',
+      // future_sl_id: '止损委托ID',
+      tp_price: '止盈价格',
+      sl_price: '止损价格'
     },
-    3: {
-      id: '流水号',
-      user_id: '用户ID',
-      chain: '链名',
+    mapFinanceColumns: {
+      time: '成交时间',
+      currency: '币种',
+      opetate: '操作',
+      amount: '数额',
+      available: '余额',
+      ord_status: '状态'
+    }
+  },
+
+  shareAccount: {
+    mapTableColumns: {
       currency: '币名',
-      to_address: '目标地址',
-      memo: '备忘',
-      amount: '充值量',
-      txid: '链上交易号',
-      confirm: '确认数',
-      state: '状态',
-      create_time: '开始时间',
-      update_time: '最近更新时间'
-    },
-    4: {
-      id: '流水号',
-      wallet_tx_id: '钱包流水号',
-      user_id: '用户ID',
-      chain: '链名',
-      currency: '币名',
-      from_address: '源地址',
-      to_address: '目标地址',
-      change_address: '找零地址',
-      memo: '备忘',
-      amount: '提币量',
-      fee: '提币手续费',
-      txid: '链上交易号',
-      confirm: '确认数',
-      state: '状态',
-      create_time: '开始时间',
-      update_time: '最近更新时间',
-      reviewer_id: '审核人ID',
-      reviewer_nonce: '审核人nonce',
-      reviewer_signature: '审核人签名',
-      review_time: '审核时间',
-      raw_tx: '原始tx',
-      sign_result: '签名结果'
+      available: '可用量',
+      ordering: '冻结量',
+      totalValue: '估值'
     }
   }
+
 }

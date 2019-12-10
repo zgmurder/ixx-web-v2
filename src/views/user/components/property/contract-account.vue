@@ -12,18 +12,23 @@
     <div v-else>
       <el-page-header content="历史记录" @back="showHistory = false,handlePageChange(null),$emit('showHistory',showHistory)" />
       <hr>
+      <el-tabs v-model="activeTab" type="card" @tab-click="handlePageChange(null)">
+        <el-tab-pane label="交易记录" name="1" />
+        <el-tab-pane label="财务记录" name="2" />
+        <el-tab-pane label="盈亏记录" name="3" />
+      </el-tabs>
     </div>
-    <zg-table v-loading="loading" size="small" :column="mapAccoutColumns" border stripe :data="tableList" @change="handlePageChange" />
+    <zg-table v-loading="loading" size="small" :span-method="arraySpanMethod" :column="mapAccoutColumns" border stripe :data="tableList" @change="handlePageChange" />
   </div>
 </template>
 <script>
 import ZgTable from '@/components/zg-table'
-import { getCoinsBalanceList, getCoinsBalanceHistoryList } from '@/api/property'
+import { getFutureBalanceList, getFutureBalanceHistoryList, getFutureRecordList } from '@/api/property'
 import { mapCurrency } from '@/const'
 // getPropertyAccountList, getFinanceList, getDepositList, getWithdrawList,
 import CountUp from 'countup/dist/countUp.min'
 export default {
-  name: 'CoinAccount',
+  name: 'ContractAccount',
   components: {
     ZgTable
   },
@@ -33,27 +38,39 @@ export default {
       tableList: [],
       loading: true,
       activeCurrency: 'CNY',
-      showHistory: false
+      showHistory: false,
+      activeTab: '1'
     }
   },
   computed: {
     mapAccoutColumns() {
-      const mapTableColumns = this.langData[this.showHistory ? 'mapHistoryColumns' : 'mapTableColumns']
+      const mapTableColumns = !this.showHistory ? this.langData.mapTableColumns : this.columns[this.activeTab]
       return Object.keys(mapTableColumns).map(key => {
         const obj = { prop: key, label: mapTableColumns[key] }
-        if (key === 'totalValue') {
-          obj.formatter = (row, column, cellValue, index) => {
-            const value = row.totalValue[this.activeCurrency]
-            return value ? this.bigRound(value, 4) + ' ' + this.activeCurrency : '--'
-          }
+        if (['realized', 'unrealized', 'available'].includes(key)) {
+          obj.formatter = row => +row[key] ? this.bigRound(row[key], 8) + ' BTC' : '--'
+          key !== 'available' && (obj.width = '120')
         }
         return obj
       })
     },
     estimatedTotalValue() {
-      return this.tableList.reduce((prev, curr) => {
-        return +curr.totalValue[this.activeCurrency] + prev
-      }, 0)
+      return 0
+      // return this.tableList.reduce((prev, curr) => {
+      //   return +curr.totalValue[this.activeCurrency] + prev
+      // }, 0)
+    },
+    columns() {
+      return {
+        1: this.allLangData.contract.mapTableTapContents.historyEntrust.mapTableColumns,
+        2: this.langData.mapFinanceColumns
+      }
+    },
+    api() {
+      return {
+        1: getFutureBalanceHistoryList,
+        2: getFutureRecordList
+      }
     }
   },
   methods: {
@@ -62,24 +79,28 @@ export default {
       if (!pageConfig) this._temPageConfig.init()
       const { pageSize, currentPage } = this._temPageConfig
       this.loading = true
-      const fn = this.showHistory ? getCoinsBalanceHistoryList : getCoinsBalanceList
+      const fn = this.showHistory ? this.api[this.activeTab] : getFutureBalanceList
       fn({ page: currentPage, size: pageSize }).then(res => {
-        const arr = res.data.map(item => {
-          item.totalValue = mapCurrency.reduce((prev, curr) => {
-            prev[curr] = +item.rates[curr] * (+item.available + (+item.ordering))
-            return prev
-          }, {})
-          return item
-        })
-        this.tableList = arr
+        // const arr = res.data.map(item => {
+        //   item.totalValue = mapCurrency.reduce((prev, curr) => {
+        //     prev[curr] = +item.rates[curr] * (+item.available + (+item.ordering))
+        //     return prev
+        //   }, {})
+        //   return item
+        // })
+        this.tableList = Array.isArray(res.data) ? res.data : res.data.data
         !this.showHistory && this.updateNumber()
-        this._temPageConfig.total = res.total
+        this._temPageConfig.total = res.data.total
         this.loading = false
       })
     },
     updateNumber() {
       const countObj = new CountUp(this.$refs.numerical, 0, { duration: 4 })
       countObj.update(this.estimatedTotalValue || 0)
+    },
+    arraySpanMethod({ row, column, rowIndex, columnIndex }) {
+      if (this.showHistory) return
+      if (columnIndex === 1) return !rowIndex ? [3, 1] : [0, 0]
     }
   }
 }

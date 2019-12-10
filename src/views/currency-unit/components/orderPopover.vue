@@ -84,6 +84,10 @@ export default {
     onlyLever: {
       type: Boolean,
       default: false
+    },
+    activeProduct: {
+      type: Object,
+      default: () => ({})
     }
   },
   data() {
@@ -119,7 +123,7 @@ export default {
   },
   methods: {
     leveragePreview() {
-      leveragePreview({ name: this.$parent.activeProduct.name, leverage: this.sliderValue }).then(res => {
+      leveragePreview({ name: this.activeProduct.name, leverage: this.sliderValue }).then(res => {
         this.leverageTipObj = res.data
       })
     },

@@ -24,8 +24,8 @@
             <div class="content-header" flex="main:justify">
               <span v-for="(value,key) in mapHeader1" :key="key">{{ $tR(`mapDelegateList.mapHeader1.${key}`) }}</span>
             </div>
-            <div ref="content-wrap" class="content-wrap">
-              <div v-if="delegateData && activeProduct.UNIT" class="content-container">
+            <div v-if="delegateData && activeProduct.UNIT" ref="content-wrap" class="content-wrap">
+              <div class="content-container">
                 <ul>
                   <li v-for="(item,index) in asks.arr" :key="index" flex="main:justify cross:center">
                     <span class="text-danger" @click="userData && (activeAcountAndPriceArr[1]=item.values[0])">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
@@ -130,7 +130,7 @@
                     :disabled="popoverDisabled"
                     :title="handlePopoverTitle(key)"
                   >
-                    <orderPopover v-if="activeProduct.UNIT" v-model="activeLever" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" :type="key === 'buy'?'success':'danger'" @change="setLeverage" @command="handleCommandOrder" />
+                    <orderPopover v-if="activeProduct.UNIT" v-model="activeLever" :active-product="activeProduct" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" :type="key === 'buy'?'success':'danger'" @change="setLeverage" @command="handleCommandOrder" />
                     <el-button slot="reference" :type="key === 'buy'?'success':'danger'" :class="{activeBtn:isBuy ? key === 'buy': key === 'sell'}" :loading="buyBtnLoading" :disabled="handleDisabledBtn(key)" style="width:100%" @click="handlePopoverClick(key)">
                       <div v-show="!buyBtnLoading" flex="main:justify cross:center">
                         <span>{{ $tR(`mapFormContent.mapHandleBtn.${key}`) }}</span>
@@ -212,7 +212,14 @@
                 <p style="border-left:1px solid #333;border-right:1px solid #333">{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('rateOReturn') }}</p>
                 <p>{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('quota') }}</p>
               </div>
-              <orderPopover v-if="activeProduct.UNIT" v-model="activeLever" only-lever flex="dir:top" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" type="success" @change="setLeverage" @command="handleCommandOrder" />
+              <orderPopover
+                v-if="activeProduct.UNIT" v-model="activeLever"
+                only-lever flex="dir:top"
+                :loading="buyBtnLoading" :form-value-obj="formValueObj"
+                :active-product="activeProduct" :data="mapLever"
+                type="success" @change="setLeverage"
+                @command="handleCommandOrder"
+              />
             </div>
           </div>
         </td>
@@ -802,8 +809,9 @@ export default {
     },
     dataLoaded(lessPosition) {
       const element = this.$refs['content-wrap']
-      const centerEle = document.querySelector('.content-center') || {}
-      element.scrollTop = (element.scrollHeight - element.clientHeight + (lessPosition ? centerEle.clientHeight || 0 : 0)) / 2
+      if (!element) return setTimeout(() => this.dataLoaded(), 200)
+      const centerEle = element.querySelector('.content-center') || {}
+      element.scrollTop = (element.scrollHeight - element.clientHeight + (lessPosition ? centerEle.clientHeight || 64 : 64)) / 2
       element.removeEventListener('scroll', this.handleScroll)
       element.addEventListener('scroll', this.handleScroll)
     },

@@ -22,13 +22,14 @@
       :style="{ 'margin-top': paginationTop, 'text-align': paginationAlign }">
     </el-pagination> -->
     <el-pagination
-      v-if="!!pageConfig.total"
+      v-if="pageConfig.total>pageConfig.pageSize"
       :current-page="pageConfig.currentPage"
       :page-sizes="pageConfig.pageSizes"
       :page-size="pageConfig.pageSize"
       :layout="pageConfig.layout"
       :total="pageConfig.total"
       v-bind="initpage"
+      :background="pageConfig.background"
       @size-change="pageConfig.handleSizeChange"
       @current-change="pageConfig.handleCurrentChange"
     />
@@ -49,8 +50,8 @@ export default {
     merge: Array
   },
   data(vm) {
-    const { currentPage = 1, pageSizes, pageSize = 15, layout = `total, sizes, prev, pager, next, jumper` } = vm.initpage || {}
-    const defaultValue = { currentPage, pageSizes, pageSize, layout }
+    const { currentPage = 1, pageSizes, pageSize = 15, layout = `total, sizes, prev, pager, next, jumper`, background = true } = vm.initpage || {}
+    const defaultValue = { currentPage, pageSizes, pageSize, layout, background }
     const pageConfig = {
       ...defaultValue,
       total: 0,
@@ -67,7 +68,6 @@ export default {
       }
     }
     pageConfig.handleCurrentChange()
-
     return {
       mergeLine: {},
       mergeIndex: {},
