@@ -924,7 +924,7 @@ export default {
       }
       .info-left{
         margin-left:8px;
-        margin-right:3.5%;
+        margin-right:2.5%;
         line-height: 32px;
         font-size: 12px;
       }
