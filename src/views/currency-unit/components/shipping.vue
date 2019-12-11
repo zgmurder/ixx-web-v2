@@ -53,17 +53,17 @@
             <p class="text-info" :class="{interval:i>4}">{{ $t(`contract.mapTableTapContents.shipping.mapTableColumns.${key}`) }}
               <el-popover v-if="key === 'margin_position'" v-model="margin_popover" placement="top" width="400">
                 <div>
-                  <!-- <div flex="main:justify">
-                    <el-radio v-model="checked">增加仓位保证金</el-radio>
-                    <el-radio v-model="checked">减少仓位保证金</el-radio>
+                  <div flex="main:justify">
+                    <el-radio v-model="checked" :label="0">增加仓位保证金</el-radio>
+                    <el-radio v-model="checked" :label="1">减少仓位保证金</el-radio>
                   </div>
-                  <hr> -->
+                  <hr>
                   <div class="text-info" style="font-size:12px; line-height:24px">
                     <p>你的当前仓位: <span class="text-danger"> {{ item.holding }}</span> 张合约 ({{ item.leverage }}x)</p>
                     <p>当前已分配的保证金: <span class="text-danger">{{ item.margin_position }}</span> BTC 【最大可减少 <span class="text-danger">{{ Math.floor(item.margin_position) }}</span> {{ item.currency }}】<span class="text-danger hover-point" @click="margin_position = -Math.floor(item.margin_position)">全部</span></p>
                     <p>可用保证金: <span class="text-danger">{{ item.available_balance }}</span> BTC【最大可增加 <span class="text-danger">{{ Math.floor(item.available_balance) }}</span> {{ item.currency }}】<span class="text-danger hover-point" @click="margin_position = Math.floor(item.available_balance)">全部</span></p>
                   </div>
-                  <el-input-number v-model="margin_position" size="small" :min="-Math.floor(item.margin_position)" :max="Math.floor(item.available_balance)" style="width:100%" placeholder="请输入数量" />
+                  <el-input v-model="margin_position" size="small" :min="-Math.floor(item.margin_position)" :max="Math.floor(item.available_balance)" style="width:100%" placeholder="请输入数量" />
                 </div>
                 <hr>
                 <div flex="main:justify cross:center dir:right">
@@ -106,7 +106,7 @@
         </div>
         <div v-else class="product-hover">
           <div flex="cross:center">
-            <p>你以150的价格发布了平仓委托 <i class="el-icon-close hover-point" title="取消" @click="cancelOrder(item)" /></p>
+            <p>在{{ item.liq_price }}的平仓委托 <i class="el-icon-close hover-point" title="取消" @click="cancelOrder(item)" /></p>
             <!-- <el-button type="danger" @click="cancelOrder(item)">取消平仓</el-button> -->
           </div>
         </div>
@@ -156,7 +156,7 @@ export default {
       visibleChecked: false,
       margin_position: '',
       input: '',
-      checked: false,
+      checked: 0,
       trigger_type: 1,
       buyBtnLoading: false,
       popoverVisible: false,
@@ -189,7 +189,7 @@ export default {
   },
   methods: {
     setTransferMargin(item) {
-      setTransferMargin({ name: item.name, amount: this.margin_position }).then(res => {
+      setTransferMargin({ name: item.name, amount: !this.checked ? this.margin_position : -this.margin_position }).then(res => {
         this.$emit('change')
         this.margin_popover = false
         this.margin_position = 0
