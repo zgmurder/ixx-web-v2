@@ -25,7 +25,17 @@ export default {
       return this.$t(`${capitalizeLower(this.thisName)}.${keyPath}`, locale)
     },
     bigRound,
-    parseTime
+    parseTime,
+    confirm(content, title = '提示', options) {
+      return this.$confirm(content, title, {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        dangerouslyUseHTMLString: true,
+        lockScroll: false,
+        ...options
+      }).catch(() => false)
+    }
   },
   directives: {
     login: {

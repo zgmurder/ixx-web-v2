@@ -79,7 +79,7 @@
           </div>
         </div>
         <div v-if="!item.future_close_id" flex="dir:top cross:center main:justify">
-          <el-popover :ref="`popover-${item.name}`" :disabled="disabled" placement="top" width="160">
+          <!-- <el-popover :ref="`popover-${item.name}`" :disabled="disabled" placement="top" width="160">
             <p>确定要以 <span class="text-danger">市价【{{ $t(`contract.mapFormContent.perfactPrice`) }}】</span>平掉所有持仓吗</p>
             <hr>
             <div flex="main:justify cross:center">
@@ -94,11 +94,16 @@
             <p style="margin-top:5px">确定到<span class="text-danger">指定价格</span>后平掉所有持仓吗</p>
             <hr>
             <div flex="main:justify cross:center dir:right">
-              <!-- <el-checkbox v-model="visibleChecked">不在提示</el-checkbox> -->
               <el-button type="primary" size="mini" @click="closeStorehouse(item)">确定</el-button>
             </div>
             <el-button slot="reference" type="primary" plain>限价平仓</el-button>
-          </el-popover>
+          </el-popover> -->
+          <div flex="dir:top" style="font-size:12px">
+            <div>平仓价格</div>
+            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px">
+          </div>
+          <div class="el-button el-button--small bd-succes" @click="closeStorehouse(item,true)">限价平仓</div>
+          <div class="el-button el-button--small bd-succes" style="margin-left:0" @click="closeStorehouse(item)">市价平仓</div>
         </div>
         <div v-else class="product-hover">
           <div flex="cross:center">
@@ -235,17 +240,26 @@ export default {
       if (!this.currencyRates) return
       return bigTimes([this.currencyRates['USD'], value])
     },
-    closeStorehouse(item, isMarket) {
-      if (this.visibleChecked) {
-        this.disabled = true
-      }
+    async closeStorehouse(item, isMarket) {
+      console.log(item)
+
+      const isOk = await this.confirm(`<span class="text-danger">卖出</span>在${isMarket ? this.input || this.markData[item.currency] : '最优'}价格${item.holding}张BTC合约在执行时，将平掉你的整个仓位`, isMarket ? '限价平仓' : '市价平仓')
+      if (!isOk) return
       const params = { name: item.name, user_id: item.user_id, price: isMarket ? '0' : this.input }
       closeStorehouse(params).then(res => {
         this.$emit('change')
         this.$message.success(this.$t('handleSuccess'))
       })
-      this.visible = false
-      this.visible1 = false
+      // if (this.visibleChecked) {
+      //   this.disabled = true
+      // }
+      // const params = { name: item.name, user_id: item.user_id, price: isMarket ? '0' : this.input }
+      // closeStorehouse(params).then(res => {
+      //   this.$emit('change')
+      //   this.$message.success(this.$t('handleSuccess'))
+      // })
+      // this.visible = false
+      // this.visible1 = false
     },
     cancelOrder(item) {
       const { user_id, future_close_id, name } = item

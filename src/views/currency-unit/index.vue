@@ -146,7 +146,7 @@
 
                   <p style="font-size:12px;color:#999">{{ $tR(`mapFormContent.cost`) }}：<span>{{ !activeAcountAndPriceArr[0]?'--':costObj[key] }}</span> {{ activeProduct.currency }}</p>
                 </div>
-                <hr>
+                <!-- <hr> -->
                 <div v-for="(value,key) in mapFormContent.mapDescribe" :key="key" style="font-size:12px;line-height:24px" flex="main:justify">
                   <span>{{ $tR(`mapFormContent.mapDescribe.${key}`) }}</span>
                   <span v-if="key === 'entrustValue'" class="text-warning">{{ formValueObj[1] | bigRound(8) }} {{ activeProduct.currency }}</span>
@@ -209,8 +209,7 @@
             <div class="content-container-hold">
               <div flex="box:mean" style="text-align:center">
                 <p>{{ (activeBalance||{}).holding || 0 }} <br> {{ $tR('deal') }}</p>
-                <p style="border-left:1px solid #333;border-right:1px solid #333">{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('rateOReturn') }}</p>
-                <p>{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('quota') }}</p>
+                <p style="border-left:1px solid #333">{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('rateOReturn') }}</p>
               </div>
               <orderPopover
                 v-if="activeProduct.UNIT" v-model="activeLever"
@@ -220,6 +219,10 @@
                 type="success" @change="setLeverage"
                 @command="handleCommandOrder"
               />
+              <div flex="main:justify" style="padding:8px">
+                <p>{{ $tR('quota') }}</p>
+                <p>{{ (activeBalance||{}).unrealized || 0 }}</p>
+              </div>
             </div>
           </div>
         </td>
@@ -347,7 +350,7 @@ export default {
       amountObj: null,
       balanceList: [],
 
-      popoverDisabled: true,
+      popoverDisabled: false,
 
       symbolInfo: {}
 
@@ -475,9 +478,11 @@ export default {
               case 'tp_type':
                 return `${value}/${row.sl_price}`
               case 'create_time':
-                return this.parseTime(value)
+                return this.parseTime(+value / 1000)
               case 'distancePrice':
                 return `${value > 0 ? '+' : ''}${value}`
+              case 'amount_surplus':
+                return row.amount_total - row.amount_last || '0'
               default:
                 return value
             }
@@ -822,7 +827,6 @@ export default {
         this.triggerBtn = Math.abs(e.target.scrollTop - constHeight) > (e.target.clientHeight / 2)
       }, 100)
     },
-
     handleSwitch(btnKey) {
       this.activeBtnsKey = btnKey
     },

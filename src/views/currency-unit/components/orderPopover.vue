@@ -8,27 +8,42 @@
       </div>
 
       <div class="multiple-bar">
-        <div flex="main:justify cross:center">
+        <div flex="main:justify cross:center" class="text-light">
           <span>当前杠杆：{{ active }}x</span>
           <i class="el-icon-edit hover-point" @click="showEdit=!showEdit" />
         </div>
-        <ul
-          v-if="!showEdit" v-loading="leverageLoading"
-          element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.5)"
-          flex="main:justify" class="dot-box"
-        >
-          <div class="line" />
-          <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="activeTag == tag && 'active'||''" @click="handleActive(tag)">
-            <div style="font-size:32px;text-align:center">•</div>
-            <div>{{ tag }}x</div>
-          </li>
-        </ul>
-        <div v-else class="input-box" flex="main:justify cross:strech">
-          <input v-model="activeTag" :min="1" :max="calcData[calcData.length-1]" type="number" autofocus="autofocus">
-          <div @click="showEdit=!showEdit"><i class="el-icon-close" /></div>
-          <div><i class="el-icon-check" @click="handleActive(activeTag)" /></div>
-        </div>
-        <div class="divider-line-info" style="background:#333" />
+        <el-popover ref="popover" v-model="popoverVisible" placement="top" width="360" trigger="manual">
+          <p>
+            <span v-if="+leverageTipObj.margin_position" v-html="$tR('tip',leverageTipObj)" />
+            <span v-else v-html="$tR('leverageTip',leverageTipObj)" />
+          </p>
+          <hr>
+          <div flex="main:justify dir:right cross:center">
+            <div>
+              <el-button size="mini" type="text" @click="cancelClick">{{ $t('cancel') }}</el-button>
+              <el-button type="primary" size="mini" @click="confirmClick">{{ $t('confirm') }}</el-button>
+            </div>
+          </div>
+          <div slot="reference">
+            <ul
+              v-if="!showEdit" v-loading="leverageLoading"
+              element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.5)"
+              flex="main:justify" class="dot-box"
+            >
+              <div class="line" />
+              <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="activeTag == tag && 'active'||''" @click="handleActive(tag)">
+                <div style="font-size:32px;text-align:center">•</div>
+                <div>{{ tag }}x</div>
+              </li>
+            </ul>
+            <div v-else slot="reference" class="input-box text-light" flex="main:justify cross:strech">
+              <input v-model="activeTag" :min="1" :max="calcData[calcData.length-1]" type="number" autofocus="autofocus">
+              <div @click="showEdit=!showEdit"><i class="el-icon-close" /></div>
+              <div><i class="el-icon-check" @click="handleActive(activeTag)" /></div>
+            </div>
+          </div>
+        </el-popover>
+        <div v-if="!onlyLever" class="divider-line-info" style="background:#333" />
         <!-- <el-divider content-position="center"> <span style="font-size:12px" class="text-nowrap">{{ $tR(`setLever`) }}</span> </el-divider>
         <div :flex="$attrs.flex || 'main:justify cross:center'" style="margin-top:30px">
           <el-input-number v-model="sliderValue" :min="1" :max="100" size="mini" :style="{width: !onlyLever ? '100px':'100%'}" @change="handleSliderChange" />
@@ -160,23 +175,31 @@ export default {
       if (decimals && decimals.length > 1) this.input = this.bigRound(this.input, 1)
       if (+this.input >= +data[data.length - 2]) this.input = data[data.length - 2]
     },
+    cancelClick() {
+      this.activeTag = this.active
+      this.popoverVisible = false
+    },
+    confirmClick() {
+      this.popoverVisible = false
+      this.$emit('change', this.activeTag)
+      this.showEdit = false
+    },
     async handleActive(tag) {
       this.activeTag = tag
       this.leverageLoading = true
       await this.leveragePreview(tag)
       this.leverageLoading = false
+      if (this.$root.modelVisible) {
+        this.popoverVisible = true
+        return
+      }
       this.$confirm(this.$tR('tip', this.leverageTipObj), '修改杠杆', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
         dangerouslyUseHTMLString: true,
         lockScroll: false
-      }).then(() => {
-        this.$emit('change', this.activeTag)
-        this.showEdit = false
-      }).catch(() => {
-        this.activeTag = this.active
-      })
+      }).then(this.confirmClick).catch(this.cancelClick)
     }
   }
 }
@@ -229,7 +252,7 @@ export default {
           height: 40px;
           cursor: pointer;
           position:relative;
-          z-index: 4;
+          z-index: 1;
           &:hover>*,&.active>*{
             transform: scale(1.5);
             text-shadow: 0 0 10px $--color-primary

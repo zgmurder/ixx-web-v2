@@ -64,7 +64,9 @@ tr.contract-order-list-row-class{
     }
   }
 }
-
+.custom-popper{
+  background: $--contract-table-bg;
+}   
 .login-custom-form{
   .el-input__inner{
       background: transparent;
@@ -78,4 +80,17 @@ tr.contract-order-list-row-class{
     color: #fff;
     border:none
   }
+}
+.el-popover__reference:focus{
+  outline: none;
+}
+.el-popup-parent--hidden{
+  overflow: auto;
+}
+.custom-input{
+  line-height: 24px;
+  border: 1px solid $--color-info;
+  color: #d7d7d7;
+  text-indent: 5px;
+  background: none;
 }

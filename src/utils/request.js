@@ -104,11 +104,11 @@ service.interceptors.response.use(
   },
   error => {
     console.log('err' + error, 1111) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
+    // Message({
+    //   message: error.message,
+    //   type: 'error',
+    //   duration: 5 * 1000
+    // })
     // window.location.href = `/#/404?redirect=${window.location.hash}`
     return Promise.reject(error)
   }

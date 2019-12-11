@@ -1,5 +1,5 @@
 <template>
-  <div id="depth-map" style="height:280px" />
+  <div id="depth-map" style="height:220px" />
 </template>
 <script>
 import Highcharts from 'highcharts/highcharts'

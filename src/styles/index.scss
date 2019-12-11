@@ -25,6 +25,9 @@ body::-webkit-scrollbar {
 .text-warning{color: $--color-warning;}
 .text-info{color: $--color-info;}
 .text-light{color: $--color-light;}
+
+.bd-succes{border:1px solid $--color-success;background: none;color:$--color-success ;}
+.bd-info{color: $--color-info;}
 .hover-point:hover{cursor: pointer;color:$--color-primary}
 
 
@@ -50,11 +53,9 @@ body::-webkit-scrollbar {
   justify-content: center;
   align-items: center;
   background-color: rgba(0,0,0,.8);
-  z-index: 3;
+  z-index: 5;
 }
-.custom-popper{
-  background: #000;
-}   
+
 
 
 .share-text-info{
