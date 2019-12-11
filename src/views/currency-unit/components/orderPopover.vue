@@ -2,12 +2,32 @@
   <div v-loading="false" class="hold-content" element-loading-background="rgba(0, 0, 0, 0.3)">
     <div class="content-container-hold">
       <div class="linear-bar" flex="main:justify cross:center">
-        <svg-icon icon-class="btc" />
-        <svg-icon icon-class="bug" />
+        <svg-icon icon-class="money" />
+        <i class="el-icon-warning" />
         <div class="mark">{{ active }} x</div>
       </div>
       <div class="multiple-bar">
-        <el-divider content-position="center"> <span style="font-size:12px" class="text-nowrap">{{ $tR(`setLever`) }}</span> </el-divider>
+        <div flex="main:justify cross:center">
+          <span>当前杠杆：{{ active }}x</span>
+          <i class="el-icon-edit hover-point" @click="showEdit=!showEdit" />
+        </div>
+        <ul
+          v-if="!showEdit" v-loading="leverageLoading"
+          element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.5)"
+          flex="main:justify" class="dot-box"
+        >
+          <div class="line" />
+          <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="activeTag === tag && 'active'||''" @click="handleActive(tag)">
+            <div style="font-size:32px;text-align:center">•</div>
+            <div>{{ tag }}x</div>
+          </li>
+        </ul>
+        <div v-else class="input-box" flex="main:justify cross:strech">
+          <input v-model="activeTag" type="number" autofocus="autofocus">
+          <div @click="showEdit=!showEdit"><i class="el-icon-close" /></div>
+          <div><i class="el-icon-check" /></div>
+        </div>
+        <!-- <el-divider content-position="center"> <span style="font-size:12px" class="text-nowrap">{{ $tR(`setLever`) }}</span> </el-divider>
         <div :flex="$attrs.flex || 'main:justify cross:center'" style="margin-top:30px">
           <el-input-number v-model="sliderValue" :min="1" :max="100" size="mini" :style="{width: !onlyLever ? '100px':'100%'}" @change="handleSliderChange" />
           <el-popover ref="popover" v-model="popoverVisible" placement="top" width="270" trigger="manual" @show="leveragePreview">
@@ -17,7 +37,6 @@
             </p>
             <hr>
             <div flex="main:justify dir:right cross:center">
-              <!-- <el-checkbox v-model="checked">{{ $t('noShow') }}</el-checkbox> -->
               <div>
                 <el-button size="mini" type="text" @click="cancelClick">{{ $t('cancel') }}</el-button>
                 <el-button type="primary" size="mini" @click="handleTagClick">{{ $t('confirm') }}</el-button>
@@ -35,7 +54,7 @@
             </div>
           </el-popover>
         </div>
-        <el-slider v-model="sliderValue" @change="handleSliderChange" />
+        <el-slider v-model="sliderValue" @change="handleSliderChange" /> -->
       </div>
       <div v-if="!onlyLever">
         <div v-for="(value,key) in mapTableColumns" :key="key" style="color:#ccc" flex="box:mean">
@@ -98,8 +117,11 @@ export default {
       sliderValue: +this.active,
       popoverVisible: false,
       checked: false,
-      activeTag: '',
-      leverageTipObj: {}
+
+      activeTag: this.active,
+      leverageTipObj: {},
+      showEdit: false,
+      leverageLoading: false
     }
   },
   computed: {
@@ -107,23 +129,25 @@ export default {
       return this.langData.mapTableColumns
     },
     calcData() {
-      return Object.values(this.data).reduce((prev, curr, index) => {
-        prev[index * 10] = curr + 'x'
-        return prev
-      }, {})
+      const arr = this.data
+      return [arr[arr.length - 1]].concat(this.data.slice(0, this.data.length - 1))
+      // return Object.values(this.data).reduce((prev, curr, index) => {
+      //   prev[index * 10] = curr + 'x'
+      //   return prev
+      // }, {})
     }
 
   },
   watch: {
-    active: {
-      handler(newValue) {
-        this.sliderValue = !+this.active ? +this.data[this.data.length - 2] : +this.active
-      }
-    }
+    // active: {
+    //   handler(newValue) {
+    //     this.sliderValue = !+this.active ? +this.data[this.data.length - 2] : +this.active
+    //   }
+    // }
   },
   methods: {
-    leveragePreview() {
-      leveragePreview({ name: this.activeProduct.name, leverage: this.sliderValue }).then(res => {
+    leveragePreview(tag) {
+      return leveragePreview({ name: this.activeProduct.name, leverage: tag }).then(res => {
         this.leverageTipObj = res.data
       })
     },
@@ -135,32 +159,22 @@ export default {
       if (decimals && decimals.length > 1) this.input = this.bigRound(this.input, 1)
       if (+this.input >= +data[data.length - 2]) this.input = data[data.length - 2]
     },
-    handleTagClick() {
-      if (this.activeTag) {
+    async handleActive(tag) {
+      this.activeTag = tag
+      this.leverageLoading = true
+      await this.leveragePreview(tag)
+      this.leverageLoading = false
+      this.$confirm(this.$tR('tip', this.leverageTipObj), '修改杠杆', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        dangerouslyUseHTMLString: true,
+        lockScroll: false
+      }).then(() => {
         this.$emit('change', this.activeTag)
-        this.sliderValue = +this.activeTag || +this.data[this.data.length - 2]
-        this.activeTag = ''
-      } else {
-        this.$emit('change', this.sliderValue)
-      }
-      this.popoverVisible = false
-      // this.$nextTick(() => {
-      //   this.$refs.popover.popperElm.style.left = index * 20 + 'px'
-      // })
-    },
-    cancelClick() {
-      this.activeTag = ''
-      this.popoverVisible = false
-      this.sliderValue = +this.active
-    },
-    handleActive(tag) {
-      if (tag === this.active) return
-      this.activeTag = !this.popoverVisible ? tag : ''
-      this.popoverVisible = true
-    },
-    handleSliderChange() {
-      this.popoverVisible = true
-      // this.$emit('change', this.sliderValue + '')
+      }).catch(() => {
+        this.activeTag = this.active
+      })
     }
   }
 }
@@ -196,7 +210,58 @@ export default {
       }
     }
     &>.multiple-bar{
-      margin-top: 40px;
+      // margin-top: 40px;
+      .dot-box{
+        margin-top: 8px;
+        position:relative;
+        &>.line{
+          border-top:1px solid #d7d7d7;
+          height:0;
+          position:absolute;
+          left:4px;
+          right:5px;
+          top: 11px;
+        }
+        &>li{
+          height: 40px;
+          cursor: pointer;
+          position:relative;
+          z-index: 4;
+          &:hover>*,&.active>*{
+            transform: scale(1.5);
+            text-shadow: 0 0 10px $--color-primary
+          }
+        }
+      }
+      .input-box{
+        margin-top: 8px;
+        &>input{
+          line-height: 24px;
+          // font-size: 14px;
+          border: 1px solid $--border-info;
+          // flex: 1;
+          color: #d7d7d7;
+          text-indent: 5px;
+          background: none
+        }
+        &>div{
+          width: 26px;
+          flex: 1;
+          line-height: 26px;
+          text-align: center;
+          opacity: .8;
+          &:hover{
+            cursor: pointer;
+            opacity: 1;
+          }
+          &:nth-child(2){
+            background: $--color-danger;
+          }
+          &:last-child{
+            background: $--color-success;
+          }
+        }
+      }
       text-align: left
     }
     &>.table-wrap{

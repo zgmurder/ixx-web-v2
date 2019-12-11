@@ -59,6 +59,7 @@ export default {
       const mapTableColumns = this.langData.mapTableColumns[this.activeTab]
       return Object.keys(mapTableColumns).map(key => {
         const obj = { prop: key, label: mapTableColumns[key] }
+
         return obj
       })
     },

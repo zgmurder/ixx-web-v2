@@ -502,7 +502,8 @@ export default {
       // quota: '当前提币剩余额度',
       // max_quota: '当前提币总额度',
       // rates: '汇率',
-      totalValue: '估值'
+      totalValue: '估值',
+      handle: '操作'
     }
   },
   coinAccount: {

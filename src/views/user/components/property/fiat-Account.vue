@@ -14,7 +14,6 @@
       <hr>
     </div>
     <zg-table v-loading="loading" size="small" :column="mapAccoutColumns" border stripe :data="tableList" @change="handlePageChange" />
-
   </div>
 </template>
 <script>
@@ -47,6 +46,15 @@ export default {
             const value = row.totalValue[this.activeCurrency]
             return value ? this.bigRound(value, 4) + ' ' + this.activeCurrency : '--'
           }
+        }
+        if (key === 'handle') {
+          obj.render = (h, scope) => {
+            return <div>
+              <el-button size='mini' type='primary'>划转</el-button>
+              <el-button size='mini'>交易</el-button>
+            </div>
+          }
+          console.log(obj)
         }
         return obj
       })
