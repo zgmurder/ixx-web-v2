@@ -33,8 +33,9 @@ service.interceptors.request.use(
 
     config.headers['from'] = 'ixx'
     config.headers['lang'] = localStorage.getItem('locale') || 'zh-CN'
+
     config.cancelToken = new axios.CancelToken(cancel => {
-      window._axiosPromiseArr.push({ cancel })
+      window._axiosPromiseArr.push({ cancel, noDelete: ['/user/session'].includes(config.url) })
     })
     return config
   },

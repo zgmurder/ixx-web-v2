@@ -478,7 +478,7 @@ export default {
               case 'tp_type':
                 return `${value}/${row.sl_price}`
               case 'create_time':
-                return this.parseTime(+value / 1000)
+                return this.parseTime(String(value).substring(0, 13))
               case 'distancePrice':
                 return `${value > 0 ? '+' : ''}${value}`
               case 'amount_surplus':

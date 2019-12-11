@@ -65,7 +65,6 @@
                   </div>
                   <el-input-number v-model="margin_position" size="small" :min="-Math.floor(item.margin_position)" :max="Math.floor(item.available_balance)" style="width:100%" placeholder="请输入数量" />
                 </div>
-
                 <hr>
                 <div flex="main:justify cross:center dir:right">
                   <el-button type="primary" size="mini" @click="setTransferMargin(item)">确定</el-button>
@@ -100,7 +99,7 @@
           </el-popover> -->
           <div flex="dir:top" style="font-size:12px">
             <div>平仓价格</div>
-            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px">
+            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px" @input="e=>input = e.target.value">
           </div>
           <div class="el-button el-button--small bd-succes" @click="closeStorehouse(item,true)">限价平仓</div>
           <div class="el-button el-button--small bd-succes" style="margin-left:0" @click="closeStorehouse(item)">市价平仓</div>
