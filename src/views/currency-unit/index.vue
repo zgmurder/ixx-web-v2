@@ -923,12 +923,13 @@ export default {
         font-size: 16px;
       }
       .info-left{
-        margin: 0 30px;
+        margin-left:8px;
+        margin-right:3.5%;
         line-height: 32px;
         font-size: 12px;
       }
       .info-list-box{
-        flex-basis: 500px;
+        flex-basis: 450px;
         font-size: 12px;
         display: flex;
         flex-wrap: wrap;
