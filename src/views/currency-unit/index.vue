@@ -281,7 +281,7 @@
 import candlestick from '@/components/candlestick'
 import selectBase from '@/components/selectBase'
 import soket from '@/mixins/resoket'
-import { bigRound, logogramNum, calcValueByAmountAndPrice, bigDiv, bigTimes, bigPlus, bigMinus, getCost } from '@/utils/handleNum'
+import { bigRound, logogramNum, calcValueByAmountAndPrice, bigDiv, bigTimes, bigPlus, bigMinus, getCost, getLiqPrice, getTotalValue } from '@/utils/handleNum'
 import {
   getSymbolInfo,
   getFutureListByKey,
@@ -307,7 +307,6 @@ import shipping from './components/shipping'
 import customTable from '@/components/customTable'
 import dropdown from '@/components/dropdown'
 import { mapPeriod } from '@/const'
-import { getLiqPrice, getTotalValue } from '@/utils/handleNum'
 export default {
   name: 'Contract',
   components: {
@@ -483,6 +482,8 @@ export default {
                 return `${value > 0 ? '+' : ''}${value}`
               case 'amount_surplus':
                 return row.amount_total - row.amount_last || '0'
+              case 'entrustValue':
+                return this.bigRound(calcValueByAmountAndPrice(row.amount, row.price), 8)
               default:
                 return value
             }
