@@ -1,11 +1,12 @@
 <template>
   <div v-loading="false" class="hold-content" element-loading-background="rgba(0, 0, 0, 0.3)">
-    <div class="content-container-hold">
-      <div class="linear-bar" flex="main:justify cross:center">
+    <div class="content-container-hold text-info">
+      <div class="linear-bar text-light" flex="main:justify cross:center">
         <svg-icon icon-class="money" />
         <i class="el-icon-warning" />
         <div class="mark">{{ active }} x</div>
       </div>
+
       <div class="multiple-bar">
         <div flex="main:justify cross:center">
           <span>当前杠杆：{{ active }}x</span>
@@ -17,16 +18,17 @@
           flex="main:justify" class="dot-box"
         >
           <div class="line" />
-          <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="activeTag === tag && 'active'||''" @click="handleActive(tag)">
+          <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="activeTag == tag && 'active'||''" @click="handleActive(tag)">
             <div style="font-size:32px;text-align:center">•</div>
             <div>{{ tag }}x</div>
           </li>
         </ul>
         <div v-else class="input-box" flex="main:justify cross:strech">
-          <input v-model="activeTag" type="number" autofocus="autofocus">
+          <input v-model="activeTag" :min="1" :max="calcData[calcData.length-1]" type="number" autofocus="autofocus">
           <div @click="showEdit=!showEdit"><i class="el-icon-close" /></div>
-          <div><i class="el-icon-check" /></div>
+          <div><i class="el-icon-check" @click="handleActive(activeTag)" /></div>
         </div>
+        <div class="divider-line-info" style="background:#333" />
         <!-- <el-divider content-position="center"> <span style="font-size:12px" class="text-nowrap">{{ $tR(`setLever`) }}</span> </el-divider>
         <div :flex="$attrs.flex || 'main:justify cross:center'" style="margin-top:30px">
           <el-input-number v-model="sliderValue" :min="1" :max="100" size="mini" :style="{width: !onlyLever ? '100px':'100%'}" @change="handleSliderChange" />
@@ -57,13 +59,12 @@
         <el-slider v-model="sliderValue" @change="handleSliderChange" /> -->
       </div>
       <div v-if="!onlyLever">
-        <div v-for="(value,key) in mapTableColumns" :key="key" style="color:#ccc" flex="box:mean">
+        <div v-for="(value,key) in mapTableColumns" :key="key" class="table-box" flex="box:mean">
           <span>{{ $tR(`mapTableColumns.${key}`) }}</span>
           <span>{{ ['4','5'].includes(key)?formValueObj[key]:bigRound(formValueObj[key],8) }}</span>
-
         </div>
-        <el-divider />
-        <div flex="box:mean">
+        <!-- <div class="divider-line-info" style="background:none" /> -->
+        <div flex="box:mean" style="margin-top:22px">
           <el-button @click="$emit('command')">{{ $t('cancel') }}</el-button>
           <el-button :type="type" :loading="loading" @click="$emit('command',true)">{{ $t('confirm') }}</el-button>
         </div>
@@ -172,6 +173,7 @@ export default {
         lockScroll: false
       }).then(() => {
         this.$emit('change', this.activeTag)
+        this.showEdit = false
       }).catch(() => {
         this.activeTag = this.active
       })
@@ -211,11 +213,12 @@ export default {
     }
     &>.multiple-bar{
       // margin-top: 40px;
+      line-height: 24px;
       .dot-box{
         margin-top: 8px;
         position:relative;
         &>.line{
-          border-top:1px solid #d7d7d7;
+          border-top:1px solid $--color-info;
           height:0;
           position:absolute;
           left:4px;
@@ -239,14 +242,13 @@ export default {
           line-height: 24px;
           // font-size: 14px;
           border: 1px solid $--border-info;
-          // flex: 1;
+          flex: 1;
           color: #d7d7d7;
           text-indent: 5px;
           background: none
         }
         &>div{
           width: 26px;
-          flex: 1;
           line-height: 26px;
           text-align: center;
           opacity: .8;
@@ -267,6 +269,16 @@ export default {
     &>.table-wrap{
       border:1px solid #ccc;
       text-align: center
+    }
+    .table-box{
+      border-bottom: 1px solid #222;
+      &>span{
+        text-indent: 5px;
+        &:first-child{
+          // border-bottom: 1px solid;
+          border-right: 1px solid #222;
+        }
+      }
     }
   }
 }

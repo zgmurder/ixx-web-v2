@@ -24,6 +24,7 @@ body::-webkit-scrollbar {
 .text-danger{color: $--color-danger;}
 .text-warning{color: $--color-warning;}
 .text-info{color: $--color-info;}
+.text-light{color: $--color-light;}
 .hover-point:hover{cursor: pointer;color:$--color-primary}
 
 
@@ -32,7 +33,12 @@ body::-webkit-scrollbar {
 .el-slider__button-wrapper{
   z-index: 2;
 }
-
+.divider-line-info{
+  height: 1px;
+  width: 100%;
+  margin: 24px 0;
+  background: $--color-info;
+}
 .directive-login{
   position: absolute;
   height: 100%;
