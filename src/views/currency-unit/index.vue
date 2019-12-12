@@ -573,7 +573,8 @@ export default {
       return {
         'market': this.handleTickers,
         'orderbook': this.handleOrderbookSoket,
-        'deal': this.handleDealSoket
+        'deal': this.handleDealSoket,
+        'orderfills': this.handleAmountObj
       }
     }
   },
@@ -581,18 +582,22 @@ export default {
     this.products = (await getSymbolList()).data
     await this.openWebSocket(this.handleSoketData, websocket => {
       this.websocket.send('{"op":"subscribepub","args":["market@ticker"]}')
+      if (this.userData) {
+        this.websocket.send(`{"op":"loginWeb","args":["${this.userData.session_id}"]}`)
+        this.websocket.send('{"op":"subscribe","args":["orderfills"]}')
+      }
       // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
     })
     const queryStr = localStorage.getItem('unit-product') || this.products[0].name
     const product = this.products.find(item => item.name === queryStr)
     this.handleProductsChange(product)
-    this.openWebSocket(WSURL, res => {
-      if (res && res[0] && !this.cancelBtnLoading && !this.buyBtnLoading) this.handleAmountObj()
-    }, websocket => {
-      websocket.send('{"op":"login","args":["8be85859c7e2d88c87d6e31d650c6cef","8c7d5d714632ece63bc2eef4301acf94c121ea23065f2456f28e083485e558a1"]}')
-      websocket.send('{"op":"subscribe","args":["orderfills"]}')
-      // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
-    })
+    // this.openWebSocket(WSURL, res => {
+    //   if (res && res[0] && !this.cancelBtnLoading && !this.buyBtnLoading) this.handleAmountObj()
+    // }, websocket => {
+    //   websocket.send('{"op":"login","args":["8be85859c7e2d88c87d6e31d650c6cef","8c7d5d714632ece63bc2eef4301acf94c121ea23065f2456f28e083485e558a1"]}')
+    //   websocket.send('{"op":"subscribe","args":["orderfills"]}')
+    //   // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
+    // })
     this.handleAmountObj()
     // this.handleTabClick('FUTURE_BTCUSD')
     // getFinanceRecord()
@@ -626,7 +631,13 @@ export default {
         })
       }
     },
-    handleDealSoket(data) {
+    // handleDealSoket(data) {
+    //   const last = data[data.length - 1]
+    //   this.newBargainListData.unshift(last)
+    //   this.newBargainListData.pop()
+    //   this.isBuy = last.side === 'buy'
+    // },
+    handleOrderfills(data) {
       const last = data[data.length - 1]
       this.newBargainListData.unshift(last)
       this.newBargainListData.pop()

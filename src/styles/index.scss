@@ -27,6 +27,7 @@ body::-webkit-scrollbar {
 .text-light{color: $--color-light;}
 
 .bd-succes{border:1px solid $--color-success;background: none;color:$--color-success ;}
+.bd-primary{border:1px solid $--color-primary;background: none;color:$--color-primary ;}
 .bd-info{color: $--color-info;}
 .hover-point:hover{cursor: pointer;color:$--color-primary}
 

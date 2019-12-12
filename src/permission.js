@@ -29,7 +29,9 @@ router.beforeEach(async(to, from, next) => {
       if (!store.state.userData) {
         const userData = JSON.parse(user)
         store.commit('SET_USERDATA', userData)
-
+        // getSession().then(res => {
+        //   console.log(res)
+        // })
         // store.dispatch('getShareAccountList', userData.id).then(res => next())
         // const res = await getShareAccountList(userData.id).catch(res => removeUser())
         // userData.mapShareAccount = res.data
@@ -70,6 +72,7 @@ router.beforeEach(async(to, from, next) => {
     /* has no token*/
     // && to.path.meta && to.path.meta.needSign
     // const user = await getSession()
+
     if (whiteList.includes(to.path) || !to.matched[0].meta || !to.matched[0].meta.needSign) {
       // in the free login whitelist, go directly
       next()

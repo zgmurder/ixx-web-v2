@@ -38,7 +38,7 @@
                 </div>
                 <div class="border-active text-active" style="padding:0 10px">
                   <i class="text-success">{{ mapFormContent.mapTriggerType[formItem.trigger_type] }}</i>
-                  <i class="text-success">{{ $t(`${item.holding>0 || !index?'down':'up'}`) }}</i> 至
+                  <i class="text-success">{{ $t(`${(item.buy && !index)?'up':'down'}`) }}</i> 至
                   <i class="text-success">{{ formItem.trigger_price||'--' }}</i> 将触发 市价止盈单 预计 盈利：
                   <i class="text-success">{{ formItem.calcProfit||'--' }}</i> {{ item.currency }}</div>
               </div>
@@ -60,8 +60,8 @@
                   <hr>
                   <div class="text-info" style="font-size:12px; line-height:24px">
                     <p>你的当前仓位: <span class="text-danger"> {{ item.holding }}</span> 张合约 ({{ item.leverage }}x)</p>
-                    <p>当前已分配的保证金: <span class="text-danger">{{ item.margin_position }}</span> BTC 【最大可减少 <span class="text-danger">{{ Math.floor(item.margin_position) }}</span> {{ item.currency }}】<span class="text-danger hover-point" @click="margin_position = -Math.floor(item.margin_position)">全部</span></p>
-                    <p>可用保证金: <span class="text-danger">{{ item.available_balance }}</span> BTC【最大可增加 <span class="text-danger">{{ Math.floor(item.available_balance) }}</span> {{ item.currency }}】<span class="text-danger hover-point" @click="margin_position = Math.floor(item.available_balance)">全部</span></p>
+                    <p>当前已分配的保证金: <span class="text-danger">{{ item.margin_position }}</span> BTC 【最大可减少 <span class="text-danger">{{ Math.floor(item.margin_position) }}</span> {{ item.currency }}】<span v-if="checked" class="text-danger hover-point" @click="margin_position = Math.floor(item.margin_position)">全部</span></p>
+                    <p>可用保证金: <span class="text-danger">{{ item.available_balance }}</span> BTC【最大可增加 <span class="text-danger">{{ Math.floor(item.available_balance) }}</span> {{ item.currency }}】<span v-if="!checked" class="text-danger hover-point" @click="margin_position = Math.floor(item.available_balance)">全部</span></p>
                   </div>
                   <el-input v-model="margin_position" size="small" :min="-Math.floor(item.margin_position)" :max="Math.floor(item.available_balance)" style="width:100%" placeholder="请输入数量" />
                 </div>
@@ -99,10 +99,10 @@
           </el-popover> -->
           <div flex="dir:top" style="font-size:12px">
             <div>平仓价格</div>
-            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px" @input="e=>input = e.target.value">
+            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px;text-align:center" @input="e=>input = e.target.value">
           </div>
-          <div class="el-button el-button--small bd-succes" @click="closeStorehouse(item,true)">限价平仓</div>
-          <div class="el-button el-button--small bd-succes" style="margin-left:0" @click="closeStorehouse(item)">市价平仓</div>
+          <div class="el-button el-button--small bd-primary" @click="closeStorehouse(item,true)">限价平仓</div>
+          <div class="el-button el-button--small bd-primary" style="margin-left:0" @click="closeStorehouse(item)">市价平仓</div>
         </div>
         <div v-else class="product-hover">
           <div flex="cross:center">
