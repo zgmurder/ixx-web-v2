@@ -486,6 +486,8 @@ export default {
                 return this.bigRound(value, 8)
               case 'entrustValue':
                 return this.bigRound(calcValueByAmountAndPrice(row.amount, row.price), 8)
+              case 'price':
+                return this.bigRound(value, 2)
               default:
                 return value
             }
