@@ -283,7 +283,7 @@ import selectBase from '@/components/selectBase'
 import soket from '@/mixins/resoket'
 import { bigRound, logogramNum, calcValueByAmountAndPrice, bigDiv, bigTimes, bigPlus, bigMinus, getCost, getLiqPrice, getTotalValue } from '@/utils/handleNum'
 import {
-  getSymbolInfo,
+  // getSymbolInfo,
   getFutureListByKey,
   getSymbolList,
   getBalanceList,
@@ -292,21 +292,20 @@ import {
   getActivetriggers,
   getActiveOrderhistory,
   getActiveOrderfills,
-  WSURL,
-  getRates,
+  // getRates,
   submitOrder,
   cancelOrder,
   getAllAmount,
-  getFinanceRecord,
-  setLeverage,
-  getKlineHistoryList
+  // getFinanceRecord,
+  setLeverage
+  // getKlineHistoryList
 } from '@/api/currencyUnit'
 import depthMap from './components/depth-map'
 import orderPopover from './components/orderPopover'
 import shipping from './components/shipping'
 import customTable from '@/components/customTable'
 import dropdown from '@/components/dropdown'
-import { mapPeriod } from '@/const'
+// import { mapPeriod } from '@/const'
 export default {
   name: 'Contract',
   components: {
@@ -482,6 +481,8 @@ export default {
                 return `${value > 0 ? '+' : ''}${value}`
               case 'amount_surplus':
                 return row.amount_total - row.amount_last || '0'
+              case 'fee':
+                return this.bigRound(value, 8)
               case 'entrustValue':
                 return this.bigRound(calcValueByAmountAndPrice(row.amount, row.price), 8)
               default:
@@ -538,12 +539,16 @@ export default {
     },
     updateTableList() {
       return this.tableList && this.tableList.map(item => {
-        const distancePrice = item.trigger_price - this.activeProduct.UNIT.current
+        const distancePrice = bigMinus([item.trigger_price || 0, this.activeProduct.UNIT.current || 0], 2)
         return { ...item, distancePrice }
       }) || []
     },
     calcBalanceList() {
-      return this.balanceList.filter(item => !!+item.holding)
+      return this.balanceList.filter(item => !!+item.holding).map(item => {
+        const found = (this.entrustList || []).find(subItem => +subItem.id === item.future_close_id)
+        if (found)item.closePrice = found.price
+        return item
+      })
     },
     activeBalance() {
       const found = this.balanceList.find(item => this.activeProduct.currency === item.currency)
@@ -574,7 +579,8 @@ export default {
         'market': this.handleTickers,
         'orderbook': this.handleOrderbookSoket,
         'deal': this.handleDealSoket,
-        'orderfills': this.handleAmountObj
+        'orderfills': this.handleAmountObj,
+        'position': this.handleAmountObj
       }
     }
   },
@@ -585,6 +591,7 @@ export default {
       if (this.userData) {
         this.websocket.send(`{"op":"loginWeb","args":["${this.userData.session_id}"]}`)
         this.websocket.send('{"op":"subscribe","args":["orderfills"]}')
+        this.websocket.send('{"op":"subscribe","args":["position"]}')
       }
       // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
     })
@@ -706,7 +713,7 @@ export default {
           // item.symbol = this.$tR(`mapTabs.FUTURE_${item.symbol}`)
           return item
         })
-        return Promise.resolve({})
+        return Promise.resolve()
       })
     },
     handleTickers(data) {
@@ -768,7 +775,7 @@ export default {
       return +bigDiv([amount, max]) * 100 + '%'
     },
 
-    async handleAmountObj() {
+    handleAmountObj() {
       if (!this.$store.state.userData) return
       clearTimeout(this._timer)
       return new Promise(resolve => {
@@ -864,8 +871,7 @@ export default {
         // sl_price 止损价格
       }
       return submitOrder(data).then(res => {
-        return this.handleAmountObj()
-      }).then(res => {
+        this.handleAmountObj()
         setTimeout(() => {
           this.buyBtnLoading = false
           this.$message.success(this.$tR('handleSuccess'))
@@ -876,12 +882,11 @@ export default {
       const { user_id, id, name } = data
       data.cancelBtnLoading = true
       cancelOrder({ user_id, order_id: id, name }).then(res => {
-        this.handleAmountObj().then(res => {
-          setTimeout(() => {
-            // this.cancelBtnLoading = false
-            this.$message.success(this.$tR('handleSuccess'))
-          }, 500)
-        })
+        this.handleAmountObj()
+        setTimeout(() => {
+          // this.cancelBtnLoading = false
+          this.$message.success(this.$tR('handleSuccess'))
+        }, 500)
       })
     }
   }

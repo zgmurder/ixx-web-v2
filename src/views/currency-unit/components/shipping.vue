@@ -22,7 +22,7 @@
             <div>
               <div v-for="(formItem,index) in formArrData" :key="index" class="popover-body">
                 <el-checkbox v-model="formItem.type">{{ $tR(`${ !index?'winLimit':'lossLimit'}`) }} USD</el-checkbox>
-                <div flex="main:justify" class="">
+                <div flex="main:justify">
                   <label for="">{{ $t('contract.mapFormContent.mapInput.triggerType') }}</label>
                   <el-select v-model="formItem.trigger_type" :disabled="!formItem.type" size="small" class="custom-select transactionPrice" @change="handleInput(false,formItem,item.holding)">
                     <el-option v-for="(subValue,subKey) in mapFormContent.mapTriggerType" :key="subKey" :label="subValue" :value="+subKey" />
@@ -39,10 +39,10 @@
                 <div class="border-active text-active" style="padding:0 10px">
                   <i class="text-success">{{ mapFormContent.mapTriggerType[formItem.trigger_type] }}</i>
                   <i class="text-success">{{ $t(`${(item.buy && !index)?'up':'down'}`) }}</i> 至
-                  <i class="text-success">{{ formItem.trigger_price||'--' }}</i> 将触发 市价止盈单 预计 盈利：
+                  <i class="text-success">{{ formItem.trigger_price||'--' }}</i> 将触发 市价<i class="text-success">{{ (item.buy && !index)?'止盈':'止损' }}</i>单 预计 <i class="text-success">{{ (item.buy && !index)?'盈利':'亏损' }}</i>：
                   <i class="text-success">{{ formItem.calcProfit||'--' }}</i> {{ item.currency }}</div>
               </div>
-              <el-button type="primary" style="margin-top:12px;width:100%" :loading="buyBtnLoading" :disabled="verifyPopoverBtn(item.price,item.holding>0)" @click="submitOrder(item)">确定</el-button>
+              <el-button type="primary" style="margin-top:12px;width:100%" :loading="buyBtnLoading" :disabled="verifyPopoverBtn(item.price,item.buy)" @click="submitOrder(item)">确定</el-button>
             </div>
             <i slot="reference" class="el-icon-edit hover-point" @click="handleEdit(item)" />
           </el-popover></p>
@@ -72,12 +72,12 @@
                 <i slot="reference" class="el-icon-edit hover-point" />
               </el-popover>
             </p>
-            <p v-if="i<5" class="text-success">{{ key === 'markPrice'?markData[item.currency]:item[key] }}</p>
+            <p v-if="i<5" class="text-success">{{ key === 'markPrice'?markData[item.currency]:key === 'liq_price'?bigRound(item[key],2):item[key] }}</p>
             <p v-else class="text-success">{{ item[key]|bigRound(8) }} <span v-if="i==5||i==6">{{ item.currency }}</span> </p>
             <p v-if="i>4">≈ {{ translateByRate(item[key])|bigRound(2) }} USD </p>
           </div>
         </div>
-        <div v-if="!item.future_close_id" flex="dir:top cross:center main:justify">
+        <div v-if="!item.future_close_id" v-loading="loadingHouse" flex="dir:top cross:center main:justify" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.5)">
           <!-- <el-popover :ref="`popover-${item.name}`" :disabled="disabled" placement="top" width="160">
             <p>确定要以 <span class="text-danger">市价【{{ $t(`contract.mapFormContent.perfactPrice`) }}】</span>平掉所有持仓吗</p>
             <hr>
@@ -101,12 +101,12 @@
             <div>平仓价格</div>
             <input :value="input||markData[item.currency]" class="custom-input" style="width:80px;text-align:center" @input="e=>input = e.target.value">
           </div>
-          <div class="el-button el-button--small bd-primary" @click="closeStorehouse(item,true)">限价平仓</div>
-          <div class="el-button el-button--small bd-primary" style="margin-left:0" @click="closeStorehouse(item)">市价平仓</div>
+          <div class="el-button el-button--small bd-primary" @click="closeStorehouse(item)">限价平仓</div>
+          <div class="el-button el-button--small bd-primary" style="margin-left:0" @click="closeStorehouse(item,true)">市价平仓</div>
         </div>
-        <div v-else class="product-hover">
+        <div v-else v-loading="loadingHouse" class="product-hover" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.5)">
           <div flex="cross:center">
-            <p>在{{ item.liq_price }}的平仓委托 <i class="el-icon-close hover-point" title="取消" @click="cancelOrder(item)" /></p>
+            <p>在{{ item.closePrice|bigRound(2) }}的平仓委托 <i class="el-icon-close hover-point" title="取消" @click="cancelOrder(item)" /></p>
             <!-- <el-button type="danger" @click="cancelOrder(item)">取消平仓</el-button> -->
           </div>
         </div>
@@ -176,7 +176,8 @@ export default {
           isEdit: false,
           calcProfit: ''
         }
-      ]
+      ],
+      loadingHouse: false
     }
   },
   computed: {
@@ -185,7 +186,7 @@ export default {
     }
   },
   async created() {
-    this.currencyRates = (await getRates({ currency: 'BTC' })).data.BTC
+    this.currencyRates = (await getRates({ currency: 'ETH' })).data.ETH
   },
   methods: {
     setTransferMargin(item) {
@@ -240,12 +241,15 @@ export default {
       return bigTimes([this.currencyRates['USD'], value])
     },
     async closeStorehouse(item, isMarket) {
-      console.log(item)
-
-      const isOk = await this.confirm(`<span class="text-danger">卖出</span>在${isMarket ? this.input || this.markData[item.currency] : '最优'}价格${item.holding}张BTC合约在执行时，将平掉你的整个仓位`, isMarket ? '限价平仓' : '市价平仓')
-      if (!isOk) return
-      const params = { name: item.name, user_id: item.user_id, price: isMarket ? '0' : this.input }
+      this.loadingHouse = true
+      const isOk = await this.confirm(`<span class="text-danger">卖出</span>在${isMarket ? '最优' : this.input || this.markData[item.currency]}价格${item.holding}张BTC合约在执行时，将平掉你的整个仓位`, isMarket ? '市价平仓' : '限价平仓')
+      if (!isOk) {
+        this.loadingHouse = false
+        return
+      }
+      const params = { name: item.name, user_id: item.user_id, price: isMarket ? 0 : +this.input || +this.markData[item.currency] }
       closeStorehouse(params).then(res => {
+        this.loadingHouse = false
         this.$emit('change')
         this.$message.success(this.$t('handleSuccess'))
       })
@@ -262,15 +266,20 @@ export default {
     },
     cancelOrder(item) {
       const { user_id, future_close_id, name } = item
+      this.loadingHouse = true
       cancelOrder({ user_id, order_id: future_close_id, name }).then(res => {
         this.$emit('change')
+        this.loadingHouse = false
         this.$message.success(this.$t('handleSuccess'))
       })
     },
-    verifyPopoverBtn(price, correct) {
-      if (!this.formArrData[0].type && !this.formArrData[1].type) return true
-      if (this.formArrData[0].type && +this.formArrData[0].trigger_price > +price) return !correct
-      if (this.formArrData[1].type && +this.formArrData[1].trigger_price < +price) return !correct
+    verifyPopoverBtn(price, isBuy) {
+      const check1 = isBuy && this.formArrData[0].trigger_price > +price
+      const check2 = isBuy && +this.formArrData[1].trigger_price < +price
+      if (this.formArrData[0].type && this.formArrData[1].type && check1 && check2) return false
+      else if (this.formArrData[0].type && check1 && !this.formArrData[1].type) return false
+      else if (!this.formArrData[0].type && this.formArrData[1].type && check2) return false
+      return true
     },
     submitOrder(holdingObj) {
       // const product = this.activeProduct
