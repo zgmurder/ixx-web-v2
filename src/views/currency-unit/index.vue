@@ -91,7 +91,8 @@
                       {{ activePriceType.label }} <i class="el-icon-caret-bottom" />
                     </el-button>
                   </dropdown>
-                  <el-tooltip v-else :content="$tR(`mapFormContent.mapBtns.${key}.describe`)" placement="top" effect="dark">
+                  <el-tooltip v-else placement="bottom" effect="dark" popper-class="custom-tooltip">
+                    <div slot="content" style="width:200px;font-size:12px;line-height:20px">{{ $tR(`mapFormContent.mapBtns.${key}.describe`) }}</div>
                     <el-button class="custom-btn" :class="{active:activeBtnsKey === key}" size="small" plain @click="handleSwitch(key)">
                       {{ $tR(`mapFormContent.mapBtns.${key}.text`) }}
                     </el-button>
