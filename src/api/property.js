@@ -83,6 +83,24 @@ export const getFutureRecordList = (data = { page: 1, size: 10 }) => request({
   method: 'post',
   data
 })
+// 币本位账户 POST /future/account/balance/list
+export const getUnitBalanceList = (data = { page: 1, size: 10 }) => request({
+  url: '/unit/account/balance/list',
+  method: 'post',
+  data
+})
+// 币本位账户交易历史 POST /contract/orderhistory
+export const getUnitBalanceHistoryList = (data = { page: 1, size: 10 }) => request({
+  url: '/unit/orderhistory',
+  method: 'post',
+  data
+})
+// 币本位账户财务记录 POST /future/account/fund/history
+export const getUnitRecordList = (data = { page: 1, size: 10 }) => request({
+  url: '/unit/account/fund/history',
+  method: 'post',
+  data
+})
 // 急速账户 POST /future/account/balance/list
 export const getShareBalanceList = (data = { currencys: [] }) => request({
   url: '/opt/account/balance',

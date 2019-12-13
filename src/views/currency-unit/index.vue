@@ -520,19 +520,19 @@ export default {
       if (!this.activeBalance) return
       const obj = {}
       const price = this.activeAcountAndPriceArr[1] || this.activeProduct.UNIT.current
-      const activeLever = !+this.activeLever ? 100 : +this.activeLever
+      // const activeLever = !+this.activeLever ? 100 : +this.activeLever
       if (+this.activeBalance.holding < 0) {
         let buyAmount
         buyAmount = this.activeAcountAndPriceArr[0] - Math.abs(+this.activeBalance.holding)
         buyAmount = buyAmount <= 0 ? 0 : buyAmount
-        obj.buy = getCost({ ...this.activeProduct, amount: buyAmount, price }, activeLever)
-        obj.sell = getCost({ ...this.activeProduct, amount: this.activeAcountAndPriceArr[0], price }, activeLever)
+        obj.buy = getCost({ ...this.activeProduct, amount: buyAmount, price }, this.activeLever)
+        obj.sell = getCost({ ...this.activeProduct, amount: this.activeAcountAndPriceArr[0], price }, this.activeLever)
       } else {
         let sellAmount
         sellAmount = this.activeAcountAndPriceArr[0] - +this.activeBalance.holding
         sellAmount = sellAmount <= 0 ? 0 : sellAmount
-        obj.buy = getCost({ ...this.activeProduct, amount: this.activeAcountAndPriceArr[0], price }, activeLever)
-        obj.sell = getCost({ ...this.activeProduct, amount: sellAmount, price }, activeLever)
+        obj.buy = getCost({ ...this.activeProduct, amount: this.activeAcountAndPriceArr[0], price }, this.activeLever)
+        obj.sell = getCost({ ...this.activeProduct, amount: sellAmount, price }, this.activeLever)
       }
       return obj
     },

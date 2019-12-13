@@ -296,7 +296,7 @@ export default {
   orderPopover: {
     mapTableColumns: {
       1: '委托价值',
-      2: '成本@80x',
+      2: '成本@{active}x',
       3: '可用余额',
       4: '成交后的仓位大小',
       5: '标记价格',
@@ -363,12 +363,13 @@ export default {
           'fiat-account': '法币账户',
           'coin-account': '币币账户',
           'contract-account': '合约账户',
+          'unit-account': '币本位账户',
           'share-account': '急速账户'
         }
       },
       4: {
         label: '其他',
-        children: { 'address-Manage': '地址管理' }
+        children: { 'address-manage': '地址管理' }
       }
     }
   },

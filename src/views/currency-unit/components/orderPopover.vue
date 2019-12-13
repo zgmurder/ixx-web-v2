@@ -33,7 +33,7 @@
               <div class="line" />
               <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="activeTag == tag && 'active'||''" @click="handleActive(tag)">
                 <div style="font-size:32px;text-align:center">•</div>
-                <div>{{ tag }}x</div>
+                <div>{{ tag === '0'?'全仓':tag+'x' }}</div>
               </li>
             </ul>
             <div v-else slot="reference" class="input-box text-light" flex="main:justify cross:strech">
@@ -75,7 +75,7 @@
       </div>
       <div v-if="!onlyLever">
         <div v-for="(value,key) in mapTableColumns" :key="key" class="table-box" flex="box:mean">
-          <span>{{ $tR(`mapTableColumns.${key}`) }}</span>
+          <span>{{ $tR(`mapTableColumns.${key}`,{active}) }}</span>
           <span>{{ ['4','5'].includes(key)?formValueObj[key]:bigRound(formValueObj[key],8) }}</span>
         </div>
         <!-- <div class="divider-line-info" style="background:none" /> -->
@@ -244,8 +244,8 @@ export default {
           border-top:1px solid $--color-info;
           height:0;
           position:absolute;
-          left:4px;
-          right:5px;
+          left:10px;
+          right:6px;
           top: 11px;
         }
         &>li{

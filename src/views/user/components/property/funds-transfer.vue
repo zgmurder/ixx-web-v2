@@ -42,8 +42,9 @@ export default {
         },
         {
           render(h, { formData, context }) {
-            context.$set(formData, 'from', '1')
-            context.$set(formData, 'to', '2')
+            if (!formData.from)context.$set(formData, 'from', '1')
+            if (!formData.to)context.$set(formData, 'to', '2')
+            // context.$set(formData, 'to', '2')
             return <div>
               <el-col span={11}>
                 <el-form-item prop='from'>
@@ -61,10 +62,6 @@ export default {
                 </el-form-item>
               </el-col>
             </div>
-          },
-          rules: {
-            from: [{ required: true, message: '选择源账户', trigger: 'change' }],
-            to: [{ required: true, message: '选择目标账户', trigger: 'change' }]
           },
           label: '划转账户'
         },
