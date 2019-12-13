@@ -9,7 +9,7 @@
 
       <div class="multiple-bar">
         <div flex="main:justify cross:center" class="text-light">
-          <span>当前杠杆：{{ active }}x</span>
+          <span>当前杠杆：{{ active === '0'?'全仓':active+'x' }}</span>
           <i class="el-icon-edit hover-point" @click="showEdit=!showEdit" />
         </div>
         <el-popover ref="popover" v-model="popoverVisible" placement="top" width="360" trigger="manual">
@@ -75,7 +75,7 @@
       </div>
       <div v-if="!onlyLever">
         <div v-for="(value,key) in mapTableColumns" :key="key" class="table-box" flex="box:mean">
-          <span>{{ $tR(`mapTableColumns.${key}`,{active}) }}</span>
+          <span>{{ $tR(`mapTableColumns.${key}`,{active:active === '0'?'全仓':active+'x'}) }}</span>
           <span v-if="key==='7'">{{ +formValueObj[key]*100|bigRound(2) }}%</span>
           <span v-else>{{ ['4','5'].includes(key)?formValueObj[key]:bigRound(formValueObj[key],key==='6'?2:8) }}</span>
         </div>

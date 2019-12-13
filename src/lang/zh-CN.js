@@ -116,7 +116,7 @@ export default {
         text: '仓位',
         mapTableColumns: {
           holding: '目前仓位数量',
-          leverage: '杠杆倍数',
+          _leverage: '杠杆倍数',
           markPrice: '标记价格',
           price: '开仓价格',
           liq_price: '强平价格',
@@ -296,7 +296,7 @@ export default {
   orderPopover: {
     mapTableColumns: {
       1: '委托价值',
-      2: '成本@{active}x',
+      2: '成本@{active}',
       3: '可用余额',
       4: '成交后的仓位大小',
       5: '标记价格',

@@ -712,6 +712,7 @@ export default {
         this.balanceList = res.data.map(item => {
           item.value = !+item.holding ? 0 : bigDiv([item.holding, item.price], 8)
           item.price = this.bigRound(item.price, this.activeProduct['price_scale'])
+          item._leverage = item.leverage === '0' ? '全仓' : item.leverage
           // item._symbol = item.symbol
           // item.symbol = this.$tR(`mapTabs.FUTURE_${item.symbol}`)
           return item
