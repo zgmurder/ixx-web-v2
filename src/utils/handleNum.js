@@ -190,8 +190,6 @@ export const getCost = (product, leverages, entrustList, currHolding) => {
   // 起始保证金
   // const margin = Big(currValue).div(leverages).times(Big(1).plus(endIM)).plus(serviceCharge)
   const IM = calcIM(totalValue, base_risk, gap_risk, im, mm)
-  console.log(!+leverages ? max_leverage : leverages)
-
   const margin = initalMargin(currValue, !+leverages ? max_leverage : leverages, IM)
   // 成本
   return margin.plus(serviceCharge).round(8)

@@ -76,7 +76,8 @@
       <div v-if="!onlyLever">
         <div v-for="(value,key) in mapTableColumns" :key="key" class="table-box" flex="box:mean">
           <span>{{ $tR(`mapTableColumns.${key}`,{active}) }}</span>
-          <span>{{ ['4','5'].includes(key)?formValueObj[key]:bigRound(formValueObj[key],8) }}</span>
+          <span v-if="key==='7'">{{ +formValueObj[key]*100|bigRound(2) }}%</span>
+          <span v-else>{{ ['4','5'].includes(key)?formValueObj[key]:bigRound(formValueObj[key],8) }}</span>
         </div>
         <!-- <div class="divider-line-info" style="background:none" /> -->
         <div flex="box:mean" style="margin-top:22px">

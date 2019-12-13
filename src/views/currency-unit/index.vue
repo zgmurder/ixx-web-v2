@@ -361,7 +361,7 @@ export default {
     // },
 
     formValueObj() {
-      if (!this.activeProduct.UNIT || !this.costObj || !this.activeBalance) return {}
+      if (!this.activeProduct.UNIT || !this.costObj || !this.activeBalance || !this.activeProduct.MARKET) return {}
       const price = this.activeAcountAndPriceArr[1] || this.activeProduct.UNIT.current
       const getLiqPrice = this.getLiqPrice()
       return {
@@ -369,7 +369,7 @@ export default {
         2: this.costObj[this.side === 1 ? 'buy' : 'sell'],
         3: this.activeBalance.available_balance,
         4: +this.activeBalance.holding + (this.side === 2 ? -this.activeAcountAndPriceArr[0] : +this.activeAcountAndPriceArr[0]),
-        5: this.activeProduct.UNIT.current,
+        5: this.activeProduct.MARKET.current,
         6: getLiqPrice,
         7: 1 - (this.activeProduct.UNIT.current - getLiqPrice) / this.activeProduct.UNIT.current
       }
