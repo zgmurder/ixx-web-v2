@@ -188,10 +188,10 @@ export default {
       this.activeTag = ''
       this.showEdit = false
     },
-    async handleActive(tag) {
+    handleActive(tag) {
       this.activeTag = tag
       this.leverageLoading = true
-      await this.leveragePreview(tag)
+      this.leveragePreview(tag)
       this.leverageLoading = false
       if (this.$root.modelVisible) {
         this.popoverVisible = true
