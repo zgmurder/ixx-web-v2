@@ -641,16 +641,17 @@ export default {
         })
       }
     },
-    // handleDealSoket(data) {
-    //   const last = data[data.length - 1]
-    //   this.newBargainListData.unshift(last)
-    //   this.newBargainListData.pop()
-    //   this.isBuy = last.side === 'buy'
-    // },
+    handleDealSoket(data) {
+      const last = data[data.length - 1]
+      this.newBargainListData.unshift(last)
+      this.newBargainListData.pop()
+      this.isBuy = last.side === 'buy'
+    },
     handleOrderfills(data) {
       const last = data[data.length - 1]
       this.newBargainListData.unshift(last)
       this.newBargainListData.pop()
+
       this.isBuy = last.side === 'buy'
     },
     handleSoketData(res) {
