@@ -31,7 +31,7 @@
               flex="main:justify" class="dot-box"
             >
               <div class="line" />
-              <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="activeTag == tag && 'active'||''" @click="handleActive(tag)">
+              <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="[active == tag && 'active'||'']" @click="handleActive(tag)">
                 <div style="font-size:32px;text-align:center">•</div>
                 <div>{{ tag === '0'?'全仓':tag+'x' }}</div>
               </li>
@@ -181,7 +181,9 @@ export default {
     },
     confirmClick() {
       this.popoverVisible = false
+      // this.this.activeTag
       this.$emit('change', this.activeTag)
+      // this.activeTag = this.active
       this.showEdit = false
     },
     async handleActive(tag) {
