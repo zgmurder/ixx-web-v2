@@ -4,7 +4,7 @@
       <div class="linear-bar text-light" flex="main:justify cross:center">
         <svg-icon icon-class="money" />
         <i class="el-icon-warning" />
-        <div class="mark">{{ active }} x</div>
+        <div class="mark">{{ active === '0'?'全仓':active+'x' }}</div>
       </div>
 
       <div class="multiple-bar">
@@ -191,13 +191,12 @@ export default {
     handleActive(tag) {
       this.activeTag = tag
       this.leverageLoading = true
-
       this.leverageLoading = false
-      if (this.$root.modelVisible) {
-        this.popoverVisible = true
-        return
-      }
       this.leveragePreview(tag).then(res => {
+        if (this.$root.modelVisible) {
+          this.popoverVisible = true
+          return
+        }
         this.$confirm(this.$tR('tip', this.leverageTipObj), '修改杠杆', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
