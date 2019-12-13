@@ -31,7 +31,7 @@
               flex="main:justify" class="dot-box"
             >
               <div class="line" />
-              <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="[active == tag && 'active'||'']" @click="handleActive(tag)">
+              <li v-for="tag in calcData" :key="tag" flex="dir:top main:justify" :class="[active == tag && 'active'||'',activeTag === tag && 'previewActive']" @click="handleActive(tag)">
                 <div style="font-size:32px;text-align:center">•</div>
                 <div>{{ tag === '0'?'全仓':tag+'x' }}</div>
               </li>
@@ -134,7 +134,7 @@ export default {
       popoverVisible: false,
       checked: false,
 
-      activeTag: this.active,
+      activeTag: '',
       leverageTipObj: {},
       showEdit: false,
       leverageLoading: false
@@ -176,7 +176,7 @@ export default {
       if (+this.input >= +data[data.length - 2]) this.input = data[data.length - 2]
     },
     cancelClick() {
-      this.activeTag = this.active
+      this.activeTag = ''
       this.popoverVisible = false
     },
     confirmClick() {
@@ -184,6 +184,7 @@ export default {
       // this.this.activeTag
       this.$emit('change', this.activeTag)
       // this.activeTag = this.active
+      this.activeTag = ''
       this.showEdit = false
     },
     async handleActive(tag) {
@@ -255,7 +256,7 @@ export default {
           cursor: pointer;
           position:relative;
           z-index: 1;
-          &:hover>*,&.active>*{
+          &:hover>*,&.active>*,&.previewActive>*{
             transform: scale(1.5);
             text-shadow: 0 0 10px $--color-primary
           }
