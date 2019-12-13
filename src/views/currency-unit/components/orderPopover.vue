@@ -191,19 +191,21 @@ export default {
     handleActive(tag) {
       this.activeTag = tag
       this.leverageLoading = true
-      this.leveragePreview(tag)
+
       this.leverageLoading = false
       if (this.$root.modelVisible) {
         this.popoverVisible = true
         return
       }
-      this.$confirm(this.$tR('tip', this.leverageTipObj), '修改杠杆', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-        dangerouslyUseHTMLString: true,
-        lockScroll: false
-      }).then(this.confirmClick).catch(this.cancelClick)
+      this.leveragePreview(tag).then(res => {
+        this.$confirm(this.$tR('tip', this.leverageTipObj), '修改杠杆', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          dangerouslyUseHTMLString: true,
+          lockScroll: false
+        }).then(this.confirmClick).catch(this.cancelClick)
+      })
     }
   }
 }
