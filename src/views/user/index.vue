@@ -2,8 +2,7 @@
   <div class="user-center">
     <div class="user-center-container" flex="main:justify box:mean">
       <div class="container-left">
-        <sideBar />
-        <!-- <navMenu v-model="activeKey" :map-menu-list="mapMenuList" @change="handleClick" /> -->
+        <navMenu v-model="activeKey" :map-menu-list="mapMenuList" @change="handleClick" />
         <!-- <ul class="menu-list">
           <li v-for="(value,key) in mapMenuList" :key="key" :class="{active:activeKey === key}" @click="handleClick(key)">{{ $tR(`mapMenuList.${key}`) }}</li>
         </ul> -->

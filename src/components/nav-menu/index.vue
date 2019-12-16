@@ -1,9 +1,12 @@
 <template>
   <div class="menu-list-warp">
-    <ul v-for="(item,key) in mapMenuList" :key="key" class="menu-list">
-      <li class="title"><i class="el-icon-document" /> {{ item.label }}</li>
-      <li v-for="(v,k) in item.children" :key="k" :class="{'background-active':active === `${key}.${k}`}" @click="$emit('change',`${key}.${k}`)">{{ v }}</li>
-    </ul>
+    <div>
+      <ul v-for="(item,key) in mapMenuList" :key="key" class="menu-list">
+        <li class="title"><i class="el-icon-document" /> {{ item.label }}</li>
+        <li v-for="(v,k) in item.children" :key="k" :class="{'background-active':active === `${key}.${k}`}" @click="$emit('change',`${key}.${k}`)">{{ v }}</li>
+      </ul>
+    </div>
+
   </div>
 </template>
 <script>

@@ -19,7 +19,7 @@
           <div v-loading="!delegateData" class="delegate-list" element-loading-background="rgba(0, 0, 0, 0.3)" style="height:100%">
             <div class="header" flex="main:justify">
               <span> {{ $tR(`mapDelegateList.entrust-list`) }}</span>
-              <selectBase v-model="dataDeep" :handle-label="value=>`${$tR(`mapDelegateList.depth`)}${value}`" :map-data="['1','0.1']" />
+              <selectBase v-model="dataDeep" :handle-label="value=>`${$tR(`mapDelegateList.depth`)}${value}`" :map-data="mapDeepData" />
             </div>
             <div class="content-header" flex="main:justify">
               <span v-for="(value,key) in mapHeader1" :key="key">{{ $tR(`mapDelegateList.mapHeader1.${key}`) }}</span>
@@ -359,7 +359,11 @@ export default {
     // mapTabs() {
     //   return this.langData.mapTabs
     // },
-
+    mapDeepData() {
+      return Array.from({ length: this.activeProduct.price_scale + 1 }).map((e, index) => {
+        return 1 / Math.pow(10, index)
+      })
+    },
     formValueObj() {
       if (!this.activeProduct.UNIT || !this.costObj || !this.activeBalance || !this.activeProduct.MARKET) return {}
       const price = this.activeAcountAndPriceArr[1] || this.activeProduct.UNIT.current
@@ -651,7 +655,6 @@ export default {
       const last = data[data.length - 1]
       this.newBargainListData.unshift(last)
       this.newBargainListData.pop()
-
       this.isBuy = last.side === 'buy'
     },
     handleSoketData(res) {
