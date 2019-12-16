@@ -81,6 +81,44 @@ export default {
     'register_count': '注册账号',
     'forget_pass': '忘记密码'
   },
+  trading: {
+    buy: '买入',
+    sell: '卖出',
+    price: '价格',
+    quantity: '数量',
+    amount: '金额',
+    mapDelegateList: {
+      'depth': '深度',
+      'return-dish': '返回盘口',
+      'new-bargain': '最新交易',
+      mapHeader1: {
+        'price': '价格',
+        'amount': '数量',
+        'total': '累计'
+      },
+      mapHeader2: {
+        'direction': '方向',
+        'transaction-price': '成交价',
+        'trading-volumn': '成交量',
+        'time': '时间'
+      }
+    },
+    mapDishInfo: {
+      change_24h: '涨跌幅',
+      volume_24: '24H 量',
+      height: '高',
+      low: '低'
+    },
+    mapFormContent: {
+      fee: '费率',
+      available: '可用',
+      mapTabs: {
+        limit: '限价单',
+        market: '市价单',
+        stopLoss: '止盈止损'
+      }
+    }
+  },
   contract: {
     sheet: '张',
     buy: '买入',
@@ -110,7 +148,6 @@ export default {
       ETHUSD: `ETH币本位`,
       EOSUSD: `EOS币本位`
     },
-
     mapTableTapContents: {
       shipping: {
         text: '仓位',

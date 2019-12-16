@@ -49,26 +49,27 @@
   </div>
 </template>
 <script>
+import candlestick from '@/components/candlestick'
 import { getRates, getPairList, getBalanceList } from '@/api/trading'
 import { toBig, bigTimes, bigMinus, bigDiv } from '@/utils/handleNum'
 import orderbook from './components/Orderbook'
-import soket from '../../mixins/soket'
+import soket from '@/mixins/resoket'
 
 export default {
   name: 'Trading',
-  components: { orderbook },
+  components: { orderbook, candlestick },
   mixins: [soket],
   data() {
     return {
       pair: '',
       products: [],
+      activeProduct: '',
       currentProduct: {},
       tickersData: null,
       pairTick: {}
     }
   },
   async created() {
-    console.log(1111)
     const res = await getPairList()
     if (res.code === 200 && res.data) {
       res.data = res.data.map(item => {
@@ -113,6 +114,13 @@ export default {
       }
       if (this.pair === item.pair) {
         this.pairTick = item
+      }
+    },
+    handleProductsChange(product) {
+      localStorage.setItem('trading-product', product.name)
+      this.$router.replace({ query: { product: product.name }})
+      if (this.activeProduct) {
+        this.websocket.send('{')
       }
     }
   }
