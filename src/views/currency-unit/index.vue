@@ -136,7 +136,7 @@
                       <div v-show="!buyBtnLoading" flex="main:justify cross:center">
                         <span>{{ $tR(`mapFormContent.mapHandleBtn.${key}`) }}</span>
                         <span v-if="activeBtnsKey === '1'" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ activeAcountAndPriceArr[1]||(activeProduct.UNIT||{}).current }} USD</span>
-                        <span v-else-if="activeBtnsKey === '2'" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ key === 'buy'?asks.last[0]:bids.first[0] }} USD</span>
+                        <span v-else-if="activeBtnsKey === '2' && asks.last && bids.first" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ key === 'buy'?asks.last[0]:bids.first[0] }} USD</span>
                         <span v-else-if="activeBtnsKey === '3'" style="font-size:12px">
                           <span v-if="activePriceType.key === '4'">{{ activeAcountAndPriceArr[0] }} @ {{ (activeProduct.UNIT||{}).current }}</span>
                           <span>{{ key === 'buy'? '≦':'≧' }} {{ (activeProduct.UNIT||{}).current }}</span>
@@ -415,27 +415,22 @@ export default {
       return this.activeProduct.name === 'FUTURE_BTCUSD' ? bigDiv(arr) : bigTimes([...arr, this.activeProduct.multiplier])
     },
     asks() {
-      const value = this.bids.first[0]
-      const data = Array.from({ length: 10 }).map((item, index) => {
-        const obj = { values: [+value + index, 100] }
-        return obj
-      })
-      const arr = [...(this.delegateData.asks || data)]
+      const arr = [...(this.delegateData.asks || [])]
       let max = 0
       arr.forEach((item, index, arr) => {
         max = Math.max(item.values[1], max)
         item.values[2] = index > 0 ? bigPlus([item.values[1], arr[index - 1].values[2]], 0) : item.values[1]
       })
-      return { arr: arr.reverse(), max, first: arr[0].values, last: arr[arr.length - 1].values }
+      return { arr: arr.reverse(), max, first: (arr[0] || {}).values, last: (arr[arr.length - 1] || {}).values }
     },
     bids() {
-      const arr = [...this.delegateData.bids]
+      const arr = [...this.delegateData.bids || []]
       let max = 0
       arr.forEach((item, index, arr) => {
         max = Math.max(item.values[1], max)
         item.values[2] = index > 0 ? bigPlus([item.values[1], arr[index - 1].values[2]], 0) : item.values[1]
       })
-      return { arr, max, first: arr[0].values, last: arr[arr.length - 1].values }
+      return { arr, max, first: (arr[0] || {}).values, last: (arr[arr.length - 1] || {}).values }
     },
     mapHandlers() {
       return {
