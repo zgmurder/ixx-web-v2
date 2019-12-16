@@ -29,6 +29,8 @@ router.beforeEach(async(to, from, next) => {
       if (!store.state.userData) {
         const userData = JSON.parse(user)
         store.commit('SET_USERDATA', userData)
+        console.log('aaaa')
+
         // getSession().then(res => {
         //   console.log(res)
         // })
