@@ -4,12 +4,12 @@
       <div class="linear-bar text-light" flex="main:justify cross:center">
         <svg-icon icon-class="money" />
         <i class="el-icon-warning" />
-        <div class="mark">{{ active }} x</div>
+        <div class="mark">{{ active === '0'?'全仓':active+'x' }}</div>
       </div>
 
       <div class="multiple-bar">
         <div flex="main:justify cross:center" class="text-light">
-          <span>当前杠杆：{{ active }}x</span>
+          <span>当前杠杆：{{ active === '0'?'全仓':active+'x' }}</span>
           <i class="el-icon-edit hover-point" @click="showEdit=!showEdit" />
         </div>
         <el-popover ref="popover" v-model="popoverVisible" placement="top" width="360" trigger="manual">
@@ -75,7 +75,7 @@
       </div>
       <div v-if="!onlyLever">
         <div v-for="(value,key) in mapTableColumns" :key="key" class="table-box" flex="box:mean">
-          <span>{{ $tR(`mapTableColumns.${key}`,{active}) }}</span>
+          <span>{{ $tR(`mapTableColumns.${key}`,{active:active === '0'?'全仓':active+'x'}) }}</span>
           <span v-if="key==='7'">{{ +formValueObj[key]*100|bigRound(2) }}%</span>
           <span v-else>{{ ['4','5'].includes(key)?formValueObj[key]:bigRound(formValueObj[key],key==='6'?2:8) }}</span>
         </div>
@@ -188,22 +188,23 @@ export default {
       this.activeTag = ''
       this.showEdit = false
     },
-    async handleActive(tag) {
+    handleActive(tag) {
       this.activeTag = tag
       this.leverageLoading = true
-      await this.leveragePreview(tag)
       this.leverageLoading = false
-      if (this.$root.modelVisible) {
-        this.popoverVisible = true
-        return
-      }
-      this.$confirm(this.$tR('tip', this.leverageTipObj), '修改杠杆', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-        dangerouslyUseHTMLString: true,
-        lockScroll: false
-      }).then(this.confirmClick).catch(this.cancelClick)
+      this.leveragePreview(tag).then(res => {
+        if (this.$root.modelVisible) {
+          this.popoverVisible = true
+          return
+        }
+        this.$confirm(this.$tR('tip', this.leverageTipObj), '修改杠杆', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          dangerouslyUseHTMLString: true,
+          lockScroll: false
+        }).then(this.confirmClick).catch(this.cancelClick)
+      })
     }
   }
 }

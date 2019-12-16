@@ -1,8 +1,9 @@
 <template>
   <div class="user-center">
-    <div class="container user-center-container" flex="main:justify box:mean">
+    <div class="user-center-container" flex="main:justify box:mean">
       <div class="container-left">
-        <navMenu v-model="activeKey" :map-menu-list="mapMenuList" @change="handleClick" />
+        <sideBar />
+        <!-- <navMenu v-model="activeKey" :map-menu-list="mapMenuList" @change="handleClick" /> -->
         <!-- <ul class="menu-list">
           <li v-for="(value,key) in mapMenuList" :key="key" :class="{active:activeKey === key}" @click="handleClick(key)">{{ $tR(`mapMenuList.${key}`) }}</li>
         </ul> -->
@@ -18,11 +19,13 @@
 <script>
 import customTable from '@/components/customTable'
 import navMenu from '@/components/nav-menu'
+import sideBar from '@/components/sideBar'
 export default {
   name: 'UserCenter',
   components: {
     customTable,
-    navMenu
+    navMenu,
+    sideBar
   },
   data() {
     return {
@@ -59,7 +62,7 @@ export default {
 </script>
 <style lang="scss" scoped>
   .user-center{
-    padding-top: 60px;
+    // padding-top: 60px;
     font-size: 14px;
     background: #fafafa;
     height: calc(100vh - 60px);
