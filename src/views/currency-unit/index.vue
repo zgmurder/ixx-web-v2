@@ -680,9 +680,7 @@ export default {
       setLeverage({ name: this.activeProduct.name, leverage }).then(res => {
         this.$message.success(this.$tR('handleSuccess'))
         return Promise.resolve()
-      }).then(res => {
-        this.handleBalanceList()
-      })
+      }).then(this.handleBalanceList)
     },
     async handleCommandOrder(isSubmit) {
       if (isSubmit) await this.submitOrder()

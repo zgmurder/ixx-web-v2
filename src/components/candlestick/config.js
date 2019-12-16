@@ -59,7 +59,6 @@ const udf_datafeed = {
   getBars: (symbolInfo, resolution, from, to, onHistoryCallback, onErrorCallback, firstDataRequest) => {
     // Vue.prototype.$eventBus.$emit('getBars', { mapItemFun, symbolInfo, resolution, from, to, onHistoryCallback, onErrorCallback, firstDataRequest })
     console.log(new Date(from * 1000), new Date(to * 1000))
-
     const [period, begin, end] = [mapPeriod[resolution], from * 1000, to * 1000]
     getKlineHistoryList(symbolInfo.name, { period, begin, end }).then(res => {
       const data = res.data.map(mapItemFun)

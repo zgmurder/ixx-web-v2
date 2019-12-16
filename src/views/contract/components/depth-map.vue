@@ -1,5 +1,5 @@
 <template>
-  <div id="depth-map" style="height:280px" />
+  <div id="depth-map" style="height:220px" />
 </template>
 <script>
 import Highcharts from 'highcharts/highcharts'
@@ -18,7 +18,6 @@ export default {
           const arrData = newValue[key].map(item => [+item.values[0], +item.values[2]]).sort((a, b) => a[0] - b[0])
           this.chart.series[index].setData(arrData, false, false, true)
         })
-        this.chart.xAxis[0].update({})
         this.chart.redraw()
       }
     }
@@ -44,7 +43,8 @@ export default {
         minPadding: 0,
         maxPadding: 0,
         gridLineColor: 'rgba(167, 174, 196, 0.1)',
-        gridLineWidth: 1
+        gridLineWidth: 1,
+        tickPixelInterval: 100
       },
       yAxis: [{
         lineWidth: 1,

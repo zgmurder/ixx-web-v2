@@ -19,17 +19,17 @@
           <div v-loading="!delegateData" class="delegate-list" element-loading-background="rgba(0, 0, 0, 0.3)" style="height:100%">
             <div class="header" flex="main:justify">
               <span> {{ $tR(`mapDelegateList.entrust-list`) }}</span>
-              <selectBase v-model="dataDeep" :handle-label="value=>`${$tR(`mapDelegateList.depth`)}${value}`" :map-data="['1','0.1']" />
+              <selectBase v-model="dataDeep" :handle-label="value=>`${$tR(`mapDelegateList.depth`)}${value}`" :map-data="mapDeepData" />
             </div>
             <div class="content-header" flex="main:justify">
               <span v-for="(value,key) in mapHeader1" :key="key">{{ $tR(`mapDelegateList.mapHeader1.${key}`) }}</span>
             </div>
-            <div ref="content-wrap" class="content-wrap">
-              <div v-if="delegateData" class="content-container">
+            <div v-if="delegateData && activeProduct.FUTURE" ref="content-wrap" class="content-wrap">
+              <div class="content-container">
                 <ul>
                   <li v-for="(item,index) in asks.arr" :key="index" flex="main:justify cross:center">
-                    <span class="text-danger" @click="activeAcountAndPriceArr[1]=item.values[0]">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
-                    <span @click="activeAcountAndPriceArr[0]=item.values[1]">{{ item.values[1] | bigRound(0) }}</span>
+                    <span class="text-danger" @click="userData && (activeAcountAndPriceArr[1]=item.values[0])">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
+                    <span style="flex:1" @click="userData && (activeAcountAndPriceArr[0]=item.values[1])">{{ item.values[1] | bigRound(0) }}</span>
                     <span>{{ item.values[2] }}</span>
                     <div class="mark-bg is-buy" :style="{width:handleWidthBg(item.values[1],asks.max)}" />
                   </li>
@@ -46,8 +46,8 @@
                 </div>
                 <ul>
                   <li v-for="(item,index) in bids.arr" :key="index" flex="main:justify cross:center">
-                    <span class="text-success" @click="activeAcountAndPriceArr[1]=item.values[0]">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
-                    <span @click="activeAcountAndPriceArr[0]=item.values[1]">{{ item.values[1] | bigRound(0) }}</span>
+                    <span class="text-success" @click="userData && (activeAcountAndPriceArr[1]=item.values[0])">{{ item.values[0] | bigRound(activeProduct.price_scale) }}</span>
+                    <span style="flex:1" @click="userData && (activeAcountAndPriceArr[0]=item.values[1])">{{ item.values[1] | bigRound(0) }}</span>
                     <span>{{ item.values[2] }}</span>
                     <div class="mark-bg is-sell" :style="{width:handleWidthBg(item.values[1],bids.max)}" />
                   </li>
@@ -91,7 +91,8 @@
                       {{ activePriceType.label }} <i class="el-icon-caret-bottom" />
                     </el-button>
                   </dropdown>
-                  <el-tooltip v-else :content="$tR(`mapFormContent.mapBtns.${key}.describe`)" placement="top" effect="dark">
+                  <el-tooltip v-else placement="bottom" effect="dark" popper-class="custom-tooltip">
+                    <div slot="content" style="width:200px;font-size:12px;line-height:20px">{{ $tR(`mapFormContent.mapBtns.${key}.describe`) }}</div>
                     <el-button class="custom-btn" :class="{active:activeBtnsKey === key}" size="small" plain @click="handleSwitch(key)">
                       {{ $tR(`mapFormContent.mapBtns.${key}.text`) }}
                     </el-button>
@@ -130,29 +131,26 @@
                     :disabled="popoverDisabled"
                     :title="handlePopoverTitle(key)"
                   >
-                    <orderPopover v-if="activeProduct.FUTURE" v-model="activeLever" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" :type="key === 'buy'?'success':'danger'" @change="setLeverage" @command="handleCommandOrder" />
-                    <el-button slot="reference" :type="key === 'buy'?'success':'danger'" :loading="buyBtnLoading" :disabled="handleDisabledBtn(key)" style="width:100%" @click="handlePopoverClick(key)">
+                    <orderPopover v-if="activeProduct.FUTURE" v-model="activeLever" :active-product="activeProduct" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" :type="key === 'buy'?'success':'danger'" @change="setLeverage" @command="handleCommandOrder" />
+                    <el-button slot="reference" :type="key === 'buy'?'success':'danger'" :class="{activeBtn:isBuy ? key === 'buy': key === 'sell'}" :loading="buyBtnLoading" :disabled="handleDisabledBtn(key)" style="width:100%" @click="handlePopoverClick(key)">
                       <div v-show="!buyBtnLoading" flex="main:justify cross:center">
                         <span>{{ $tR(`mapFormContent.mapHandleBtn.${key}`) }}</span>
                         <span v-if="activeBtnsKey === '1'" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ activeAcountAndPriceArr[1]||(activeProduct.FUTURE||{}).current }} USD</span>
-                        <span v-else-if="activeBtnsKey === '2'" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ key === 'buy'?asks.last[0]:bids.first[0] }} USD</span>
+                        <span v-else-if="activeBtnsKey === '2' && asks.last && bids.first" style="font-size:12px">{{ activeAcountAndPriceArr[0] }} @ {{ key === 'buy'?asks.last[0]:bids.first[0] }} USD</span>
                         <span v-else-if="activeBtnsKey === '3'" style="font-size:12px">
                           <span v-if="activePriceType.key === '4'">{{ activeAcountAndPriceArr[0] }} @ {{ (activeProduct.FUTURE||{}).current }}</span>
                           <span>{{ key === 'buy'? '≦':'≧' }} {{ (activeProduct.FUTURE||{}).current }}</span>
                         </span>
                       </div>
                     </el-button>
-                    <!-- @click="submitOrder(key === 'buy'?1:2)" -->
                   </el-popover>
 
-                  <p style="font-size:12px;color:#999">{{ $tR(`mapFormContent.cost`) }}：<span>{{ !activeAcountAndPriceArr[0]?'--':costObj[key] }}</span>BTC</p>
-                  <!-- <p v-else style="font-size:12px;color:#999">{{ $tR(`mapFormContent.cost`) }}：<span>{{ !activeAcountAndPriceArr[0]?'--':sellCost }}</span>BTC</p> -->
+                  <p style="font-size:12px;color:#999">{{ $tR(`mapFormContent.cost`) }}：<span>{{ !activeAcountAndPriceArr[0]?'--':costObj[key] }}</span> {{ activeProduct.currency }}</p>
                 </div>
-                <hr>
                 <div v-for="(value,key) in mapFormContent.mapDescribe" :key="key" style="font-size:12px;line-height:24px" flex="main:justify">
                   <span>{{ $tR(`mapFormContent.mapDescribe.${key}`) }}</span>
-                  <span v-if="key === 'entrustValue'" class="text-warning">{{ formValueObj[1] | bigRound(8) }} BTC</span>
-                  <el-link v-else style="font-size:12px" type="primary">{{ (activeBalance||{}).available_balance||0| bigRound(8) }} BTC</el-link>
+                  <span v-if="key === 'entrustValue'" class="text-warning">{{ formValueObj[1] | bigRound(8) }} {{ activeProduct.currency }}</span>
+                  <el-link v-else style="font-size:12px" type="primary">{{ (activeBalance||{}).available_balance||0| bigRound(8) }}  {{ activeProduct.currency }}</el-link>
                 </div>
               </div>
             </div>
@@ -181,7 +179,7 @@
                   {{ $tR(`mapDishInfo.${key}`) }}：
                   <span :class="[matchClassByKey(key)]">{{ handleDishInfoItem(key) }}{{ key === 'change_24h' && '%' ||'' }}</span>
                 </div>
-                <div>≈ {{ calcToBTC }} BTC</div>
+                <div>≈ {{ calcToBTC }} {{ activeProduct.currency }}</div>
               </div>
             </template>
 
@@ -211,21 +209,20 @@
             <div class="content-container-hold">
               <div flex="box:mean" style="text-align:center">
                 <p>{{ (activeBalance||{}).holding || 0 }} <br> {{ $tR('deal') }}</p>
-                <p style="border-left:1px solid #333;border-right:1px solid #333">{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('rateOReturn') }}</p>
-                <p>{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('quota') }}</p>
+                <p style="border-left:1px solid #333">{{ (activeBalance||{}).unrealized || 0 }} <br> {{ $tR('rateOReturn') }}</p>
               </div>
-              <orderPopover v-if="activeProduct.FUTURE" v-model="activeLever" only-lever flex="dir:top" :loading="buyBtnLoading" :form-value-obj="formValueObj" :data="mapLever" type="success" @change="setLeverage" @command="handleCommandOrder" />
-              <!-- <div class="linear-bar" flex="main:justify cross:center">
-                <svg-icon icon-class="btc" />
-                <svg-icon icon-class="bug" />
-                <div class="mark">{{ activeLever }} x</div>
+              <orderPopover
+                v-if="activeProduct.FUTURE" v-model="activeLever"
+                only-lever flex="dir:top"
+                :loading="buyBtnLoading" :form-value-obj="formValueObj"
+                :active-product="activeProduct" :data="mapLever"
+                type="success" @change="setLeverage"
+                @command="handleCommandOrder"
+              />
+              <div flex="main:justify" style="padding:8px">
+                <p>{{ $tR('quota') }}</p>
+                <p>{{ (activeBalance||{}).unrealized || 0 }}</p>
               </div>
-              <div class="multiple-bar">
-                <div> 杠杆倍数：<el-link type="primary" :underline="false" style="font-size:12px">设置</el-link></div>
-                <div>
-                  <el-tag v-for="tag in mapLever" :key="tag" style="cursor: pointer;" size="mini" :effect="activeLever === tag && 'dark'||'plain'" @click="activeLever = tag"> {{ tag === '0'?'全仓':tag+'x' }} </el-tag>
-                </div>
-              </div> -->
             </div>
           </div>
         </td>
@@ -242,7 +239,7 @@
               </div>
             </div>
             <div v-loading="!calcTableList" class="order-list-content" element-loading-background="rgba(0, 0, 0, 0.3)">
-              <shipping v-if="activeTableTabKey === 'shipping'" :mark-data="markData" :data="calcTableList" :table-columns="tableColumns" />
+              <shipping v-if="activeTableTabKey === 'shipping'" :active-product="activeProduct" :mark-data="markData" :data="calcTableList" :table-columns="tableColumns" @change="handleAmountObj" />
               <customTable v-if="activeTableTabKey !== 'shipping' && calcTableList" header-row-class-name="contract-order-list-row-class" row-class-name="contract-order-list-row-class" size="mini" :table-list="calcTableList" :last-column-config="lastColumnConfig" :table-columns="tableColumns">
                 <div slot="handlerDom" slot-scope="{data}">
                   <el-button size="mini" type="danger" :loading="data.cancelBtnLoading" @click="cancelOrder(data)">{{ $tR('cancel') }}</el-button>
@@ -256,7 +253,7 @@
             <div class="header" flex="main:justify">
               <span> 深度图</span>
             </div>
-            <div v-if="delegateData" class="information-content">
+            <div v-if="delegateData && activeProduct.FUTURE" class="information-content">
               <div class="content-center">
                 <p :class="[isBuy?'text-success':'text-danger',triggerBtn && 'justify'||'']">
                   <span>
@@ -283,10 +280,10 @@
 <script>
 import candlestick from '@/components/candlestick'
 import selectBase from '@/components/selectBase'
-import soket from '@/mixins/soket'
-import { bigRound, logogramNum, calcValueByAmountAndPrice, bigDiv, bigTimes, bigPlus, bigMinus, getCost } from '@/utils/handleNum'
+import soket from '@/mixins/resoket'
+import { bigRound, logogramNum, calcValueByAmountAndPrice, bigDiv, bigTimes, bigPlus, bigMinus, getCost, getLiqPrice, getTotalValue } from '@/utils/handleNum'
 import {
-  getSymbolInfo,
+  // getSymbolInfo,
   getFutureListByKey,
   getSymbolList,
   getBalanceList,
@@ -295,19 +292,20 @@ import {
   getActivetriggers,
   getActiveOrderhistory,
   getActiveOrderfills,
-  WSURL,
-  getRates,
+  // getRates,
   submitOrder,
   cancelOrder,
   getAllAmount,
-  getFinanceRecord,
+  // getFinanceRecord,
   setLeverage
+  // getKlineHistoryList
 } from '@/api/contract'
 import depthMap from './components/depth-map'
 import orderPopover from './components/orderPopover'
 import shipping from './components/shipping'
 import customTable from '@/components/customTable'
 import dropdown from '@/components/dropdown'
+// import { mapPeriod } from '@/const'
 export default {
   name: 'Contract',
   components: {
@@ -350,7 +348,7 @@ export default {
       amountObj: null,
       balanceList: [],
 
-      popoverDisabled: true,
+      popoverDisabled: false,
 
       symbolInfo: {}
 
@@ -360,15 +358,23 @@ export default {
     // mapTabs() {
     //   return this.langData.mapTabs
     // },
+    mapDeepData() {
+      return Array.from({ length: this.activeProduct.price_scale + 1 }).map((e, index) => {
+        return 1 / Math.pow(10, index)
+      })
+    },
     formValueObj() {
-      if (!this.activeProduct.FUTURE || !this.costObj || !this.activeBalance) return {}
+      if (!this.activeProduct.FUTURE || !this.costObj || !this.activeBalance || !this.activeProduct.MARKET) return {}
       const price = this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current
+      const getLiqPrice = this.getLiqPrice()
       return {
         1: calcValueByAmountAndPrice(this.activeAcountAndPriceArr[0], price),
         2: this.costObj[this.side === 1 ? 'buy' : 'sell'],
         3: this.activeBalance.available_balance,
         4: +this.activeBalance.holding + (this.side === 2 ? -this.activeAcountAndPriceArr[0] : +this.activeAcountAndPriceArr[0]),
-        5: this.activeProduct.FUTURE.current
+        5: this.activeProduct.MARKET.current,
+        6: getLiqPrice,
+        7: 1 - (this.activeProduct.FUTURE.current - getLiqPrice) / this.activeProduct.FUTURE.current
       }
     },
     userData() {
@@ -414,16 +420,16 @@ export default {
         max = Math.max(item.values[1], max)
         item.values[2] = index > 0 ? bigPlus([item.values[1], arr[index - 1].values[2]], 0) : item.values[1]
       })
-      return { arr: arr.reverse(), max, first: arr[0].values, last: arr[arr.length - 1].values }
+      return { arr: arr.reverse(), max, first: (arr[0] || {}).values, last: (arr[arr.length - 1] || {}).values }
     },
     bids() {
-      const arr = [...this.delegateData.bids]
+      const arr = [...this.delegateData.bids || []]
       let max = 0
       arr.forEach((item, index, arr) => {
         max = Math.max(item.values[1], max)
         item.values[2] = index > 0 ? bigPlus([item.values[1], arr[index - 1].values[2]], 0) : item.values[1]
       })
-      return { arr, max, first: arr[0].values, last: arr[arr.length - 1].values }
+      return { arr, max, first: (arr[0] || {}).values, last: (arr[arr.length - 1] || {}).values }
     },
     mapHandlers() {
       return {
@@ -469,9 +475,17 @@ export default {
               case 'tp_type':
                 return `${value}/${row.sl_price}`
               case 'create_time':
-                return this.parseTime(value)
+                return this.parseTime(String(value).substring(0, 13))
               case 'distancePrice':
                 return `${value > 0 ? '+' : ''}${value}`
+              case 'amount_surplus':
+                return row.amount_total - row.amount_last || '0'
+              case 'fee':
+                return this.bigRound(value, 8)
+              case 'entrustValue':
+                return this.bigRound(calcValueByAmountAndPrice(row.amount, row.price), 8)
+              case 'price':
+                return this.bigRound(value, 2)
               default:
                 return value
             }
@@ -483,8 +497,7 @@ export default {
     lastColumnConfig() {
       return ['curEntrust', 'lossEntrust'].includes(this.activeTableTabKey) ? {
         headerLabel: this.$tR('handle'),
-        headerAlign: 'left',
-        width: '50px'
+        headerAlign: 'left'
       } : null
     },
     menuOptions() {
@@ -505,19 +518,19 @@ export default {
       if (!this.activeBalance) return
       const obj = {}
       const price = this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current
-      const activeLever = !+this.activeLever ? 100 : +this.activeLever
+      // const activeLever = !+this.activeLever ? 100 : +this.activeLever
       if (+this.activeBalance.holding < 0) {
         let buyAmount
         buyAmount = this.activeAcountAndPriceArr[0] - Math.abs(+this.activeBalance.holding)
         buyAmount = buyAmount <= 0 ? 0 : buyAmount
-        obj.buy = getCost({ ...this.activeProduct, amount: buyAmount, price }, activeLever)
-        obj.sell = getCost({ ...this.activeProduct, amount: this.activeAcountAndPriceArr[0], price }, activeLever)
+        obj.buy = getCost({ ...this.activeProduct, amount: buyAmount, price }, this.activeLever)
+        obj.sell = getCost({ ...this.activeProduct, amount: this.activeAcountAndPriceArr[0], price }, this.activeLever)
       } else {
         let sellAmount
         sellAmount = this.activeAcountAndPriceArr[0] - +this.activeBalance.holding
         sellAmount = sellAmount <= 0 ? 0 : sellAmount
-        obj.buy = getCost({ ...this.activeProduct, amount: this.activeAcountAndPriceArr[0], price }, activeLever)
-        obj.sell = getCost({ ...this.activeProduct, amount: sellAmount, price }, activeLever)
+        obj.buy = getCost({ ...this.activeProduct, amount: this.activeAcountAndPriceArr[0], price }, this.activeLever)
+        obj.sell = getCost({ ...this.activeProduct, amount: sellAmount, price }, this.activeLever)
       }
       return obj
     },
@@ -527,12 +540,16 @@ export default {
     },
     updateTableList() {
       return this.tableList && this.tableList.map(item => {
-        const distancePrice = item.trigger_price - this.activeProduct.FUTURE.current
+        const distancePrice = bigMinus([item.trigger_price || 0, this.activeProduct.FUTURE.current || 0], 2)
         return { ...item, distancePrice }
       }) || []
     },
     calcBalanceList() {
-      return this.balanceList.filter(item => !!+item.holding)
+      return this.balanceList.filter(item => !!+item.holding).map(item => {
+        const found = (this.entrustList || []).find(subItem => +subItem.id === item.future_close_id)
+        if (found)item.closePrice = found.price
+        return item
+      })
     },
     activeBalance() {
       const found = this.balanceList.find(item => this.activeProduct.currency === item.currency)
@@ -557,25 +574,87 @@ export default {
         value: '合约价值',
         valueRate: this.symbolInfo.fee_rate
       }
+    },
+    mapHandlerSoket() {
+      return {
+        'market': this.handleTickers,
+        'orderbook': this.handleOrderbookSoket,
+        'deal': this.handleDealSoket,
+        'orderfills': this.handleAmountObj,
+        'position': this.handleAmountObj
+      }
     }
   },
   async created() {
     this.products = (await getSymbolList()).data
-    await this.openWebSocket('/market/tickers', this.handleTickers)
-    this.handleProductsChange(this.products[0])
-    this.openWebSocket(WSURL, res => {
-      if (res && res[0] && !this.cancelBtnLoading && !this.buyBtnLoading) this.handleAmountObj()
-    }, websocket => {
-      if (!this.$store.state.userData) return
-      websocket.send(`{"op":"loginWeb","args":["${this.$store.state.userData.session_id}"]}`)
-      websocket.send('{"op":"subscribe","args":["orderfills"]}')
+    await this.openWebSocket(this.handleSoketData, websocket => {
+      this.websocket.send('{"op":"subscribepub","args":["market@ticker"]}')
+      if (this.userData) {
+        this.websocket.send(`{"op":"loginWeb","args":["${this.userData.session_id}"]}`)
+        this.websocket.send('{"op":"subscribe","args":["orderfills"]}')
+        this.websocket.send('{"op":"subscribe","args":["position"]}')
+      }
       // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
     })
+    const queryStr = localStorage.getItem('futrue-product') || this.products[0].name
+    const product = this.products.find(item => item.name === queryStr)
+    this.handleProductsChange(product)
+    // this.openWebSocket(WSURL, res => {
+    //   if (res && res[0] && !this.cancelBtnLoading && !this.buyBtnLoading) this.handleAmountObj()
+    // }, websocket => {
+    //   websocket.send('{"op":"login","args":["8be85859c7e2d88c87d6e31d650c6cef","8c7d5d714632ece63bc2eef4301acf94c121ea23065f2456f28e083485e558a1"]}')
+    //   websocket.send('{"op":"subscribe","args":["orderfills"]}')
+    //   // websocket.send('{"op":"subscribe","args":["orderupdate"]}')
+    // })
     this.handleAmountObj()
     // this.handleTabClick('FUTURE_BTCUSD')
     // getFinanceRecord()
   },
   methods: {
+    totalValue() {
+      if (!this.activeAcountAndPriceArr[0] || !this.entrustList) return
+      return getTotalValue(this.entrustList,
+        { amount: this.activeAcountAndPriceArr[0],
+          price: this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current },
+        this.activeProduct.multiplier)
+    },
+    getLiqPrice() {
+      if (!this.activeAcountAndPriceArr[0]) return
+      const price = getLiqPrice({
+        isBuy: this.isBuy,
+        leverages: this.activeLever,
+        amount: this.activeAcountAndPriceArr[0],
+        price: this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current,
+        available_balance: this.activeBalance.available_balance,
+        totalValue: this.totalValue()
+      }, this.activeProduct)
+      return price
+    },
+    handleOrderbookSoket(data) {
+      this.delegateData = data
+      if (!this._scrolled) {
+        this.$nextTick(() => {
+          this.dataLoaded()
+          this._scrolled = true
+        })
+      }
+    },
+    handleDealSoket(data) {
+      const last = data[data.length - 1]
+      this.newBargainListData.unshift(last)
+      this.newBargainListData.pop()
+      this.isBuy = last.side === 'buy'
+    },
+    handleOrderfills(data) {
+      const last = data[data.length - 1]
+      this.newBargainListData.unshift(last)
+      this.newBargainListData.pop()
+      this.isBuy = last.side === 'buy'
+    },
+    handleSoketData(res) {
+      const key = res.topic && res.topic.split('@')[0]
+      this.mapHandlerSoket[key] && this.mapHandlerSoket[key](res.data)
+    },
     handlePopoverTitle(key) {
       const type = this.activeBtnsKey === '3' && this.activePriceType.key || this.activeBtnsKey
       const price = this.activeAcountAndPriceArr[1] || (this.activeProduct.FUTURE || {}).current
@@ -597,7 +676,7 @@ export default {
       } else return !this.activeAcountAndPriceArr[0]
     },
     setLeverage(leverage) {
-      setLeverage({ currency: this.activeProduct.currency, leverage }).then(res => {
+      setLeverage({ name: this.activeProduct.name, leverage }).then(res => {
         this.$message.success(this.$tR('handleSuccess'))
         return Promise.resolve()
       }).then(res => {
@@ -620,21 +699,23 @@ export default {
         this.entrustList = res.data.data.map(item => {
           item.cancelBtnLoading = false
           item._symbol = item.symbol
-          item.symbol = this.$tR(`mapTabs.${item.symbol}`)
+          item.symbol = this.$tR(`mapTabs.${item.name}`)
           return item
         })
       })
     },
     handleBalanceList() {
       // this.balanceList = null
-      this.mapHandlers.shipping().then(res => {
+      return this.mapHandlers.shipping().then(res => {
         this.balanceList = res.data.map(item => {
           item.value = !+item.holding ? 0 : bigDiv([item.holding, item.price], 8)
           item.price = this.bigRound(item.price, this.activeProduct['price_scale'])
+          item._leverage = item.leverage === '0' ? '全仓' : item.leverage
           // item._symbol = item.symbol
           // item.symbol = this.$tR(`mapTabs.FUTURE_${item.symbol}`)
           return item
         })
+        return Promise.resolve()
       })
     },
     handleTickers(data) {
@@ -646,28 +727,38 @@ export default {
       }, this.products)
     },
     handleProductsChange(product) {
+      // ws.send('{"op":"subscribepub","args":["orderbook@FUTURE_BTCUSD@1@2@10"]}')
+      // this.websocket.send(`{"op":"subscribepub","args":["orderbook@${product.name}@1@2@10"]}`)
+      // this.websocket.send(`{"op":"subscribepub","args":["deal@${product.name}"]}`)
+      // this.$nextTick(() => this.dataLoaded())
+      // this.newBargainListData = (await getFutureListByKey(product.name, { size: 20 })).data
+      localStorage.setItem('futrue-product', product.name)
+      this.$router.replace({ query: { product: product.name }})
       if (this.activeProduct) {
-        this.closeWebSocket(`/orderbook/${this.activeProduct.name}/0/1/20`)
-        this.closeWebSocket(`/deal/${this.activeProduct.name}`)
+        this.websocket.send(`{"op":"unsubscribepub","args":["orderbook@${this.activeProduct.product}_${this.activeProduct.currency}@1@2@20"]}`)
+        this.websocket.send(`{"op":"unsubscribepub","args":["deal@${this.activeProduct.product}_${this.activeProduct.currency}"]}`)
       }
-      this.openWebSocket(`/orderbook/${product.name}/0/1/20`, data => {
-        this.delegateData = data
-      }).then(res => { this.$nextTick(() => this.dataLoaded()) })
-      getFutureListByKey(product.name, { size: 16 }).then(res => (this.newBargainListData = res.data)).then(res => {
-        this.openWebSocket(`/deal/${product.name}`, data => {
-          const last = data[data.length - 1]
-          this.newBargainListData.length = this.newBargainListData.length - 1
-          this.newBargainListData.unshift(last)
-          this.isBuy = last.side === 'buy'
-        })
+      this.websocket.send(`{"op":"subscribepub","args":["orderbook@${product.product}_${product.currency}@1@2@20"]}`)
+      this.websocket.send(`{"op":"subscribepub","args":["deal@${product.product}_${product.currency}"]}`)
+      getFutureListByKey(`${product.product}_${product.currency}`, { size: 20 }).then(({ data }) => {
+        this.newBargainListData = data
       })
-      getSymbolInfo({ symbol: product.name }).then(res => {
-        this.symbolInfo = res.data
-      })
+      // if (this.activeProduct) {
+      //   this.closeWebSocket(`/orderbook/${this.activeProduct.name}/0/1/20`)
+      //   this.closeWebSocket(`/deal/${this.activeProduct.name}`)
+      // }
+      // this.openWebSocket(`/orderbook/${product.name}/0/1/20`, data => {
+      //   this.delegateData = data
+      // }).then(res => { this.$nextTick(() => this.dataLoaded()) })
+
+      // getSymbolInfo({ symbol: product.name }).then(res => {
+      //   this.symbolInfo = res.data
+      // })
       this.activeProduct = product
-      this.tvWidget
+      console.log(this.activeProduct)
+
       if (!this.$refs.candlestick.tvWidget) {
-        this.$refs.candlestick.initTV(product.name)
+        this.$refs.candlestick.initTV(`${product.product}_${product.currency}`)
       } else this.$refs.candlestick.tvWidget.chart().setSymbol(`${product.product}_${product.currency}`)
     },
     calcIncreaseRate(product) {
@@ -687,7 +778,8 @@ export default {
     handleWidthBg(amount, max) {
       return +bigDiv([amount, max]) * 100 + '%'
     },
-    async handleAmountObj() {
+
+    handleAmountObj() {
       if (!this.$store.state.userData) return
       clearTimeout(this._timer)
       return new Promise(resolve => {
@@ -716,28 +808,6 @@ export default {
       if (!this.tickersData) return {}
       return this.tickersData.FUTURE.find(item => item.pair === key)
     },
-
-    handleTabClick(key) {
-      if (this.activeProduct === key) return
-      this.delegateData = null
-      this.newBargainListData = []
-      if (this.activeProduct) {
-        this.closeWebSocket(`/orderbook/${this.activeProduct}/0/1/20`)
-        this.closeWebSocket(`/deal/${this.activeProduct}`)
-      }
-      this.openWebSocket(`/orderbook/${key}/0/1/20`, data => {
-        this.delegateData = data
-      }).then(res => { this.$nextTick(() => this.dataLoaded()) })
-      getFutureListByKey(key, { size: 16 }).then(res => (this.newBargainListData = res.data)).then(res => {
-        this.openWebSocket(`/deal/${key}`, data => {
-          const last = data[data.length - 1]
-          this.newBargainListData.length = this.newBargainListData.length - 1
-          this.newBargainListData.unshift(last)
-          this.isBuy = last.side === 'buy'
-        })
-      })
-      this.activeProduct = key
-    },
     async handleTableTabClick(key) {
       this.activeTableTabKey = key
       if (['curEntrust', 'shipping'].includes(key)) return
@@ -750,6 +820,8 @@ export default {
         if (item.symbol) {
           item._symbol = item.symbol
           item.symbol = key === 'shipped' ? this.$tR(`mapTabs.FUTURE_${item.symbol}`) : this.$tR(`mapTabs.${item.symbol}`)
+        } else {
+          item.symbol = this.$tR(`mapTabs.${item.name}`)
         }
         return item
       })
@@ -765,8 +837,9 @@ export default {
     },
     dataLoaded(lessPosition) {
       const element = this.$refs['content-wrap']
-      const centerEle = document.querySelector('.content-center') || {}
-      element.scrollTop = (element.scrollHeight - element.clientHeight + (lessPosition ? centerEle.clientHeight || 0 : 0)) / 2
+      if (!element) return setTimeout(() => this.dataLoaded(), 200)
+      const centerEle = element.querySelector('.content-center') || {}
+      element.scrollTop = (element.scrollHeight - element.clientHeight + (lessPosition ? centerEle.clientHeight || 64 : 64)) / 2
       element.removeEventListener('scroll', this.handleScroll)
       element.addEventListener('scroll', this.handleScroll)
     },
@@ -777,7 +850,6 @@ export default {
         this.triggerBtn = Math.abs(e.target.scrollTop - constHeight) > (e.target.clientHeight / 2)
       }, 100)
     },
-
     handleSwitch(btnKey) {
       this.activeBtnsKey = btnKey
     },
@@ -790,12 +862,12 @@ export default {
         price: this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current,
         type: this.activeBtnsKey === '3' && this.activePriceType.key || this.activeBtnsKey, // 下单类型 1 限价 2市价 3限价止损 4市价止损 5限价止盈 6市价止盈
         side: this.side,
-        symbol: this.activeProduct.name,
+        name: this.activeProduct.name,
         leverage: this.activeLever,
         trigger_price: this.activeAcountAndPriceArr[2],
         trigger_type: this.trigger_type,
-        trigger_close: this.trigger_close
-        // passive 是否被动委托 0否 1是
+        trigger_close: this.trigger_close,
+        passive: 0
 
         // tp_type 止盈触发类型 0默认 1盘口价格 2标记价格 3指数价格 如果是-1的话代表从仓位里下的触发单
         // tp_price 止盈价格
@@ -803,8 +875,7 @@ export default {
         // sl_price 止损价格
       }
       return submitOrder(data).then(res => {
-        return this.handleAmountObj()
-      }).then(res => {
+        this.handleAmountObj()
         setTimeout(() => {
           this.buyBtnLoading = false
           this.$message.success(this.$tR('handleSuccess'))
@@ -812,15 +883,14 @@ export default {
       })
     },
     cancelOrder(data) {
-      const { user_id, id, _symbol } = data
+      const { user_id, id, name } = data
       data.cancelBtnLoading = true
-      cancelOrder({ user_id, order_id: id, symbol: _symbol }).then(res => {
-        this.handleAmountObj().then(res => {
-          setTimeout(() => {
-            // this.cancelBtnLoading = false
-            this.$message.success(this.$tR('handleSuccess'))
-          }, 500)
-        })
+      cancelOrder({ user_id, order_id: id, name }).then(res => {
+        this.handleAmountObj()
+        setTimeout(() => {
+          // this.cancelBtnLoading = false
+          this.$message.success(this.$tR('handleSuccess'))
+        }, 500)
       })
     }
   }
@@ -878,12 +948,13 @@ export default {
         font-size: 16px;
       }
       .info-left{
-        margin: 0 30px;
+        margin-left:8px;
+        margin-right:2.5%;
         line-height: 32px;
         font-size: 12px;
       }
       .info-list-box{
-        flex-basis: 500px;
+        flex-basis: 450px;
         font-size: 12px;
         display: flex;
         flex-wrap: wrap;
@@ -1005,6 +1076,9 @@ export default {
         &>input{
           text-align: right;
           padding-right: 45px;
+        }
+        .activeBtn{
+          box-shadow: 0 2px 0px 0px #fff;
         }
         &>span{
           position:absolute;
