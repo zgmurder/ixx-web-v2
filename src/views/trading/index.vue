@@ -63,7 +63,7 @@ export default {
     return {
       pair: '',
       products: [],
-      activeProduct: ''
+      activeProduct: '',
       currentProduct: {},
       tickersData: null,
       pairTick: {}
