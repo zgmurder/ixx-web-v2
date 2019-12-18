@@ -204,3 +204,13 @@ export const getKlineHistoryList = (symbol, query) => request({
   method: 'get',
   params: query
 })
+/* 设置杠杆倍数(预览) POST /future/account/leverage_preview
+参数
+user_id
+name 合约名(EHTUSD,EOSUSD)
+leverage 杠杆倍数 */
+export const leveragePreview = data => request({
+  url: `/future/account/leverage_preview`,
+  method: 'post',
+  data
+})

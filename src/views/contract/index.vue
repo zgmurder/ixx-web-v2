@@ -676,7 +676,7 @@ export default {
       } else return !this.activeAcountAndPriceArr[0]
     },
     setLeverage(leverage) {
-      setLeverage({ name: this.activeProduct.name, leverage }).then(res => {
+      setLeverage({ symbol: this.activeProduct.name, leverage }).then(res => {
         this.$message.success(this.$tR('handleSuccess'))
         return Promise.resolve()
       }).then(res => {
@@ -800,7 +800,7 @@ export default {
           this.handleTableTabClick(this.activeTableTabKey)
           this.handleEntrustList()
           resolve()
-        }, 100)
+        }, 200)
       })
     },
 
@@ -862,7 +862,7 @@ export default {
         price: this.activeAcountAndPriceArr[1] || this.activeProduct.FUTURE.current,
         type: this.activeBtnsKey === '3' && this.activePriceType.key || this.activeBtnsKey, // 下单类型 1 限价 2市价 3限价止损 4市价止损 5限价止盈 6市价止盈
         side: this.side,
-        name: this.activeProduct.name,
+        symbol: this.activeProduct.name,
         leverage: this.activeLever,
         trigger_price: this.activeAcountAndPriceArr[2],
         trigger_type: this.trigger_type,
@@ -883,9 +883,9 @@ export default {
       })
     },
     cancelOrder(data) {
-      const { user_id, id, name } = data
+      const { user_id, id, _symbol } = data
       data.cancelBtnLoading = true
-      cancelOrder({ user_id, order_id: id, name }).then(res => {
+      cancelOrder({ user_id, order_id: id, symbol:_symbol }).then(res => {
         this.handleAmountObj()
         setTimeout(() => {
           // this.cancelBtnLoading = false

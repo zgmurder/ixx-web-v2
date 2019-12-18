@@ -99,7 +99,7 @@
           </el-popover> -->
           <div flex="dir:top" style="font-size:12px">
             <div>平仓价格</div>
-            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px;text-align:center" @input="e=>input = e.target.value">
+            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px;text-align:center"  @focus="e=>e.currentTarget.select()" @input="e=>input = e.target.value">
           </div>
           <div class="el-button el-button--small bd-primary" @click="closeStorehouse(item)">限价平仓</div>
           <div class="el-button el-button--small bd-primary" style="margin-left:0" @click="closeStorehouse(item,true)">市价平仓</div>
@@ -252,6 +252,8 @@ export default {
         this.loadingHouse = false
         this.$emit('change')
         this.$message.success(this.$t('handleSuccess'))
+      }).catch(res=>{
+        this.loadingHouse = false
       })
       // if (this.visibleChecked) {
       //   this.disabled = true

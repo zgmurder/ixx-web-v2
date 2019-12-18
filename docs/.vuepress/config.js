@@ -8,7 +8,7 @@ module.exports = {
     }
   },
   themeConfig: {
-    repo: 'liub1934/lb-element-table',
+    repo: 'zgmurder/lb-element-table',
     docsDir: 'docs',
     locales: {
       '/zh/': {

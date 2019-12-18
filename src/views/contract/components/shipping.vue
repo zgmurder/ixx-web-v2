@@ -99,7 +99,7 @@
           </el-popover> -->
           <div flex="dir:top" style="font-size:12px">
             <div>平仓价格</div>
-            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px;text-align:center" @input="e=>input = e.target.value">
+            <input :value="input||markData[item.currency]" class="custom-input" style="width:80px;text-align:center"  @focus="e=>e.currentTarget.select()" @input="e=>input = e.target.value">
           </div>
           <div class="el-button el-button--small bd-primary" @click="closeStorehouse(item)">限价平仓</div>
           <div class="el-button el-button--small bd-primary" style="margin-left:0" @click="closeStorehouse(item,true)">市价平仓</div>
@@ -126,7 +126,7 @@
 </template>
 <script>
 import { bigDiv, bigTimes, calcProfit } from '@/utils/handleNum'
-import { getRates, closeStorehouse, cancelOrder, setModify, setTransferMargin, submitOrder } from '@/api/currencyUnit'
+import { getRates, closeStorehouse, cancelOrder, setModify, setTransferMargin, submitOrder } from '@/api/contract'
 export default {
   name: 'Shipping',
   props: {
@@ -186,11 +186,11 @@ export default {
     }
   },
   async created() {
-    this.currencyRates = (await getRates({ currency: 'ETH' })).data.ETH
+    this.currencyRates = (await getRates({ currency: 'BTC' })).data.BTC
   },
   methods: {
     setTransferMargin(item) {
-      setTransferMargin({ name: item.name, amount: !this.checked ? this.margin_position : -this.margin_position }).then(res => {
+      setTransferMargin({ symbol: `FUTURE_${item.currency}`, amount: !this.checked ? this.margin_position : -this.margin_position }).then(res => {
         this.$emit('change')
         this.margin_popover = false
         this.margin_position = 0
@@ -247,11 +247,13 @@ export default {
         this.loadingHouse = false
         return
       }
-      const params = { name: item.name, user_id: item.user_id, price: isMarket ? 0 : +this.input || +this.markData[item.currency] }
+      const params = { symbol: `FUTURE_${item.currency}`, user_id: item.user_id, price: isMarket ? 0 : +this.input || +this.markData[item.currency] }
       closeStorehouse(params).then(res => {
         this.loadingHouse = false
         this.$emit('change')
         this.$message.success(this.$t('handleSuccess'))
+      }).catch(res=>{
+        this.loadingHouse = false
       })
       // if (this.visibleChecked) {
       //   this.disabled = true
@@ -265,9 +267,9 @@ export default {
       // this.visible1 = false
     },
     cancelOrder(item) {
-      const { user_id, future_close_id, name } = item
+      const { user_id, future_close_id } = item
       this.loadingHouse = true
-      cancelOrder({ user_id, order_id: future_close_id, name }).then(res => {
+      cancelOrder({ user_id, order_id: future_close_id, symbol: `FUTURE_${item.currency}` }).then(res => {
         this.$emit('change')
         this.loadingHouse = false
         this.$message.success(this.$t('handleSuccess'))
@@ -283,14 +285,15 @@ export default {
     },
     submitOrder(holdingObj) {
       // const product = this.activeProduct
-      const { passive, holding, buy, tp_price, sl_price, name, future_sl_id, future_tp_id } = holdingObj
+      // symbol: `FUTURE_${item.currency}`
+      const { passive, holding, buy, tp_price, sl_price, future_sl_id, future_tp_id } = holdingObj
       this.buyBtnLoading = true
       this.formArrData.forEach((item, index) => {
         const data = index === 0 ? { tp_type: -1, type: item.type && '6', order_id: future_tp_id } : { sl_type: -1, type: item.type && '4', order_id: future_sl_id }
         if (item.type) {
           const fun = item.isEdit ? setModify : submitOrder
           if (item.isEdit && item.trigger_price === (!index ? tp_price : sl_price)) return
-          fun({ amount: Math.abs(holding), passive, price: '0', side: buy ? 2 : 1, name, ...item, ...data }).then(res => {
+          fun({ amount: Math.abs(holding), passive, price: '0', side: buy ? 2 : 1, symbol: `FUTURE_${item.currency}`, ...item, ...data }).then(res => {
             this.$emit('change')
             this.buyBtnLoading = false
             this.$message.success(this.$t('handleSuccess'))

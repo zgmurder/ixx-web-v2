@@ -89,7 +89,7 @@
   </div>
 </template>
 <script>
-import { leveragePreview } from '@/api/currencyUnit'
+import { leveragePreview } from '@/api/contract'
 export default {
   name: 'OrderPopover',
   model: {
@@ -164,7 +164,7 @@ export default {
   },
   methods: {
     leveragePreview(tag) {
-      return leveragePreview({ name: this.activeProduct.name, leverage: tag }).then(res => {
+      return leveragePreview({ currency: this.activeProduct.name, leverage: tag }).then(res => {
         this.leverageTipObj = res.data
       })
     },
